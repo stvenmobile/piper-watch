@@ -7,14 +7,14 @@ $fn = 96;                        // circle smoothness for previews/exports
 line_w      = 0.45;              // extrusion width
 wall        = 4 * line_w;        // 1.8 mm: minimum for load-bearing walls
 bed         = [225, 225, 225];   // build volume
-clr_hole    = 0.25;              // added to bolt hole diameters (tune with the tolerance coupon)
-clr_fit     = 0.30;              // gap for parts that slide/rotate against each other
+clr_hole    = 0.30;              // added to bolt hole diameters - measured: +0.3 is the smallest free fit (coupon, 2026-10-01)
+clr_fit     = 0.35;              // gap for parts that slide/rotate against each other (a little looser than clr_hole)
 
 // --- Fasteners ------------------------------------------------------------------
 m3          = 3.0;
 m4          = 4.0;
-insert_m3   = [4.1, 5.0];        // heat-set insert bore [diameter, depth]
-insert_m4   = [5.6, 6.0];
+insert_m3   = [4.1, 5.0];        // heat-set insert bore [diameter, depth] - coupon "M3a" confirmed
+insert_m4   = [5.6, 6.0];        // coupon "M4a" confirmed
 
 // --- Lazy Susan: 140 mm round aluminium turntable bearing (Amazon B08CSMCRC6) ----
 ls_od        = 140;              // outer diameter (given)
