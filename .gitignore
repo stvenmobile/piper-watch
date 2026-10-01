@@ -1,0 +1,48 @@
+# --- Privacy: face images, enrolment data and embeddings never leave the Jetson ---
+jetson/data/
+gallery/
+faces/
+captures/
+*.npy
+*.npz
+*.pkl
+*.onnx
+*.engine
+*.trt
+
+# --- Secrets / local config ---
+.env
+.env.*
+*.local.json
+*.local.yaml
+
+# --- PlatformIO / ESP32 firmware ---
+.pio/
+.pioenvs/
+.piolibdeps/
+firmware/**/.vscode/.browse.c_cpp.db*
+firmware/**/.vscode/c_cpp_properties.json
+firmware/**/.vscode/launch.json
+firmware/**/.vscode/ipch
+
+# --- Python (Jetson side) ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# --- CAD backups / slicer output ---
+*.FCBak
+*.FCStd1
+*.bak
+*.gcode
+*.3mf.bak
+
+# --- Editors / OS ---
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
