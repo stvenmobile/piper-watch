@@ -28,9 +28,9 @@ ls_inner_od  = ls_outer_id - 2 * ls_gap;         // 113.6  inner ring, outside
 ls_id        = ls_inner_od - 2 * ls_ring_w;      // 88.8   centre opening (measured ~89)
 ls_h         = 10.5;             // thickness of both rings (measured)
 ls_hole_d    = 4.5;              // EST: through holes, countersunk (M4 / #8)
-ls_outer_bc  = 128;              // EST: outer ring bolt circle diameter, 4 holes (~127.6 if centred in the ring)
-ls_inner_bc  = 100;              // EST: inner ring bolt circle diameter, 4 holes (~101.2 if centred in the ring)
-ls_holes     = 4;
+ls_outer_bc  = (ls_od + ls_outer_id) / 2;       // 127.6  holes centred in the outer ring (observed)
+ls_inner_bc  = (ls_inner_od + ls_id) / 2;       // 101.2  holes centred in the inner ring (observed)
+ls_holes     = 4;                // per ring, 90 degrees apart
 ls_inner_rot = 45;               // inner holes sit between the outer ones
 
 // Mounting rules that follow from the flush rings
