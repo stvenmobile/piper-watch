@@ -52,9 +52,10 @@ sts_horn_h   = 3;
 // (the mic grilles) with a small notch where each grille meets the face.
 cam_w        = 94;               // width, along the tilt axis (measured)
 cam_h        = 29;               // height (measured)
-cam_d        = 24;               // EST from photo: depth front-to-back at the middle
-cam_face_l   = 65;               // EST from photo: flat front face length between the notches
-cam_cable_x  = 35;               // EST from photo: cable leaves the back this far from one end
+cam_d        = 24.1;             // depth front-to-back at the middle (measured)
+cam_face_l   = 63.5;             // flat front face length between the notches (measured)
+cam_cable_x  = 30;               // cable leaves the back this far from the nearest end (measured)
+cam_cable_d  = 3.0;              // cable diameter (measured); USB-A plug on the end, so it can't thread through holes
 cam_core     = [cam_w, cam_d, cam_h];
 
 // --- E32R40T 4" display board - TODO: measure outline, holes, connector positions --
