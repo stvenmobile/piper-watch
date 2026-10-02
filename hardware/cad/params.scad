@@ -15,6 +15,8 @@ m3          = 3.0;
 m4          = 4.0;
 insert_m3   = [4.1, 5.0];        // heat-set insert bore [diameter, depth] - coupon "M3a" confirmed
 insert_m4   = [5.6, 6.0];        // coupon "M4a" confirmed
+m5          = 5.0;
+insert_m5   = [6.4, 7.0];        // EST - confirm with parts/m5_coupon.scad
 
 // --- Lazy Susan: 140 mm round aluminium turntable bearing (Amazon B08CSMCRC6) ----
 // Two COPLANAR rings, both 10.5 mm thick and flush top and bottom, with a 0.8 mm gap.
@@ -27,7 +29,7 @@ ls_outer_id  = ls_od - 2 * ls_ring_w;            // 115.2  outer ring, inside
 ls_inner_od  = ls_outer_id - 2 * ls_gap;         // 113.6  inner ring, outside
 ls_id        = ls_inner_od - 2 * ls_ring_w;      // 88.8   centre opening (measured ~89)
 ls_h         = 10.5;             // thickness of both rings (measured)
-ls_hole_d    = 4.5;              // EST: through holes, countersunk (M4 / #8)
+ls_hole_d    = 5.5;              // through holes, countersunk: M5 passes cleanly (measured) -> M5 flat-head screws
 ls_outer_bc  = (ls_od + ls_outer_id) / 2;       // 127.6  holes centred in the outer ring (observed)
 ls_inner_bc  = (ls_inner_od + ls_id) / 2;       // 101.2  holes centred in the inner ring (observed)
 ls_holes     = 4;                // per ring, 90 degrees apart
