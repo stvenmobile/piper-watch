@@ -51,7 +51,9 @@ module cam_outline() {
 module cavity_outline() { offset(r = fit) cam_outline(); }
 module shell_outline()  { offset(r = fit + wall) cam_outline(); }
 
-cavity_h = cam_h + 2 * fit + lip_h;   // camera + clearance + room for the lid's lip
+// Cavity height: the rim ends about flush with the camera's top (fit test: the first
+// print was 4 mm taller than needed). The lid is a cap that fits OUTSIDE the rim.
+cavity_h = cam_h + 2 * fit + lip_h - 4;
 
 // ---- 3D: body = shell extruded, minus cavity, minus windows ----------------------
 module pod_body() {
@@ -66,12 +68,13 @@ module pod_body() {
         translate([0, 0, -fit]) linear_extrude(height = cavity_h + 1) cavity_outline();
 
         // front window: shows the glossy face and lens, keeps a rim all round
-        translate([-cam_face_l / 2 + 3, -10, 2]) cube([cam_face_l - 6, 20, cam_h - 4]);
+        // (top edge kept ~3.4 mm below the lowered rim so the strip above it stays sturdy)
+        translate([-cam_face_l / 2 + 3, -10, 2]) cube([cam_face_l - 6, 20, cam_h - 6]);
 
         // cable exit in the back wall, 30 mm from the idler-side (+X) end: a slot open
         // to the top, so the cable (plug still attached) drops in from above
         translate([cam_w / 2 - cam_cable_x, cam_d - 2, 0])
-            hull() for (z = [cam_h / 2, cavity_h + 1])
+            hull() for (z = [cam_h / 2 - 4, cavity_h + 1])   // 4 mm deeper after the fit test
                 translate([0, 0, z]) rotate([-90, 0, 0]) cylinder(d = cam_cable_d + 0.6, h = 10);
 
         // bores through the pivots
@@ -104,17 +107,20 @@ module idler_bore() {
     }
 }
 
-// ---- Lid: a plate in the shell outline with a lip that drops into the cavity ------
-lid_t   = wall;                 // plate thickness
-lip_w   = 1.2;                  // lip wall thickness
-lip_clr = 0.2;                  // gap between lip and cavity wall (friction fit)
+// ---- Lid: a cap - flat plate plus a short skirt that fits around the OUTSIDE of the
+// rim (the rim is flush with the camera's top, so there is no room for an inside lip).
+lid_t     = wall;               // plate thickness
+skirt_h   = 3;                  // how far the skirt reaches down the outside of the pod
+skirt_w   = 1.2;                // skirt wall thickness
+skirt_clr = 0.2;                // gap between skirt and pod wall (friction fit)
 
 module pod_lid() {              // modelled upside down, i.e. as printed: plate on the bed
-    linear_extrude(height = lid_t) shell_outline();
-    translate([0, 0, lid_t]) linear_extrude(height = lip_h - 0.4)
+    linear_extrude(height = lid_t)
+        offset(delta = skirt_clr + skirt_w) shell_outline();
+    translate([0, 0, lid_t]) linear_extrude(height = skirt_h)
         difference() {
-            offset(delta = -lip_clr) cavity_outline();
-            offset(delta = -lip_clr - lip_w) cavity_outline();
+            offset(delta = skirt_clr + skirt_w) shell_outline();
+            offset(delta = skirt_clr) shell_outline();
         }
 }
 
