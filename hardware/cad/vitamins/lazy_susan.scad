@@ -11,11 +11,11 @@ module lazy_susan() {
     color("silver") {
         difference() {                                   // outer ring
             cylinder(d = ls_od, h = ls_h);
-            translate([0, 0, -1]) cylinder(d = ls_split_d, h = ls_h + 2);
+            translate([0, 0, -1]) cylinder(d = ls_outer_id, h = ls_h + 2);
             ls_holes(ls_outer_bc);
         }
         difference() {                                   // inner ring
-            cylinder(d = ls_split_d - 1, h = ls_h);
+            cylinder(d = ls_inner_od, h = ls_h);
             translate([0, 0, -1]) cylinder(d = ls_id, h = ls_h + 2);
             ls_holes(ls_inner_bc, ls_inner_rot);
         }

@@ -17,15 +17,27 @@ insert_m3   = [4.1, 5.0];        // heat-set insert bore [diameter, depth] - cou
 insert_m4   = [5.6, 6.0];        // coupon "M4a" confirmed
 
 // --- Lazy Susan: 140 mm round aluminium turntable bearing (Amazon B08CSMCRC6) ----
-ls_od        = 140;              // outer diameter (given)
-ls_id        = 89;               // centre opening - measured on the real part (listing said 85)
-ls_h         = 10.5;             // total thickness, both rings (measured on listing photo)
-ls_split_d   = 113;              // EST: diameter where outer and inner ring meet
+// Two COPLANAR rings, both 10.5 mm thick and flush top and bottom, with a 0.8 mm gap.
+// The outer ring screws down into the box (countersinks on top); the inner ring
+// screws up into the turntable top plate (countersinks underneath). No access hole.
+ls_od        = 140;              // outer ring, outside (measured)
+ls_ring_w    = 12.4;             // radial width of each ring (measured)
+ls_gap       = 0.8;              // radial gap between the rings (measured)
+ls_outer_id  = ls_od - 2 * ls_ring_w;            // 115.2  outer ring, inside
+ls_inner_od  = ls_outer_id - 2 * ls_gap;         // 113.6  inner ring, outside
+ls_id        = ls_inner_od - 2 * ls_ring_w;      // 88.8   centre opening (measured ~89)
+ls_h         = 10.5;             // thickness of both rings (measured)
 ls_hole_d    = 4.5;              // EST: through holes, countersunk (M4 / #8)
-ls_outer_bc  = 128;              // EST: outer ring bolt circle diameter, 4 holes
-ls_inner_bc  = 100;              // EST: inner ring bolt circle diameter, 4 holes
+ls_outer_bc  = 128;              // EST: outer ring bolt circle diameter, 4 holes (~127.6 if centred in the ring)
+ls_inner_bc  = 100;              // EST: inner ring bolt circle diameter, 4 holes (~101.2 if centred in the ring)
 ls_holes     = 4;
 ls_inner_rot = 45;               // inner holes sit between the outer ones
+
+// Mounting rules that follow from the flush rings
+ls_clear     = 1.0;              // keep printed parts this far (diameter) from the other ring
+top_plate_d  = ls_inner_od - ls_clear;           // 112.6  turntable plate touches the inner ring only
+plinth_id    = ls_outer_id + ls_clear;           // 116.2  box-top plinth touches the outer ring only
+plinth_h     = 2.0;              // raised plinth height = clear gap under the inner ring
 
 // --- Feetech STS3215 (12 V / 30 kg.cm) - EST from datasheet, verify on arrival --
 sts_body     = [45.2, 24.7, 35]; // length x width x height (without horn)
