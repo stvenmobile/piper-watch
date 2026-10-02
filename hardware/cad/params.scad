@@ -47,8 +47,15 @@ sts_shaft_x  = 11.5;             // EST: output shaft centre from the near end
 sts_horn_d   = 20;               // EST: horn diameter
 sts_horn_h   = 3;
 
-// --- Logitech C920X core module - EST ----------------------------------------------
-cam_core     = [90, 30, 25];
+// --- Logitech C920X, housing partly stripped (photos: cam_front.jpg, cam_top.jpg) ---
+// Seen from above it is a lozenge: flat glossy front face, rounded back, rounded ends
+// (the mic grilles) with a small notch where each grille meets the face.
+cam_w        = 94;               // width, along the tilt axis (measured)
+cam_h        = 29;               // height (measured)
+cam_d        = 24;               // EST from photo: depth front-to-back at the middle
+cam_face_l   = 65;               // EST from photo: flat front face length between the notches
+cam_cable_x  = 35;               // EST from photo: cable leaves the back this far from one end
+cam_core     = [cam_w, cam_d, cam_h];
 
 // --- E32R40T 4" display board - TODO: measure outline, holes, connector positions --
 lcd_board    = [110, 70, 12];    // EST placeholder
