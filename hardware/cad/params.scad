@@ -18,7 +18,7 @@ insert_m4   = [5.6, 6.0];        // coupon "M4a" confirmed
 
 // --- Lazy Susan: 140 mm round aluminium turntable bearing (Amazon B08CSMCRC6) ----
 ls_od        = 140;              // outer diameter (given)
-ls_id        = 85;               // centre opening (given)
+ls_id        = 89;               // centre opening - measured on the real part (listing said 85)
 ls_h         = 10.5;             // total thickness, both rings (measured on listing photo)
 ls_split_d   = 113;              // EST: diameter where outer and inner ring meet
 ls_hole_d    = 4.5;              // EST: through holes, countersunk (M4 / #8)
