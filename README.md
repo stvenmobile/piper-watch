@@ -74,7 +74,7 @@ The roles are:
 | Logitech **C920X**, stripped to the core module (about 9 × 3 × 2.5 cm) | camera | have |
 | **SP-200** USB speakerphone (5 V): 4-mic array, hardware echo cancellation, USB Audio Class | microphone/speaker, connected to the Jetson | have |
 | 5.5" (140 mm) aluminium lazy Susan bearing | pan base, carries all vertical load | have / needed |
-| Idler bearing (e.g. 608) and 3D-printed tilt yoke and camera housing | tilt axis | to design |
+| 608ZZ (servo side) and 6803-2RS (cable side) bearings, 3D-printed turret, cheeks and camera pod | tilt axis | 608 have, 6803 ordering; pod v1 printed |
 | **12 V / 5 A** power brick, inline 5 A fuse, 1000 µF / 25 V capacitor | head power | needed |
 | **5 V / 3 A** buck converter | USB hub power | needed |
 | **FE1.1s 4-port USB 2.0 hub board** (~$5–7) with external 5V/GND pads and a cuttable "Disable USB Power" jumper (e.g. [Circuitneato](https://circuitneato.com/how-to-use-the-fe1-1s-usb-hub/), or generic "FE1.1s hub module" listings) | one cable to the Jetson | needed |
@@ -266,9 +266,15 @@ The live camera view, with boxes, names and contours, goes on the Jetson's **das
 
 - **Pan:** the lazy Susan carries all of the head's weight. The pan servo only *turns* it,
   through a coupling at the centre, so there's no sideways load on the servo shaft.
-- **Tilt:** a yoke on the turntable. The tilt servo drives one side through its 25T horn;
-  an idler bearing supports the other side on the same axis. Keep the camera's centre of mass
-  close to the tilt axis so the servo isn't holding a constant load.
+- **Tilt:** a turret on the turntable with two cheeks; the camera pod pivots between them on
+  **a bearing in each cheek**, so the bearings carry the pod and the servo only turns it:
+  - **Servo side: 608ZZ** (8 × 22 × 7). The pod's stub axle runs in the 608, and the STS3215 drives
+    it through a **misalignment-tolerant coupling** (pins in slots), never rigidly - a rigid joint
+    plus the servo's own bearings would over-constrain the axis and bind.
+  - **Cable side: 6803-2RS** thin-section (17 × 26 × 5). The pod's axle is a 17 mm tube the camera's
+    USB-A plug passes straight through, so the cable threads through the pivot with no slot.
+  - Keep the camera's centre of mass on the tilt axis so the servo isn't holding a constant load.
+  - Bearing seats are press fits; a small seat coupon sets the exact bore for this printer.
 - **Cables:** the camera's USB cable runs through the centre with a **service loop** sized for
   ±150° of pan. The soft limits keep it from winding further. Avoid slip rings for USB 2.0.
 - **Noise:** the STS3215s are quiet when holding still. If movement noise still reaches the

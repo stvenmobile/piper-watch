@@ -47,6 +47,14 @@ sts_shaft_x  = 11.5;             // EST: output shaft centre from the near end
 sts_horn_d   = 20;               // EST: horn diameter
 sts_horn_h   = 3;
 
+// --- Tilt bearings: one in each cheek, carrying the camera pod -----------------------
+// Servo side: 608ZZ (the servo only supplies torque through a misalignment-tolerant coupling).
+// Cable side: 6803-2RS thin-section - its 17 mm bore takes a hollow axle the USB-A plug
+// (about 12 x 4.5 mm, 12.8 mm diagonal) can pass through, so the cable needs no slot.
+brg_608      = [8, 22, 7];       // [bore, outside, width]
+brg_6803     = [17, 26, 5];
+usb_plug     = [12.0, 4.5];      // EST: USB-A plug cross-section the hollow axle must pass
+
 // --- Logitech C920X, housing partly stripped (photos: cam_front.jpg, cam_top.jpg) ---
 // Seen from above it is a lozenge: flat glossy front face, rounded back, rounded ends
 // (the mic grilles) with a small notch where each grille meets the face.
