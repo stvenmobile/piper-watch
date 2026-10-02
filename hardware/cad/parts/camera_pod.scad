@@ -68,9 +68,11 @@ module pod_body() {
         // front window: shows the glossy face and lens, keeps a rim all round
         translate([-cam_face_l / 2 + 3, -10, 2]) cube([cam_face_l - 6, 20, cam_h - 4]);
 
-        // cable exit in the back wall, 30 mm from the idler-side (+X) end
-        translate([cam_w / 2 - cam_cable_x, cam_d - 2, cam_h / 2])
-            rotate([-90, 0, 0]) cylinder(d = cam_cable_d + 1, h = 10);
+        // cable exit in the back wall, 30 mm from the idler-side (+X) end: a slot open
+        // to the top, so the cable (plug still attached) drops in from above
+        translate([cam_w / 2 - cam_cable_x, cam_d - 2, 0])
+            hull() for (z = [cam_h / 2, cavity_h + 1])
+                translate([0, 0, z]) rotate([-90, 0, 0]) cylinder(d = cam_cable_d + 0.6, h = 10);
 
         // bores through the pivots
         // servo-side centre hole, through the horn boss and its end wall
