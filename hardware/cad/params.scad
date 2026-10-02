@@ -54,7 +54,7 @@ cam_w        = 94;               // width, along the tilt axis (measured)
 cam_h        = 29;               // height (measured)
 cam_d        = 24.1;             // depth front-to-back at the middle (measured)
 cam_face_l   = 63.5;             // flat front face length between the notches (measured)
-cam_cable_x  = 30;               // cable leaves the back this far from the nearest end (measured)
+cam_cable_x  = 31;               // cable centre from the nearest end: measured 30, moved 1 mm inward after the pod fit test
 cam_cable_d  = 3.0;              // cable diameter (measured); USB-A plug on the end, so it can't thread through holes
 cam_core     = [cam_w, cam_d, cam_h];
 
