@@ -166,8 +166,12 @@ The adapter handles the half-duplex direction switching, so the ESP32 just uses 
 1. **Give each servo its own ID.** New STS3215s all ship as ID 1, so connect them **one at a time**:
    leave the pan servo as **ID 1**, and set the tilt servo to **ID 2**. Use Feetech's FD software,
    or the Bus Servo Adapter's USB mode, or a small ESP32 sketch. Only then daisy-chain them.
-2. **Centre:** with the head assembled at its rest pose, write the middle-position calibration
-   so that **2048 = straight ahead / level** on both servos.
+2. **Zero before assembly, then centre.** Before fitting a horn or coupling, power each servo and
+   command it to **2048 (mid position)**. Only then attach the turntable coupling / camera pod with
+   the head pointing **straight ahead and level**. That way the mechanism's centre is the servo's
+   centre and nothing is under strain at rest. Afterwards, fine-tune with the middle-position
+   calibration so that **2048 = straight ahead / level** exactly. The bench firmware has a
+   `center` command for this.
 3. **Angle limits in the servo's EEPROM**, so they hold even if the software misbehaves:
    - **Pan:** about ±150° from centre (the camera cable sets the real limit; see Mechanics).
    - **Tilt:** about −30° to +45°, to suit the yoke.
@@ -195,6 +199,12 @@ Library: Feetech's **SCServo** (`SMS_STS` class) for Arduino-ESP32, at 1 Mbps.
   - over-temperature or overload reported by a servo → stop and report.
 - **Power-up:** bus servos don't jump on power-up. The ESP32 reads where they are and
   starts from there.
+- **Don't force the head while it's powered.** The STS3215 has no slip clutch: twisting a head
+  that is holding position by hand fights the motor and can strip its gears. Two defences:
+  - the servo-side **overload and current limits** (Servo setup, step 4) drop torque instead of
+    fighting;
+  - **torque is released when idle** (watchdog above). To move the head by hand on purpose, release
+    torque first (a command from the Jetson, or the head's touch menu), and turn it gently.
 
 ---
 
