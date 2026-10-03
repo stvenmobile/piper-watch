@@ -14,7 +14,7 @@ include <../params.scad>
 // ---- overall --------------------------------------------------------------------
 W       = head_size[0];      // 100  face width
 H       = head_size[2];      // 110  face height
-chamf   = 6;                 // top corner chamfers
+corner_r = 10;               // every corner of the face outline is rounded with this radius
 chin_x  = 15;                // chin: bottom corners cut as 30-60-90 triangles -
 chin_y  = chin_x * tan(60);  //   15 mm in along the bottom, ~26 mm up the side
 t_face  = 2.5;               // face plate thickness
@@ -57,11 +57,11 @@ bosses = [
 ];
 
 // ============================================================================
-module outline2d(inset = 0) {          // face outline: chamfered top, 30-60-90 chin
+module outline2d(inset = 0) {          // face outline: 30-60-90 chin, every corner rounded
     offset(delta = -inset)
-        polygon([[-W/2 + chin_x, -H/2], [W/2 - chin_x, -H/2], [W/2, -H/2 + chin_y],
-                 [W/2, H/2 - chamf], [W/2 - chamf, H/2], [-W/2 + chamf, H/2],
-                 [-W/2, H/2 - chamf], [-W/2, -H/2 + chin_y]]);
+        offset(r = corner_r) offset(delta = -corner_r)          // rounds all convex corners
+            polygon([[-W/2 + chin_x, -H/2], [W/2 - chin_x, -H/2], [W/2, -H/2 + chin_y],
+                     [W/2, H/2], [-W/2, H/2], [-W/2, -H/2 + chin_y]]);
 }
 
 module rrect(size, r) { offset(r = r) square([size[0] - 2*r, size[1] - 2*r], center = true); }
