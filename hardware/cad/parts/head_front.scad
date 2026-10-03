@@ -1,7 +1,6 @@
 // Head front - the face. Everything mounts to its back:
 //   * two 1.3" eye OLEDs located by pins through their mounting holes (hot-glued pin tips)
 //   * the C920X camera in a cradle, its lens behind the round "nose" opening
-//   * the 0.91" mouth OLED in a shallow pocket (hot-glued)
 // The glass of each display sits in a pocket cut into the back of the plate, so it is only
 // glass_inset (1 mm) behind the face surface. The back cover (separate part) screws onto the
 // four inserts in the rim.
@@ -13,36 +12,28 @@ include <../params.scad>
 
 // ---- overall --------------------------------------------------------------------
 W       = head_size[0];      // 100  face width
-H       = head_size[2];      // 114  face height
-corner_r = 10;               // the chin's bottom corners are rounded with this radius
-top_r    = 25;               // top corners: big enough to follow the eye ovals (even ~12-14 mm margin)
-chin_r   = 40;               // the corners where the chin starts (150 deg, so they need a bigger radius to show)
-chin_x  = 15;                // chin: bottom corners cut as 30-60-90 triangles -
-chin_y  = chin_x * tan(60);  //   15 mm in along the bottom, ~26 mm up the side
+H       = head_size[2];      //  90  face height (eyes + camera, no mouth)
+top_r   = 25;                // top corners: big enough to follow the eye ovals (even ~12-14 mm margin)
+bot_r   = 12;                // bottom corners: as round as the full-width camera allows
 t_face  = 2.5;               // face plate thickness
 rim_d   = 14;                // depth of the front part's rim (the back cover is the rest)
 rim_w   = 2.0;               // rim wall thickness
 
 // ---- layout (face coordinates, origin at the face centre, +Y = up) ----------------
+// Top to bottom: 15 mm margin, eye windows, 4.6 mm between the eye boards and the camera
+// cradle, the camera, then just enough below it for the camera's corners to clear the
+// rounded bottom corners.
 eye_cx     = 22;             // eye board centres at x = +/- this
-eye_cy     = 32.15;          // eye board centre height (above the face centre); ~4.6 mm clear of the camera cradle
+eye_cy     = 19.5;           // eye board centre height (above the face centre)
 eye_act_dy = 1.5;            // EST: active area sits this much above the board centre
 eye_glass_dy = 0;            // EST: glass centred on the board (vertically)
-cam_cy     = -6;             // camera centre = lens centre = nose
-// Mouth placed so its window's bottom is as far from the face's bottom edge as the eye
-// windows' top is from the face's top edge (robot symmetry).
-eye_win_top = eye_cy + eye_act_dy + (eye_active[1] + 2 * 1.0) / 2;      // (the old rectangular window; keeps the mouth where it was)
-mouth_cy    = -(eye_win_top) + (mouth_active[1] + 2 * 1.0) / 2;
-mouth_pins = -1;             // mouth board's pin end faces -X (+1 for +X)
+cam_cy     = -18.65;         // camera centre = lens centre = nose
 
 // ---- windows and glass pockets ----------------------------------------------------
-win_margin  = 1.0;           // window this much larger than the active area, each side
 eye_win    = [32, 18];       // eye windows are ovals this size, on the active area: they show the whole
                              //   drawn eye (central 80x64 px) and hide only the screen's unused corners
-mouth_win_r = 3;             // mouth window corner radius
 glass_inset = 1.0;           // glass front sits this far behind the face surface
 glass_clr   = 0.3;           // pocket clearance around the glass, each side (glass sizes are EST)
-mouth_glass_t = 1.5;         // EST: glass part of the mouth module's 2.6 mm
 nose_d     = 16;             // round lens opening at the inside face of the plate
 nose_flare = 40;             // degrees: opening widens toward the outside (no vignetting)
 
@@ -53,36 +44,21 @@ cradle_dep = 15;             // cradle reaches this far back (camera slides in f
 
 // ---- back-cover attachment: [position, direction the web runs into the corner] -------
 boss_d     = 7.5;            // around an M3 heat-set insert (4.1 mm bore)
-jaw        = [W/2 - chin_x, -H/2];                 // where the chin cut meets the bottom edge
 bosses = [
-    [[ 44, 30], [ 1, 0]],                           // beside the eye boards, below the round top
-    [[-44, 30], [-1, 0]],
-    [[ 31, -H/2 + 7], [ 4, -7] / norm([4, -7])],    // bottom, tucked into the jaw corners
-    [[-31, -H/2 + 7], [-4, -7] / norm([4, -7])],
+    [[ 44, eye_cy - 2.15], [ 1, 0]],                // beside the eye boards, below the round top
+    [[-44, eye_cy - 2.15], [-1, 0]],
+    [[ 38, -H/2 + 7], [ 1, -1] / sqrt(2)],          // bottom corners, under the camera
+    [[-38, -H/2 + 7], [-1, -1] / sqrt(2)],
 ];
 
 // ============================================================================
-module outline2d(inset = 0) {          // face outline: 30-60-90 chin, every corner rounded
-    // corners (counter-clockwise) and their radii; each corner is replaced by the arc tangent
-    // to its two edges
-    pts = [[-W/2 + chin_x, -H/2], [W/2 - chin_x, -H/2], [W/2, -H/2 + chin_y],
-           [W/2, H/2], [-W/2, H/2], [-W/2, -H/2 + chin_y]];
-    rs  = [corner_r, corner_r, chin_r, top_r, top_r, chin_r];
-    n = len(pts);
-    function unit(v) = v / norm(v);
-    function arc(i) = let(
-        p  = pts[i], r = rs[i],
-        u1 = unit(pts[(i + n - 1) % n] - p), u2 = unit(pts[(i + 1) % n] - p),
-        half = acos(u1 * u2) / 2,                                 // half the interior angle
-        c  = p + unit(u1 + u2) * r / sin(half),                   // arc centre
-        a0 = atan2(u1[0], -u1[1]),                                // outward normal of the incoming edge
-        sweep = 180 - 2 * half,
-        steps = max(2, ceil(sweep / 2)))
-        [for (k = [0 : steps]) c + r * [cos(a0 + sweep * k / steps), sin(a0 + sweep * k / steps)]];
-    offset(delta = -inset) polygon([for (i = [0 : n - 1]) each arc(i)]);
+module outline2d(inset = 0) {          // face outline: a rounded rectangle
+    offset(delta = -inset) hull()
+        for (sx = [-1, 1]) {
+            translate([sx * (W/2 - top_r), H/2 - top_r]) circle(r = top_r, $fn = 180);
+            translate([sx * (W/2 - bot_r), -H/2 + bot_r]) circle(r = bot_r, $fn = 120);
+        }
 }
-
-module rrect(size, r) { offset(r = r) square([size[0] - 2*r, size[1] - 2*r], center = true); }
 
 // Camera outline seen from above, as in camera_pod.scad: flat face on y = 0, back at y = cam_d
 end_r = 8; end_y = 15; back_a = 33;
@@ -97,10 +73,8 @@ module cam_outline() {
     }
 }
 
-// Where the display boards end up (their glass sunk into the plate)
+// Where the eye boards end up (their glass sunk into the plate)
 eye_board_z   = glass_inset + eye_t[0];                       // board's front face
-mouth_board_z = max(t_face, glass_inset + mouth_glass_t);
-mouth_glass_dx = -mouth_pins * (mouth_glass_x + mouth_glass[0] / 2 - mouth_board[0] / 2);
 
 // ---- the parts of the face ------------------------------------------------------
 module plate_and_rim() {
@@ -114,17 +88,6 @@ module eye_pins(cx) {
         translate([cx + sx * eye_holes[0] / 2, eye_cy + sy * eye_holes[1] / 2, t_face - 0.01]) {
             if (eye_board_z > t_face) cylinder(d = mount_boss_d, h = eye_board_z - t_face + 0.01);
             cylinder(d = mount_pin_d, h = eye_board_z - t_face + eye_t[1] + mount_pin_out, $fn = 32);
-        }
-}
-
-module mouth_pocket() {          // a low wall around the board footprint
-    clr = 0.3;
-    translate([0, mouth_cy, t_face - 0.01])
-        linear_extrude(mouth_board_z - t_face + (mouth_t - mouth_glass_t) + 0.4) difference() {
-            square([mouth_board[0] + 2*clr + 2.4, mouth_board[1] + 2*clr + 2.4], center = true);
-            square([mouth_board[0] + 2*clr, mouth_board[1] + 2*clr], center = true);
-            // gap at the pin end so the wires can leave
-            translate([mouth_pins * (mouth_board[0] / 2), 0]) square([6, mouth_board[1] - 2], center = true);
         }
 }
 
@@ -142,7 +105,7 @@ module camera_cradle() {
                 translate([0, 0, -1]) linear_extrude(cam_h + 10)        // keep the face side open
                     translate([-cam_face_l / 2, -5]) square([cam_face_l, 5 + 0.01]);
             }
-        translate([-W, -H, t_face]) cube([2 * W, 2 * H, cradle_dep]);  // only the front part
+        translate([0, 0, t_face]) linear_extrude(cradle_dep) outline2d();   // only the front part, inside the face
     }
 }
 
@@ -191,11 +154,6 @@ module cutouts() {
         flare = t_face * tan(nose_flare);
         translate([0, 0, -0.01]) cylinder(d1 = nose_d + 2 * flare, d2 = nose_d, h = t_face + 0.02, $fn = 96);
     }
-    // mouth: window on the active area (EST: centred in the glass) + glass pocket
-    translate([mouth_glass_dx, mouth_cy, 0])
-        flared_window() rrect(mouth_active + [2, 2] * win_margin, mouth_win_r);
-    translate([mouth_glass_dx, mouth_cy, glass_inset])
-        linear_extrude(t_face) square(mouth_glass + [2, 2] * glass_clr, center = true);
 }
 
 difference() {
@@ -203,7 +161,6 @@ difference() {
         plate_and_rim();
         eye_pins(eye_cx);
         eye_pins(-eye_cx);
-        mouth_pocket();
         camera_cradle();
         bosses_();
     }
@@ -213,4 +170,3 @@ difference() {
 // Ghosts of the parts, for checking fit in the preview (not printed)
 %for (sx = [-1, 1]) translate([sx * eye_cx - eye_board[0]/2, eye_cy - eye_board[1]/2, eye_board_z]) cube([eye_board[0], eye_board[1], eye_t[1]]);
 %translate([0, cam_cy, t_face]) rotate([90, 0, 0]) translate([0, 0, -cam_h/2]) linear_extrude(cam_h) cam_outline();
-%translate([-mouth_board[0]/2, mouth_cy - mouth_board[1]/2, mouth_board_z]) cube([mouth_board[0], mouth_board[1], mouth_t - mouth_glass_t]);
