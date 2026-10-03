@@ -53,6 +53,17 @@ head_tilt    = 15;               // fixed upward tilt, set by the swappable wedg
 neck_out     = 40;               // EST: chamfered square neck, outside
 neck_in      = 28;               // inside opening: camera USB plug + ~10 x 2 mm silicone wires
 
+// --- GT2 timing belt (6 mm) and printed pulley teeth -----------------------------------
+// Tooth-space shape is tunable: print parts/pulley_test_arc.scad and adjust until the belt
+// seats fully with no rocking.
+gt2_pitch    = 2.0;              // tooth pitch
+gt2_pld      = 0.254;            // pitch line sits this far outside the pulley's tooth tips
+gt2_belt_w   = 6.0;              // belt width
+gt2_belt_t   = 1.38;             // belt total thickness (backing 0.63 + teeth 0.75)
+gt2_depth    = 0.75 + 0.05;      // tooth-space depth (belt tooth 0.75 + clearance)
+gt2_tip_r    = 0.555 + 0.05;     // rounded bottom of the tooth space
+gt2_mouth    = 1.35;             // tooth-space width at the tips
+
 // --- Face LED ring: 24-LED WS2812-type ring (measured / vendor) ------------------------
 // Through-hole pads (2x 5 V, 2x GND, DIN, DOUT); wires can leave from either side.
 ring_od      = 65.6;             // outer diameter
