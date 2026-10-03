@@ -13,7 +13,7 @@ include <../params.scad>
 
 // ---- overall --------------------------------------------------------------------
 W       = head_size[0];      // 100  face width
-H       = head_size[2];      // 110  face height
+H       = head_size[2];      // 114  face height
 corner_r = 10;               // top corners and the chin's bottom corners are rounded with this radius
 chin_r   = 40;               // the corners where the chin starts (150 deg, so they need a bigger radius to show)
 chin_x  = 15;                // chin: bottom corners cut as 30-60-90 triangles -
@@ -24,10 +24,10 @@ rim_w   = 2.0;               // rim wall thickness
 
 // ---- layout (face coordinates, origin at the face centre, +Y = up) ----------------
 eye_cx     = 22;             // eye board centres at x = +/- this
-eye_cy     = 30.15;          // eye board centre height (above the face centre)
+eye_cy     = 32.15;          // eye board centre height (above the face centre); ~4.6 mm clear of the camera cradle
 eye_act_dy = 1.5;            // EST: active area sits this much above the board centre
 eye_glass_dy = 0;            // EST: glass centred on the board (vertically)
-cam_cy     = -4;             // camera centre = lens centre = nose
+cam_cy     = -6;             // camera centre = lens centre = nose
 // Mouth placed so its window's bottom is as far from the face's bottom edge as the eye
 // windows' top is from the face's top edge (robot symmetry).
 eye_win_top = eye_cy + eye_act_dy + (eye_active[1] + 2 * 1.0) / 2;      // 1.0 = win_margin
