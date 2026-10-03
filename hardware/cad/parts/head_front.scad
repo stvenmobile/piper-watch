@@ -28,12 +28,15 @@ cam_cy  = 0;                 // camera, lens, ring and face all share one centre
 // ---- LED ring and its light path (ring and diffuser sizes: params.scad) ------------
 ring_clr   = 0.3;            // pocket clearance, each side
 mix_gap    = 3.5;            // air between diffuser and LED tops: lets the light spread
-chamber_w  = 5.5;            // light chamber width (radial); the LEDs are 5 mm square
+chamber_w  = 5.7;            // light chamber width (radial): 5 mm LEDs (~0.3 clear each side); the
+                             //   PCB (6.65 wide) rests on the ~0.48 mm ledges either side
 spoke_w    = 1.6;            // spokes across the chamber, between LEDs
 spokes     = [90 + 7.5, 210 + 7.5, 330 + 7.5];   // half a pitch off the vertical
 ring_r     = (ring_od + ring_id) / 4;          // 29.5: radius of the LED centres
 
+led_h = ring_t - 1.6;                          // LEDs stand 1.6 mm proud of the PCB
 z_led = diff_t + mix_gap;                      // LED tops (5.5)
+z_pcb = z_led + led_h;                         // PCB front face: rests on the chamber's edges (7.1)
 z_cam = z_led + ring_t + 0.5;                  // camera's front face, just behind the ring (9.2)
 
 // ---- lens opening ------------------------------------------------------------------------
@@ -133,14 +136,16 @@ module cutouts() {
     // diffuser seat, open at the face
     translate([0, 0, -0.01]) linear_extrude(diff_t + 0.01)
         annulus(ring_r - diff_w / 2, ring_r + diff_w / 2);
-    // light chamber (narrower than the seat, so the diffuser rests on its edges), minus spokes
-    translate([0, 0, diff_t - 0.01]) linear_extrude(mix_gap + 0.02) difference() {
+    // light chamber, down to the PCB: the LEDs sit in it and the PCB rests on its edges (the
+    // seat in front is wider, so the diffuser rests on them too). Minus the spokes, which
+    // fall between LEDs.
+    translate([0, 0, diff_t - 0.01]) linear_extrude(z_pcb - diff_t + 0.02) difference() {
         annulus(ring_r - chamber_w / 2, ring_r + chamber_w / 2);
         for (a = spokes) rotate(a) translate([ring_r, 0]) square([chamber_w + 2, spoke_w], center = true);
     }
     // ring pocket, open at the back - also through the cradle's lips, so the ring can go in
     // from behind (before the camera)
-    translate([0, 0, z_led]) linear_extrude(z_cam + cradle_dep + 1)
+    translate([0, 0, z_pcb]) linear_extrude(z_cam + cradle_dep + 1)
         annulus(ring_id / 2 - ring_clr, ring_od / 2 + ring_clr);
 }
 
@@ -155,5 +160,5 @@ difference() {
 }
 
 // Ghosts of the parts, for checking fit in the preview (not printed)
-%translate([0, 0, z_led]) linear_extrude(ring_t) annulus(ring_id / 2, ring_od / 2);
+%translate([0, 0, z_pcb]) linear_extrude(1.6) annulus(ring_id / 2, ring_od / 2);
 %translate([0, cam_cy, z_cam]) rotate([90, 0, 0]) translate([0, 0, -cam_h/2]) linear_extrude(cam_h) cam_outline();
