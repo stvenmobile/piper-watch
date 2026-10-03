@@ -64,6 +64,13 @@ eye_glass    = [34.5, 23.0];     // EST: standard 1.3" panel outline
 eye_active   = [29.42, 14.70];   // standard 1.3" active area (128 x 64)
 eye_header   = [4, 2.54];        // 4 pins at 2.54 mm, centred on the top edge, pointing back
 
+// Display mounting: no screws. Stepped pillars on the back of the face plate locate the
+// board through its holes; a dab of hot glue on each pin tip holds it (and peels off).
+mount_pin_d   = eye_hole_d - 0.3;          // 2.7  pin through the mounting hole
+mount_boss_d  = 5.0;                       // standoff the board rests on
+mount_boss_h  = eye_t[0] + 0.2;            // 1.8  glass sits 0.2 mm clear of the face
+mount_pin_out = 1.5;                       // pin sticks out past the board for the glue
+
 // --- Logitech C920X, housing partly stripped (photos: cam_front.jpg, cam_top.jpg) ---
 // Seen from above it is a lozenge: flat glossy front face, rounded back, rounded ends
 // (the mic grilles) with a small notch where each grille meets the face.
