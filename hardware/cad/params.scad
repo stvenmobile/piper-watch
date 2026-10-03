@@ -71,6 +71,14 @@ mount_boss_d  = 5.0;                       // standoff the board rests on
 mount_boss_h  = eye_t[0] + 0.2;            // 1.8  glass sits 0.2 mm clear of the face
 mount_pin_out = 1.5;                       // pin sticks out past the board for the glue
 
+// --- Mouth OLED: 0.91" SSD1306 128x32 I2C (measured) ---------------------------------
+// No mounting holes: drops into a shallow pocket on the back of the face, hot-glued.
+mouth_board  = [38, 12];         // board length x width
+mouth_glass  = [30, 11.5];       // glass length x width
+mouth_glass_x = 4.75;            // glass starts this far from the pin end of the board
+mouth_t      = 2.6;              // board + glass thickness (pins excluded)
+mouth_active = [22.38, 5.58];    // standard 0.91" active area (128 x 32); EST position: centred in the glass
+
 // --- Logitech C920X, housing partly stripped (photos: cam_front.jpg, cam_top.jpg) ---
 // Seen from above it is a lozenge: flat glossy front face, rounded back, rounded ends
 // (the mic grilles) with a small notch where each grille meets the face.
