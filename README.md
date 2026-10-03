@@ -1,13 +1,14 @@
 # Piper-Watch
 
 **Piper-Watch** is the eyes of [piper-assistant](https://github.com/stvenmobile/piper_assistant):
-a desktop pan/tilt camera head that lets the assistant look around, find and follow
-faces, and recognise the people it knows. It has a small face of its own: a 4" display
-for animated robot eyes, short messages and status.
+a desktop pan/tilt robot head that lets the assistant look around, find and follow
+faces, and recognise the people it knows. The head has a face: the camera is its **nose**,
+and two small OLED screens above it are its **eyes**.
 
-All the thinking happens on an **NVIDIA Jetson Orin NX** in a separate enclosure. The head
-contains the camera, two serial bus servos, an ESP32 display board that drives the servos
-and the screen, and its own power supply.
+All the thinking happens on an **NVIDIA Jetson Orin NX** in a separate enclosure. Piper-Watch
+itself is a compact two-part unit: a **shallow cylindrical base** (power, an ESP32-S3 controller,
+the pan servo) carrying a lazy Susan, and a **head** on top that pans and tilts. Anything richer
+than eyes - text, status, the camera view - goes on the Jetson's dashboard web page.
 
 > **Status:** design phase. The servos are on order; nothing is built yet.
 
@@ -18,11 +19,12 @@ and the screen, and its own power supply.
 **Goals**
 - Smooth, quiet pan/tilt tracking of a person's face, without stepping or buzzing while holding still.
 - Face detection and recognition running entirely locally on the Jetson.
-- A friendly physical presence: eyes that look where the camera looks, plus short text messages.
+- A friendly physical presence: a head whose eyes look where the camera looks.
+- Compact: a footprint barely larger than the 140 mm lazy Susan, about 20-23 cm tall.
 - One data cable and one power brick between the head and the rest of the system.
 
 **Non-goals (for now)**
-- Live video on the head's display. The camera view, with detection overlays, lives on
+- A display on the unit. Text, status and the camera view with detection overlays live on
   the Jetson's **dashboard web page** instead.
 - Running any AI on the ESP32.
 - Battery operation.
@@ -39,11 +41,12 @@ and the screen, and its own power supply.
  └──────────────┬───────────────────────────────────────────────┬─────────────────────────┘
                 │ one USB 2.0 cable                             │ USB
                 │                                               │
- ┌──────────────▼──────────── Piper-Watch head ─────────┐  ┌────▼─────────────────────┐
+ ┌──────────────▼──────────── Piper-Watch ──────────────┐  ┌────▼─────────────────────┐
  │  FE1.1s USB 2.0 hub board (fed from the 5 V buck)    │  │ SP-200 speakerphone      │
- │   ├── Logitech C920X camera (stripped module)        │  │ 4-mic array, hardware AEC│
- │   └── ESP32-32E 4" display board (USB-C, CH340C)     │  │ placed away from the head│
- │          │ UART2 @ 1 Mbps (half-duplex servo bus)    │  └──────────────────────────┘
+ │   ├── Logitech C920X camera (stripped) - the "nose"  │  │ 4-mic array, hardware AEC│
+ │   └── ESP32-S3 DevKitC-1 N16R8 (native USB)          │  │ placed away from the head│
+ │          ├── I2C0 / I2C1 → two 1.3" SH1106 OLED eyes │  └──────────────────────────┘
+ │          │ UART1 @ 1 Mbps (half-duplex servo bus)    │
  │          ▼                                           │
  │  Waveshare Bus Servo Adapter (A) ── 12 V ──┐         │
  │          │ servo bus (daisy-chained)        │         │
@@ -56,8 +59,8 @@ and the screen, and its own power supply.
 
 The roles are:
 - **Jetson:** perception and decisions. It decides *where to look*.
-- **ESP32:** real-time body. It decides *how to move there* smoothly and safely,
-  reports where the head actually is, and animates the face.
+- **ESP32-S3:** real-time body. It decides *how to move there* smoothly and safely,
+  reports where the head actually is, and animates the eyes.
 - **Servos:** close their own position loop with a 12-bit magnetic encoder, and report
   position, load, voltage and temperature.
 
@@ -68,13 +71,14 @@ The roles are:
 | Part | Role | Status |
 |---|---|---|
 | NVIDIA Jetson Orin NX (JetPack) | vision, recognition, assistant, dashboard | have |
-| ESP32-32E 4" display, **E32R40T** ([LCDWiki](https://www.lcdwiki.com/4.0inch_ESP32-32E_Display)): ESP32-D0WD-V3, ST7796S 320×480, XPT2046 resistive touch, CH340C USB-serial, FM8002E speaker amp, RGB LED, microSD | head controller: servos, eyes, status | have |
+| **ESP32-S3 DevKitC-1 N16R8** (16 MB flash, 8 MB octal PSRAM, native USB) | controller: servo bus, eyes, link to the Jetson | have |
+| 2× **1.3" SH1106 OLED**, 128×64, I2C (4-pin) | the eyes | have |
 | 2× **Feetech STS3215, 12 V / 30 kg·cm** serial bus servos: 360° magnetic encoder (4096 steps, 0.088°), position/load/voltage/temperature feedback, 1 Mbps half-duplex TTL bus | pan and tilt | **ordered** |
 | Waveshare **Bus Servo Adapter (A)**: 9–12.6 V input, powers the servo bus and converts it to plain TX/RX for the ESP32 | servo bus interface | needed |
-| Logitech **C920X**, stripped to the core module (about 9 × 3 × 2.5 cm) | camera | have |
+| Logitech **C920X**, housing partly stripped (94 × 24.1 × 29 mm) | camera - the head's "nose" | have |
 | **SP-200** USB speakerphone (5 V): 4-mic array, hardware echo cancellation, USB Audio Class | microphone/speaker, connected to the Jetson | have |
 | 5.5" (140 mm) aluminium lazy Susan bearing | pan base, carries all vertical load | have / needed |
-| 608ZZ (servo side) and 6803-2RS (cable side) bearings, 3D-printed turret, cheeks and camera pod | tilt axis | 608 have, 6803 ordering; pod v1 printed |
+| 608ZZ (servo side) and 6803-2RS (cable side) bearings, 3D-printed base, turret, cheeks and head | tilt axis, enclosure | 608 have, 6803 ordering; camera pod fit-tested |
 | **12 V / 5 A** power brick, inline 5 A fuse, 1000 µF / 25 V capacitor | head power | needed |
 | **5 V / 3 A** buck converter | USB hub power | needed |
 | **FE1.1s 4-port USB 2.0 hub board** (~$5–7) with external 5V/GND pads and a cuttable "Disable USB Power" jumper (e.g. [Circuitneato](https://circuitneato.com/how-to-use-the-fe1-1s-usb-hub/), or generic "FE1.1s hub module" listings) | one cable to the Jetson | needed |
@@ -90,22 +94,23 @@ needs a buck converter.
 ```text
 12 V / 5 A brick ── 5 A fuse ──┬── 1000 µF ── Bus Servo Adapter (A) ── STS3215 pan + tilt
                                │
-                               └── 5 V / 3 A buck ── FE1.1s hub (5V pads) ──┬── ESP32 display (USB-C)
+                               └── 5 V / 3 A buck ── FE1.1s hub (5V pads) ──┬── ESP32-S3 (native USB) ── 3.3 V → OLED eyes
                                                                             └── C920X camera
 GND: all grounds meet at one star point at the brick input.
 ```
 
 **Why this layout**
-- **Isolation:** the display and camera get their 5 V from their own regulator, never from
-  the servo rail, so servo current spikes can't reset the ESP32 or glitch the camera. They also
-  don't depend on the Jetson's USB ports for power.
+- **Isolation:** the ESP32-S3, eyes and camera get their 5 V from their own regulator, never
+  from the servo rail, so servo current spikes can't reset the ESP32 or glitch the camera. They
+  also don't depend on the Jetson's USB ports for power.
 - **Efficiency:** the biggest load (the servos) has no conversion losses at all. The 5 V buck
   only carries about 1 A.
-- **One cable:** the hub merges the camera and ESP32 onto a single USB cable to the Jetson.
+- **One cable:** the hub merges the camera and the ESP32-S3 onto a single USB cable to the Jetson.
 
 **USB hub: FE1.1s board**
 - **Power:** wire the 5 V buck to the board's **5V/GND pads**. It runs self-powered, at
-  500 mA per port (2 A total), which covers the display (~0.3 A) and the camera (~0.5 A).
+  500 mA per port (2 A total), which covers the ESP32-S3 with its eyes (~0.15 A) and the
+  camera (~0.5 A).
 - **Stop back-feeding:** **cut the "Disable USB Power" jumper** (the name and position vary by
   maker). Otherwise the buck's 5 V flows back up the cable into the Jetson's USB port.
 - **Check it before connecting the Jetson:** with only the external 5 V applied, measure the
@@ -119,7 +124,7 @@ GND: all grounds meet at one star point at the brick input.
 |---|---|---|
 | 2× STS3215 at 12 V, holding | ~0.2 A | |
 | 2× STS3215 at 12 V, moving | ~0.5–1.5 A | ~5–6 A if both stall |
-| ESP32 display, backlight on (5 V) | ~0.3 A | |
+| ESP32-S3 + two OLED eyes (5 V) | ~0.15 A | |
 | C920X camera (5 V) | ~0.4 A | ~0.5 A |
 | **12 V input total** | **~0.5–2 A** | **~6 A** |
 
@@ -135,26 +140,30 @@ start moving, so the 12 V line doesn't dip.
 
 ---
 
-## Wiring and pins (E32R40T)
+## Wiring and pins (ESP32-S3 DevKitC-1 N16R8)
 
-The servo bus uses **UART2** on the board's 4-pin **I2C connector** (IO25/IO32), which
-isn't otherwise needed. That leaves the microSD card and the SPI header free, and keeps the
-USB-C port (UART0 via the CH340C) for the Jetson link and for flashing.
+Pins avoid the ones the N16R8 module and board use internally: GPIO 26-32 (flash),
+33-37 (octal PSRAM), 19/20 (native USB), 43/44 (UART0, the board's "UART" port) and the
+strapping pins 0, 3, 45, 46.
 
-| Signal | ESP32 pin | Board connector | Goes to |
-|---|---|---|---|
-| Servo bus TX | **IO25** (UART2 TX) | I2C header "SCL" | Bus Servo Adapter **RX** |
-| Servo bus RX | **IO32** (UART2 RX) | I2C header "SDA" | Bus Servo Adapter **TX** |
-| Ground | GND | I2C header GND | Bus Servo Adapter GND |
-| *(do not connect)* | VCC | I2C header VCC | the adapter has its own supply |
-| Jetson link | IO1/IO3 (UART0) | USB-C via CH340C | USB hub → Jetson |
-| Status LED | IO22 / IO16 / IO17 | on board | red / green / blue (active low) |
-| Speaker | IO26 (DAC), IO4 (amp enable, active low) | 2-pin speaker header | optional chirps |
-| Free | IO21, IO18, IO19, IO23 | SPI header | spare (IO18/19/23 are shared with the SD card) |
-| Free, input only | IO35, IO39 | 2-pin expansion | spare |
+| Signal | ESP32-S3 pin | Goes to |
+|---|---|---|
+| Servo bus TX | **GPIO 17** (UART1 TX) | Bus Servo Adapter **RX** |
+| Servo bus RX | **GPIO 18** (UART1 RX) | Bus Servo Adapter **TX** |
+| Ground | GND | Bus Servo Adapter GND (do not connect its supply to the S3) |
+| Left eye SDA / SCL | **GPIO 8 / GPIO 9** (I2C0) | left SH1106 OLED |
+| Right eye SDA / SCL | **GPIO 10 / GPIO 11** (I2C1) | right SH1106 OLED |
+| Eye power | 3V3 / GND | both OLEDs (~20 mA each) |
+| Jetson link + flashing | native USB (the board's **"USB"** port, GPIO 19/20) | USB hub → Jetson, appears as `/dev/ttyACM0` |
+| Status LED | on-board RGB (GPIO 48 on v1.0 boards, GPIO 38 on v1.1) | link / fault indication |
 
-Display (ST7796S) and touch (XPT2046) use their fixed on-board pins: IO15 CS, IO2 DC,
-IO14 SCK, IO13 MOSI, IO12 MISO, IO27 backlight, IO33 touch CS, IO36 touch IRQ.
+**The eyes get one I2C bus each.** SH1106 modules normally share address 0x3C, so two on one
+bus would clash; two buses also let both eyes update at the same time. The eye wires run about
+40-50 cm, from the base, through the pan centre and the tilt pivot, so:
+- run each bus at **400 kHz** (try 1 MHz once it works);
+- twist each data wire with a ground wire, or use a thin multi-core cable;
+- add **2.2-4.7 kΩ pull-ups** to 3.3 V at the ESP32 end (the modules' own pull-ups are weak for a
+  long run).
 
 Set the Bus Servo Adapter's jumper for an external UART controller (not its own USB port).
 The adapter handles the half-duplex direction switching, so the ESP32 just uses normal TX/RX.
@@ -174,7 +183,7 @@ The adapter handles the half-duplex direction switching, so the ESP32 just uses 
    `center` command for this.
 3. **Angle limits in the servo's EEPROM**, so they hold even if the software misbehaves:
    - **Pan:** about ±150° from centre (the camera cable sets the real limit; see Mechanics).
-   - **Tilt:** about −30° to +45°, to suit the yoke.
+   - **Tilt:** **±30°** (the mechanism clears ±40°, so the limit can be widened without reprinting).
 4. **Protection:** set the protection current, overload torque and temperature limits, and enable
    the overload behaviour that drops torque instead of fighting.
 5. **Speed and acceleration:** set sensible defaults. The ESP32 overrides them per move.
@@ -204,13 +213,14 @@ Library: Feetech's **SCServo** (`SMS_STS` class) for Arduino-ESP32, at 1 Mbps.
   - the servo-side **overload and current limits** (Servo setup, step 4) drop torque instead of
     fighting;
   - **torque is released when idle** (watchdog above). To move the head by hand on purpose, release
-    torque first (a command from the Jetson, or the head's touch menu), and turn it gently.
+    torque first (a command from the Jetson or the dashboard), and turn it gently.
 
 ---
 
 ## Jetson ↔ ESP32 protocol (draft)
 
-- **Link:** USB serial (`/dev/ttyUSB0` on the Jetson, CH340C), **921600 baud**.
+- **Link:** the ESP32-S3's native USB serial (`/dev/ttyACM0` on the Jetson). Native USB ignores
+  the baud setting and runs at full USB speed.
 - **Framing:** binary messages, **COBS**-framed with a **CRC-16**, each with a type byte and a
   sequence number. Unknown types are ignored, so either side can be updated first.
 
@@ -219,29 +229,27 @@ Library: Feetech's **SCServo** (`SMS_STS` class) for Arduino-ESP32, at 1 Mbps.
 | Jetson → ESP32 | `HEARTBEAT` | sequence, Jetson time |
 | Jetson → ESP32 | `LOOK` | pan°, tilt°, max speed, mode (track / glance / rest) |
 | Jetson → ESP32 | `EYES` | expression (idle, listening, thinking, speaking, happy, sleepy, …), gaze x/y |
-| Jetson → ESP32 | `TEXT` | short message, style, how long to show it |
-| Jetson → ESP32 | `CONFIG` | soft limits, smoothing, display brightness, etc. |
+| Jetson → ESP32 | `CONFIG` | soft limits, smoothing, eye brightness, etc. |
 | ESP32 → Jetson | `STATUS` | actual pan/tilt, load, voltage, temperature, ESP32 time, flags |
-| ESP32 → Jetson | `EVENT` | touch, button, watchdog/fault, boot |
+| ESP32 → Jetson | `EVENT` | watchdog/fault, boot |
 
 The message set stays small: no video or vector data crosses this link.
 
 ---
 
-## The head's display
+## The eyes
 
-The 4" screen is the head's face, not a monitor:
-- **Animated robot eyes:** blinking, expressions, and a **gaze that leads the motion**.
-  The pupils glance toward a face before the head turns, which reads as very lifelike.
-- **Short text messages:** a name when someone is recognised, reminders, and so on.
-- **Status:** link to the Jetson, servo temperatures, warnings. Touch can wake it or
-  show this page.
+Two 1.3" SH1106 OLEDs (128×64, monochrome) sit side by side above the camera, which forms the
+head's nose. The ESP32-S3 animates them:
+- **Expressions:** idle, listening, thinking, speaking, happy, sleepy, ... (`EYES` message).
+- **Blinking** at natural, slightly random intervals.
+- **A gaze that leads the motion:** the pupils glance toward a face just before the head turns,
+  which reads as very lifelike.
+- **Sleep:** eyes close and the screens dim when idle, which also protects the OLEDs from burn-in.
 
-The ESP32 has no PSRAM, so it can't hold a full 320×480 16-bit frame (307 KB). Draw the eyes
-into **sprites** with TFT_eSPI, either 8-bit or 4-bit palette, covering only the eye region,
-and push only what changed. This gives smooth animation without flicker.
-
-The live camera view, with boxes, names and contours, goes on the Jetson's **dashboard web page**.
+Each eye is drawn into a 1 KB frame buffer and sent over its own I2C bus (about 10-25 ms per
+frame), so animation runs smoothly at 20-30 fps. Everything else - text, status, the live camera
+view with boxes and names - goes on the Jetson's **dashboard web page**.
 
 ---
 
@@ -266,13 +274,21 @@ The live camera view, with boxes, names and contours, goes on the Jetson's **das
 
 - **Pan:** the lazy Susan carries all of the head's weight. The pan servo only *turns* it,
   through a coupling at the centre, so there's no sideways load on the servo shaft.
-- **Tilt:** a turret on the turntable with two cheeks; the camera pod pivots between them on
+- **Base:** a shallow cylinder about 15 cm across and 8 cm tall, a little larger than the
+  lazy Susan. It holds the ESP32-S3, Bus Servo Adapter, 5 V buck and USB hub, with the pan servo
+  in the middle and the power input and USB cable at the back.
+- **Head:** the camera pod grown into a face, about 94 mm wide × 70 mm tall × 30 mm deep, with the
+  camera (nose) at the bottom and the two eye windows above it.
+- **Tilt:** a turret on the turntable with two cheeks; the head pivots between them on
   **a bearing in each cheek**, so the bearings carry the pod and the servo only turns it:
   - **Servo side: 608ZZ** (8 × 22 × 7). The pod's stub axle runs in the 608, and the STS3215 drives
     it through a **misalignment-tolerant coupling** (pins in slots), never rigidly - a rigid joint
     plus the servo's own bearings would over-constrain the axis and bind.
-  - **Cable side: 6803-2RS** thin-section (17 × 26 × 5). The pod's axle is a 17 mm tube the camera's
-    USB-A plug passes straight through, so the cable threads through the pivot with no slot.
+  - **Cable side: 6803-2RS** thin-section (17 × 26 × 5). The head's axle is a 17 mm tube the camera's
+    USB-A plug passes straight through, so the camera cable and the eye wires thread through the
+    pivot with no slot.
+  - **Range:** soft limits **±30°** (the head rests a little above level, about +10-15°, to meet a
+    seated person's eyes); the mechanism physically clears **±40°**.
   - Keep the camera's centre of mass on the tilt axis so the servo isn't holding a constant load.
   - Bearing seats are press fits; a small seat coupon sets the exact bore for this printer.
 - **Cables:** the camera's USB cable runs through the centre with a **service loop** sized for
@@ -285,7 +301,7 @@ The live camera view, with boxes, names and contours, goes on the Jetson's **das
 ## Repository layout
 
 ```text
-firmware/head/   PlatformIO project for the E32R40T head controller (ESP32)
+firmware/head/   PlatformIO project for the ESP32-S3 controller (servos, eyes, Jetson link)
 jetson/          Jetson-side Python: vision, tracking, head link, dashboard
 hardware/        CAD for printed parts, wiring diagrams
 docs/            design notes, protocol spec
@@ -299,14 +315,16 @@ repository is public.
 
 ## Roadmap
 
-1. **Bench:** ESP32 + Bus Servo Adapter + one servo. Set IDs, read position, move by serial command.
-2. **Head v1:** printed yoke and housing, both servos, limits, watchdog, `STATUS` reporting.
-3. **Eyes:** sprite-based eye animation and the `EYES` / `TEXT` messages.
+1. **Bench:** ESP32-S3 + Bus Servo Adapter + one servo, plus the two OLED eyes. Set IDs, read position,
+   move by serial command; blink both eyes.
+2. **Head v1:** printed base, turret, cheeks and head; both servos, limits, watchdog, `STATUS` reporting.
+3. **Eyes:** expressions, blinking, gaze that leads the motion, and the `EYES` message.
 4. **Vision:** detection and tracking on the Jetson closing the loop through `LOOK`.
-5. **Recognition:** enrolment, gallery, names on the display and in the assistant.
+5. **Recognition:** enrolment, gallery, names on the dashboard and in the assistant.
 6. **Dashboard:** camera view with overlays on the Jetson's web page.
 
 ## Open questions
 
 - Final pan range, which depends on the cable routing.
-- Enclosure layout and how the display is mounted relative to the camera.
+- Head layout: eye spacing and size of the eye windows relative to the camera nose.
+- Pan drive: central direct drive or offset belt (affects cable routing through the base).
