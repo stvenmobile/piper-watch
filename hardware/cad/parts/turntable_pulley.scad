@@ -43,7 +43,8 @@ z_teeth1   = z_belt + belt_zone / 2;
 clamp_a    = 180;                       // clamp position (deg); the motor is at 0 when the head looks ahead
 clamp_half = 6 * 360 / pulley_T;        // 21.6: the belt leaves the teeth here (on a tooth space)
 slot_len   = 10;                        // 5 teeth of grip per end
-slot_clr   = 0.1;                       // around the belt's back and land
+slot_clr   = [0.05, 0.3];               // [land side, back side] clearance around the belt's backing
+                                        //   (test arc 1 with 0.1/0.1 and a 1.38 belt was too tight)
 clamp_r    = 35.5;                      // clamp block outer radius
 module ring_pulley_2d() {
     // tooth tips with one groove per tooth; groove = rounded GT2 tooth space
@@ -63,10 +64,11 @@ module groove_2d() {
 
 // The two clamp slots, in 2D. In each one's frame the belt leaves the pulley at y = 0 and runs
 // along -s*y; x is radial. Belt land (tooth roots) on x = R_od, back at R_od + land thickness.
-module clamp_slots_2d() {
+module clamp_slots_2d(back_clr = [slot_clr[1], slot_clr[1]]) {
     for (s = [-1, 1]) rotate(clamp_a + s * clamp_half) mirror([0, s > 0 ? 1 : 0]) {
         // backing strip
-        translate([R_od - slot_clr, -0.01]) square([gt2_belt_t - gt2_depth + 2 * slot_clr, slot_len + 0.01]);
+        bc = back_clr[(s + 1) / 2];
+        translate([R_od - slot_clr[0], -0.01]) square([gt2_belt_t - gt2_tooth_h + slot_clr[0] + bc, slot_len + 0.01]);
         // tooth spaces every pitch along the slot (they continue the pulley's grooves)
         for (k = [0 : floor(slot_len / gt2_pitch)]) translate([0, k * gt2_pitch]) groove_2d();
     }
@@ -80,7 +82,7 @@ module clamp_block_2d() {
     }
 }
 
-module turntable_pulley() {
+module turntable_pulley(back_clr = [slot_clr[1], slot_clr[1]]) {
     difference() {
         union() {
             // plate
@@ -105,7 +107,7 @@ module turntable_pulley() {
         // cable passage
         translate([0, 0, -1]) cylinder(d = hollow_d, h = 100, $fn = 120);
         // clamp slots, open at the top, down to the lower flange
-        translate([0, 0, z_teeth0]) linear_extrude(belt_zone + flange_out + 1) clamp_slots_2d();
+        translate([0, 0, z_teeth0]) linear_extrude(belt_zone + flange_out + 1) clamp_slots_2d(back_clr);
         // M5 heat-set inserts from the underside (the side on the lazy Susan's inner ring)
         for (i = [0 : ls_holes - 1]) rotate(ls_inner_rot + i * 360 / ls_holes)
             translate([ls_inner_bc / 2, 0, plate_t - insert_m5[1]]) cylinder(d = insert_m5[0], h = insert_m5[1] + 0.01, $fn = 32);

@@ -59,8 +59,9 @@ neck_in      = 28;               // inside opening: camera USB plug + ~10 x 2 mm
 gt2_pitch    = 2.0;              // tooth pitch
 gt2_pld      = 0.254;            // pitch line sits this far outside the pulley's tooth tips
 gt2_belt_w   = 6.0;              // belt width
-gt2_belt_t   = 1.38;             // belt total thickness (backing 0.63 + teeth 0.75)
-gt2_depth    = 0.75 + 0.05;      // tooth-space depth (belt tooth 0.75 + clearance)
+gt2_belt_t   = 1.5;              // belt total thickness, teeth included (measured)
+gt2_tooth_h  = 0.75;             // belt tooth height
+gt2_depth    = gt2_tooth_h + 0.05;   // tooth-space depth (belt tooth + clearance) - fits (test arc 1)
 gt2_tip_r    = 0.555 + 0.05;     // rounded bottom of the tooth space
 gt2_mouth    = 1.35;             // tooth-space width at the tips
 
