@@ -46,7 +46,7 @@ than eyes - text, status, the camera view - goes on the Jetson's dashboard web p
  │  FE1.1s USB 2.0 hub board (fed from the 5 V buck)    │  │ SP-200 speakerphone      │
  │   ├── Logitech C920X camera (stripped) - the "nose"  │  │ 4-mic array, hardware AEC│
  │   └── ESP32-S3 DevKitC-1 N16R8 (native USB)          │  │ placed away from the head│
- │          ├── I2C0 → left eye + mouth, I2C1 → right eye │  └────────────────────────┘
+ │          ├── I2C0/I2C1 → eyes, SPI → mouth           │  └──────────────────────────┘
  │          │ UART1 @ 1 Mbps (half-duplex servo bus)    │
  │          ▼                                           │
  │  Waveshare Bus Servo Adapter (A) ── 12 V ──┐         │
@@ -74,7 +74,7 @@ The roles are:
 | NVIDIA Jetson Orin NX (JetPack) | vision, recognition, assistant, dashboard | have |
 | **ESP32-S3 DevKitC-1 N16R8** (16 MB flash, 8 MB octal PSRAM, native USB) | controller: servo bus, eyes, link to the Jetson | have |
 | 2× **1.3" SH1106 OLED**, 128×64, I2C (4-pin) | the eyes | have |
-| **2.23" SSD1305 OLED**, 128×32, white, I2C/SPI (set to I2C, address 0x3D) | the mouth | ordering |
+| **2.08" SH1122 OLED**, 256×64, 16 grey levels, white, 4-wire SPI (7 pins); module 75.5 × 19.35 × 5.9 mm, active area 51.18 × 12.78 mm | the mouth | ordering |
 | 2× **Feetech STS3215, 12 V / 30 kg·cm** serial bus servos: 360° magnetic encoder (4096 steps, 0.088°), position/load/voltage/temperature feedback, 1 Mbps half-duplex TTL bus | pan and tilt | **ordered** |
 | Waveshare **Bus Servo Adapter (A)**: 9–12.6 V input, powers the servo bus and converts it to plain TX/RX for the ESP32 | servo bus interface | needed |
 | Logitech **C920X**, housing partly stripped (94 × 24.1 × 29 mm) | camera - the head's "nose" | have |
@@ -155,18 +155,20 @@ strapping pins 0, 3, 45, 46.
 | Ground | GND | Bus Servo Adapter GND (do not connect its supply to the S3) |
 | Left eye SDA / SCL | **GPIO 8 / GPIO 9** (I2C0) | left SH1106 OLED |
 | Right eye SDA / SCL | **GPIO 10 / GPIO 11** (I2C1) | right SH1106 OLED |
-| Mouth SDA / SCL | shares **I2C0** (GPIO 8 / 9) at address **0x3D** | SSD1305 OLED |
-| Mouth reset | **GPIO 12** | SSD1305 RES (it stays blank unless reset is driven or tied high) |
+| Mouth SPI clock / data | **GPIO 12 / GPIO 13** | SH1122 "SCL" / "SDA" (these are SPI clock and data, despite the names) |
+| Mouth chip select | **GPIO 14** | SH1122 "DS" |
+| Mouth data/command | **GPIO 21** | SH1122 "DC" |
+| Mouth reset | **GPIO 1** | SH1122 "RES" |
 | Display power | 3V3 / GND | all three OLEDs (~20-30 mA each) |
 | Jetson link + flashing | native USB (the board's **"USB"** port, GPIO 19/20) | USB hub → Jetson, appears as `/dev/ttyACM0` |
 | Status LED | on-board RGB (GPIO 48 on v1.0 boards, GPIO 38 on v1.1) | link / fault indication |
 
 **The eyes get one I2C bus each.** SH1106 modules normally share address 0x3C, so two on one
-bus would clash; two buses also let both eyes update at the same time. **The mouth shares the
-left eye's bus at 0x3D**: on the SSD1305 board, move its jumpers/resistors from SPI to I2C and pull
-its DC pin high to select 0x3D. The display wires run about 40-50 cm, from the base, through the
-pan centre and the tilt pivot, so:
-- run each bus at **400 kHz** (try 1 MHz once it works);
+bus would clash; two buses also let both eyes update at the same time. **The mouth has its own
+SPI bus.** The display wires run about 40-50 cm, from the base, through the pan centre and the tilt
+pivot (about 11 thin wires plus the camera cable), so:
+- run each eye's I2C bus at **400 kHz** (try 1 MHz once it works), and the mouth's SPI at
+  **4-8 MHz** (a full frame still takes only 5-10 ms);
 - twist each data wire with a ground wire, or use a thin multi-core cable;
 - add **2.2-4.7 kΩ pull-ups** to 3.3 V at the ESP32 end (the modules' own pull-ups are weak for a
   long run).
@@ -251,7 +253,7 @@ Three OLEDs make a face in three sections:
 |---|---|---|
 | **Eyes** (top) | 2× 1.3" SH1106, 128×64 | eyes and pupils, blinking, expressions |
 | **Nose** (middle) | the C920X camera | - (it's the camera) |
-| **Mouth** (bottom) | 2.23" SSD1305, 128×32 | smile, neutral, "o", and **talking** animation while Piper speaks |
+| **Mouth** (bottom) | 2.08" SH1122, 256×64, 16 grey levels | smile, neutral, "o", and **talking** animation while Piper speaks |
 
 The ESP32-S3 animates them from a single expression state:
 - **Expressions:** idle, listening, thinking, speaking, happy, surprised, sleepy, ... (`FACE` message).
@@ -264,8 +266,9 @@ The ESP32-S3 animates them from a single expression state:
 - **Sleep:** eyes close, the mouth goes flat and the screens dim when idle, which also protects the
   OLEDs from burn-in.
 
-Each eye is a 1 KB frame and the mouth 512 bytes, sent over I2C (about 10-25 ms per frame), so
-animation runs smoothly at 20-30 fps. Everything else - text, status, the live camera view with
+Each eye is a 1 KB frame over I2C (about 10-25 ms) and the mouth a 2 KB frame over SPI (about
+5-10 ms), so animation runs smoothly at 20-30 fps. The mouth starts in on/off (1-bit) mode, which
+U8g2 supports; its 16 grey levels (anti-aliased curves) need a small custom driver later. Everything else - text, status, the live camera view with
 boxes and names - goes on the Jetson's **dashboard web page**.
 
 ---
