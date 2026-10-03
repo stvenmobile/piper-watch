@@ -36,6 +36,8 @@ mouth_pins = -1;             // mouth board's pin end faces -X (+1 for +X)
 
 // ---- windows and glass pockets ----------------------------------------------------
 win_margin  = 1.0;           // window this much larger than the active area, each side
+eye_win_r   = 6;             // window corner radii: rounder looks friendlier; trims only a
+mouth_win_r = 3;             //   few corner pixels of the display
 glass_inset = 1.0;           // glass front sits this far behind the face surface
 glass_clr   = 0.3;           // pocket clearance around the glass, each side (glass sizes are EST)
 mouth_glass_t = 1.5;         // EST: glass part of the mouth module's 2.6 mm
@@ -164,7 +166,7 @@ module cutouts() {
     for (sx = [-1, 1]) {                                  // eyes
         // window through the plate, framing the active area
         translate([sx * eye_cx, eye_cy + eye_act_dy, -1])
-            linear_extrude(t_face + 2) rrect(eye_active + [2, 2] * win_margin, 2);
+            linear_extrude(t_face + 2) rrect(eye_active + [2, 2] * win_margin, eye_win_r);
         // pocket for the glass, from the back, leaving a glass_inset lip at the face
         translate([sx * eye_cx, eye_cy + eye_glass_dy, glass_inset])
             linear_extrude(t_face) square(eye_glass + [2, 2] * glass_clr, center = true);
@@ -176,7 +178,7 @@ module cutouts() {
     }
     // mouth: window on the active area (EST: centred in the glass) + glass pocket
     translate([mouth_glass_dx, mouth_cy, -1])
-        linear_extrude(t_face + 2) rrect(mouth_active + [2, 2] * win_margin, 1.2);
+        linear_extrude(t_face + 2) rrect(mouth_active + [2, 2] * win_margin, mouth_win_r);
     translate([mouth_glass_dx, mouth_cy, glass_inset])
         linear_extrude(t_face) square(mouth_glass + [2, 2] * glass_clr, center = true);
 }
