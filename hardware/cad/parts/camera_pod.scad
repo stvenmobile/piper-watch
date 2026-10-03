@@ -13,7 +13,7 @@
 include <../params.scad>
 
 fit     = 0.4;            // clearance between camera and cavity, all round
-lip_h   = 3;              // height of the lid's locating lip inside the cavity
+lip_h   = 2;              // room above the camera for the lid's lip (lip itself is lip_h - 0.4 = 1.6 mm); was 3, trimmed after fit test
 end_r   = 8;              // EST: radius of the camera's rounded ends (mic grilles)
 end_y   = 15;             // EST: depth position of those end circles' centres
 back_a  = 33;             // EST: half-length of the back curve (smaller = rounder back)
