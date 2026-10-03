@@ -335,7 +335,7 @@ repository is public.
 
 ## Roadmap
 
-1. **Bench:** ESP32-S3 + Bus Servo Adapter + one servo, plus the two OLED eyes. Set IDs, read position,
+1. **Bench:** ESP32-S3 + Bus Servo Adapter + one servo, plus the three OLEDs. Set IDs, read position,
    move by serial command; bring up both eyes and the mouth.
 2. **Head v1:** printed base, turret, cheeks and head; both servos, limits, watchdog, `STATUS` reporting.
 3. **Face:** expressions, blinking, gaze that leads the motion, a talking mouth, and the `FACE` message.
