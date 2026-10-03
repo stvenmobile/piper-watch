@@ -14,7 +14,8 @@ include <../params.scad>
 // ---- overall --------------------------------------------------------------------
 W       = head_size[0];      // 100  face width
 H       = head_size[2];      // 110  face height
-corner_r = 10;               // every corner of the face outline is rounded with this radius
+corner_r = 10;               // top corners and the chin's bottom corners are rounded with this radius
+chin_r   = 40;               // the corners where the chin starts (150 deg, so they need a bigger radius to show)
 chin_x  = 15;                // chin: bottom corners cut as 30-60-90 triangles -
 chin_y  = chin_x * tan(60);  //   15 mm in along the bottom, ~26 mm up the side
 t_face  = 2.5;               // face plate thickness
@@ -58,10 +59,23 @@ bosses = [
 
 // ============================================================================
 module outline2d(inset = 0) {          // face outline: 30-60-90 chin, every corner rounded
-    offset(delta = -inset)
-        offset(r = corner_r) offset(delta = -corner_r)          // rounds all convex corners
-            polygon([[-W/2 + chin_x, -H/2], [W/2 - chin_x, -H/2], [W/2, -H/2 + chin_y],
-                     [W/2, H/2], [-W/2, H/2], [-W/2, -H/2 + chin_y]]);
+    // corners (counter-clockwise) and their radii; each corner is replaced by the arc tangent
+    // to its two edges
+    pts = [[-W/2 + chin_x, -H/2], [W/2 - chin_x, -H/2], [W/2, -H/2 + chin_y],
+           [W/2, H/2], [-W/2, H/2], [-W/2, -H/2 + chin_y]];
+    rs  = [corner_r, corner_r, chin_r, corner_r, corner_r, chin_r];
+    n = len(pts);
+    function unit(v) = v / norm(v);
+    function arc(i) = let(
+        p  = pts[i], r = rs[i],
+        u1 = unit(pts[(i + n - 1) % n] - p), u2 = unit(pts[(i + 1) % n] - p),
+        half = acos(u1 * u2) / 2,                                 // half the interior angle
+        c  = p + unit(u1 + u2) * r / sin(half),                   // arc centre
+        a0 = atan2(u1[0], -u1[1]),                                // outward normal of the incoming edge
+        sweep = 180 - 2 * half,
+        steps = max(2, ceil(sweep / 2)))
+        [for (k = [0 : steps]) c + r * [cos(a0 + sweep * k / steps), sin(a0 + sweep * k / steps)]];
+    offset(delta = -inset) polygon([for (i = [0 : n - 1]) each arc(i)]);
 }
 
 module rrect(size, r) { offset(r = r) square([size[0] - 2*r, size[1] - 2*r], center = true); }
