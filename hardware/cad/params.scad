@@ -54,6 +54,16 @@ neck_out     = 40;               // EST: chamfered square neck, outside
 neck_in      = 28;               // inside opening: camera USB plug + ~10 x 2 mm silicone wires
 nose_d       = 16;               // EST: round lens opening in the face (chamfered inside)
 
+// --- Eye OLEDs: 1.3" SH1106 128x64 I2C, Hosyond white (vendor mounting drawing) -------
+// Mounts glass-forward against the back of the face plate; pins point backwards.
+eye_board    = [35.5, 33.7];     // board width x height
+eye_holes    = [30.3, 28.0];     // mounting-hole centre spacing (across, up-down)
+eye_hole_d   = 3.0;              // EST: hole diameter (M2.5 screws; check on arrival)
+eye_t        = [1.6, 1.2];       // [glass thickness, board thickness] (2.8 total)
+eye_glass    = [34.5, 23.0];     // EST: standard 1.3" panel outline
+eye_active   = [29.42, 14.70];   // standard 1.3" active area (128 x 64)
+eye_header   = [4, 2.54];        // 4 pins at 2.54 mm, centred on the top edge, pointing back
+
 // --- Logitech C920X, housing partly stripped (photos: cam_front.jpg, cam_top.jpg) ---
 // Seen from above it is a lozenge: flat glossy front face, rounded back, rounded ends
 // (the mic grilles) with a small notch where each grille meets the face.
