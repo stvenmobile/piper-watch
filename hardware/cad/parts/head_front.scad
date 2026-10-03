@@ -19,7 +19,7 @@ rim_w   = 2.0;               // rim wall thickness
 
 // ---- layout (face coordinates, origin at the face centre, +Y = up) ----------------
 eye_cx     = 22;             // eye board centres at x = +/- this
-eye_cy     = 30.15;          // eye board centre height (board top ends 1 mm under the rim)
+eye_cy     = 30.15;          // eye board centre height (above the face centre)
 eye_act_dy = 1.5;            // EST: active area sits this much above the board centre
 cam_cy     = -4;             // camera centre = lens centre = nose
 // Mouth placed so its window's bottom is as far from the face's bottom edge as the eye
