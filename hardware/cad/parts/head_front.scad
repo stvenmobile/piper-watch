@@ -22,7 +22,10 @@ eye_cx     = 22;             // eye board centres at x = +/- this
 eye_cy     = 30.15;          // eye board centre height (board top ends 1 mm under the rim)
 eye_act_dy = 1.5;            // EST: active area sits this much above the board centre
 cam_cy     = -4;             // camera centre = lens centre = nose
-mouth_cy   = -32;            // mouth board centre height
+// Mouth placed so its window's bottom is as far from the face's bottom edge as the eye
+// windows' top is from the face's top edge (robot symmetry).
+eye_win_top = eye_cy + eye_act_dy + (eye_active[1] + 2 * 1.0) / 2;      // 1.0 = win_margin
+mouth_cy    = -(eye_win_top) + (mouth_active[1] + 2 * 1.0) / 2;
 mouth_pins = -1;             // mouth board's pin end faces -X (+1 for +X)
 
 // ---- windows ------------------------------------------------------------------------
@@ -38,8 +41,9 @@ cradle_dep = 15;             // cradle reaches this far back (camera slides in f
 // ---- back-cover attachment ---------------------------------------------------------
 boss_d     = 7.5;            // around an M3 heat-set insert (4.1 mm bore)
 bosses     = [[0, H/2 - rim_w - boss_d/2 + 0.01],      // top centre (between the eyes)
-              [0, -H/2 + rim_w + boss_d/2 - 0.01],     // bottom centre (below the mouth)
-              [ W/2 - rim_w - boss_d/2 + 0.01, -30],   // sides, beside the mouth
+              [ 32, -H/2 + rim_w + boss_d/2 - 0.01],   // bottom, either side of the mouth
+              [-32, -H/2 + rim_w + boss_d/2 - 0.01],
+              [ W/2 - rim_w - boss_d/2 + 0.01, -30],   // sides
               [-W/2 + rim_w + boss_d/2 - 0.01, -30]];
 
 // ============================================================================
