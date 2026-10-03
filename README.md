@@ -80,7 +80,7 @@ The roles are:
 | Logitech **C920X**, housing partly stripped (94 × 24.1 × 29 mm) | camera - the head's "nose" | have |
 | **SP-200** USB speakerphone (5 V): 4-mic array, hardware echo cancellation, USB Audio Class | microphone/speaker, connected to the Jetson | have |
 | 5.5" (140 mm) aluminium lazy Susan bearing | pan base, carries all vertical load | have / needed |
-| 608ZZ (servo side) and 6803-2RS (cable side) bearings, 3D-printed base, turret, cheeks and head | tilt axis, enclosure | 608 have, 6803 ordering; camera pod fit-tested |
+| 2× 608ZZ bearings, 2 short 8 mm steel axles (M8 bolts or pins), 3D-printed base, turret, cheeks and head | tilt axis, enclosure | 608 have; camera pod fit-tested |
 | **12 V / 5 A** power brick, inline 5 A fuse, 1000 µF / 25 V capacitor | head power | needed |
 | **5 V / 3 A** buck converter | USB hub power | needed |
 | **FE1.1s 4-port USB 2.0 hub board** (~$5–7) with external 5V/GND pads and a cuttable "Disable USB Power" jumper (e.g. [Circuitneato](https://circuitneato.com/how-to-use-the-fe1-1s-usb-hub/), or generic "FE1.1s hub module" listings) | one cable to the Jetson | needed |
@@ -304,18 +304,23 @@ boxes and names - goes on the Jetson's **dashboard web page**.
   stays steady when the head nods and the weight above and below the axis roughly balances.
 - **Tilt:** a turret on the turntable with two cheeks; the head pivots between them on
   **a bearing in each cheek**, so the bearings carry the pod and the servo only turns it:
-  - **Servo side: 608ZZ** (8 × 22 × 7). The pod's stub axle runs in the 608, and the STS3215 drives
-    it through a **misalignment-tolerant coupling** (pins in slots), never rigidly - a rigid joint
-    plus the servo's own bearings would over-constrain the axis and bind.
-  - **Cable side: 6803-2RS** thin-section (17 × 26 × 5). The head's axle is a 17 mm tube the camera's
-    USB-A plug passes straight through, so the camera cable and the eye wires thread through the
-    pivot with no slot.
+  - **A 608ZZ (8 × 22 × 7) in each cheek**, on short **8 mm steel axles** (M8 bolts or pins) set
+    into the head - steel, not printed, since the axles are the most stressed point of the head.
+  - **Servo side:** the STS3215 drives the head through a **misalignment-tolerant coupling** (pins
+    in slots), never rigidly - a rigid joint plus the servo's own bearings would over-constrain
+    the axis and bind. The bearings carry the head; the servo only turns it.
+  - **Wires go around the pivots, not through them:** the camera cable and the display cable leave
+    the back of the head and hang in a loose **service loop** down into the turret, then pass
+    through the lazy Susan's 89 mm opening into the base.
   - **Range:** soft limits **±30°** (the head rests a little above level, about +10-15°, to meet a
     seated person's eyes); the mechanism physically clears **±40°**.
   - Keep the camera's centre of mass on the tilt axis so the servo isn't holding a constant load.
   - Bearing seats are press fits; a small seat coupon sets the exact bore for this printer.
-- **Cables:** the camera's USB cable runs through the centre with a **service loop** sized for
-  ±150° of pan. The soft limits keep it from winding further. Avoid slip rings for USB 2.0.
+- **Cables:** two cables run from the base to the head - the camera's USB cable and one display
+  cable (slim stranded patch cable, 8 cores: 3.3 V, GND, eyes SDA/SCL, mouth SPI clock/data/DC/RES).
+  Through the lazy Susan they have a **service loop** sized for ±150° of pan, and behind the head a
+  loose loop for the ±30° of tilt. Soft limits keep them from winding further. No connectors in the
+  moving sections; locking JST-PH plugs at the head. Avoid slip rings for USB 2.0.
 - **Noise:** the STS3215s are quiet when holding still. If movement noise still reaches the
   speakerphone, have piper-assistant pause or flag speech recognition while the head moves.
 
