@@ -40,11 +40,8 @@ cradle_dep = 15;             // cradle reaches this far back (camera slides in f
 
 // ---- back-cover attachment ---------------------------------------------------------
 boss_d     = 7.5;            // around an M3 heat-set insert (4.1 mm bore)
-bosses     = [[0, H/2 - rim_w - boss_d/2 + 0.01],      // top centre (between the eyes)
-              [ 32, -H/2 + rim_w + boss_d/2 - 0.01],   // bottom, either side of the mouth
-              [-32, -H/2 + rim_w + boss_d/2 - 0.01],
-              [ W/2 - rim_w - boss_d/2 + 0.01, -30],   // sides
-              [-W/2 + rim_w + boss_d/2 - 0.01, -30]];
+boss_xy    = [41, H/2 - 7];                          // one boss inside each chamfered corner
+bosses     = [for (sx = [-1, 1], sy = [-1, 1]) [sx * boss_xy[0], sy * boss_xy[1]]];
 
 // ============================================================================
 module outline2d(inset = 0) {          // chamfered-square face outline
@@ -111,11 +108,20 @@ module camera_cradle() {
 }
 
 module bosses_() {
-    for (b = bosses) translate([b[0], b[1], 0])
+    // Each boss is a column for an M3 insert, webbed into its corner walls for stiffness
+    for (b = bosses) {
+        dir = [sign(b[0]), sign(b[1])];
         difference() {
-            cylinder(d = boss_d, h = rim_d);
-            translate([0, 0, rim_d - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1);
+            linear_extrude(rim_d) intersection() {
+                outline2d();
+                hull() {
+                    translate(b) circle(d = boss_d);
+                    translate(b + 8 * dir) circle(d = boss_d);
+                }
+            }
+            translate([b[0], b[1], rim_d - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1);
         }
+    }
 }
 
 // ---- openings through the plate --------------------------------------------------
