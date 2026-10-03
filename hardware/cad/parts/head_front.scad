@@ -163,11 +163,24 @@ module bosses_() {
 }
 
 // ---- openings and pockets in the plate ---------------------------------------------
+// A display window: the 2D shape (children) cut through the plate, chamfered at the same
+// angle as the nose so the opening widens toward the face surface. The chamfer only runs
+// through the glass_inset layer in front of the glass.
+module flared_window() {
+    f = glass_inset * tan(nose_flare);                    // widening at the face, each side
+    hull() {
+        translate([0, 0, -0.01]) linear_extrude(0.01)
+            offset(r = f) children();
+        translate([0, 0, glass_inset]) linear_extrude(0.01) children();
+    }
+    translate([0, 0, glass_inset]) linear_extrude(t_face) children();
+}
+
 module cutouts() {
     for (sx = [-1, 1]) {                                  // eyes
         // oval window through the face (the glass pocket behind it stays rectangular)
-        translate([sx * eye_cx, eye_cy + eye_act_dy, -1])
-            linear_extrude(t_face + 2) scale(eye_win / 2) circle(r = 1, $fn = 120);
+        translate([sx * eye_cx, eye_cy + eye_act_dy, 0])
+            flared_window() scale(eye_win / 2) circle(r = 1, $fn = 120);
         // pocket for the glass, from the back, leaving a glass_inset lip at the face
         translate([sx * eye_cx, eye_cy + eye_glass_dy, glass_inset])
             linear_extrude(t_face) square(eye_glass + [2, 2] * glass_clr, center = true);
@@ -178,8 +191,8 @@ module cutouts() {
         translate([0, 0, -0.01]) cylinder(d1 = nose_d + 2 * flare, d2 = nose_d, h = t_face + 0.02, $fn = 96);
     }
     // mouth: window on the active area (EST: centred in the glass) + glass pocket
-    translate([mouth_glass_dx, mouth_cy, -1])
-        linear_extrude(t_face + 2) rrect(mouth_active + [2, 2] * win_margin, mouth_win_r);
+    translate([mouth_glass_dx, mouth_cy, 0])
+        flared_window() rrect(mouth_active + [2, 2] * win_margin, mouth_win_r);
     translate([mouth_glass_dx, mouth_cy, glass_inset])
         linear_extrude(t_face) square(mouth_glass + [2, 2] * glass_clr, center = true);
 }
