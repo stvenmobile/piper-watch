@@ -266,7 +266,10 @@ room. (No red ring - that reads as HAL 9000.)
 **Light path.** From the face inward: a 2 mm **diffuser ring** (printed in white or natural
 filament, pressed in flush with the face) → a 3.5 mm **air gap** where each LED's light spreads
 into its neighbours → the LEDs, facing forward. The ring sits in a pocket behind the gap, held
-with a few dabs of hot glue, pads at the top so the wires leave backwards above the camera.
+with a few dabs of hot glue. Its four power pads (15 mm apart) go at the **top** and the two data
+pads at the **bottom**; single header pins soldered into the pads take Dupont plugs, which point
+straight back above and below the camera (never at the sides, where the camera is right
+behind the ring).
 Three thin spokes cross the air gap to hold the centre of the face; they fall between LEDs.
 The camera sits just behind the ring, its lens at the bottom of a flared opening (16 mm at
 the lens, 31 mm at the face, so it doesn't clip the view). Everything else - text, status, the

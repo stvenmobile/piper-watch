@@ -1,9 +1,10 @@
 // Head front - the face: a round plate with the camera lens in the middle, framed by a
 // glowing ring (a 24-LED WS2812-type ring behind a translucent diffuser). Everything mounts to
 // its back:
-//   * the LED ring, LEDs facing forward, in a pocket behind a light chamber (hot-glued). Turn it
-//     so its pads (+5 V x2, GND x2, DIN, DOUT) are at the top, where the wires can leave
-//     backwards above the camera.
+//   * the LED ring, LEDs facing forward, in a pocket behind a light chamber (hot-glued). Its
+//     four power pads (5 V, GND, 15 mm apart) go at the TOP and the DIN/DOUT pads at the
+//     BOTTOM: header pins + Dupont plugs then point straight back above and below the camera.
+//     Never at the sides - the camera's face is only 0.5 mm behind the ring there.
 //   * the C920X camera in a cradle, its lens at the back of a flared opening
 // The back cover (separate part) screws onto the four inserts in the rim.
 //
