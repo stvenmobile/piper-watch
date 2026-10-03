@@ -47,3 +47,10 @@ venv/
 Thumbs.db
 desktop.ini
 hardware/cad/out/
+
+# Third-party CAD models (GrabCAD etc.) - used locally, not redistributed
+hardware/cad/*.zip
+hardware/cad/**/*.step
+hardware/cad/**/*.STEP
+hardware/cad/**/*.x_t
+hardware/cad/vitamins/models/
