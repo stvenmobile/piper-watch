@@ -1,73 +1,86 @@
 // Piper-Watch controller - face bring-up skeleton for the ESP32-S3.
-// I2C0: both SH1106 eyes (left 0x3C, right 0x3D).
-// The eyes blink and glance around; the pan stepper and Jetson link come next (see README
-// roadmap).
+// The face is a 24-LED WS2812-type ring around the camera lens (data on RING_DATA, through a
+// 3.3 V -> 5 V level shifter). This demo cycles through the ring's states every few seconds;
+// the pan stepper and the Jetson link (FACE message) come next (see README roadmap).
 #include <Arduino.h>
-#include <Wire.h>
-#include <U8g2lib.h>
+#include <Adafruit_NeoPixel.h>
 
-U8G2_SH1106_128X64_NONAME_F_HW_I2C eyeL(U8G2_R0, U8X8_PIN_NONE);   // I2C0 0x3C
-U8G2_SH1106_128X64_NONAME_F_HW_I2C eyeR(U8G2_R0, U8X8_PIN_NONE);   // I2C0 0x3D
+constexpr int RING_N = 24;
+constexpr uint8_t MAX_BRIGHT = 64;                 // ~25%: plenty behind a diffuser, ~250 mA max
+Adafruit_NeoPixel ring(RING_N, RING_DATA, NEO_GRB + NEO_KHZ800);
 
-static void drawEye(U8G2 &eye, int lookX, int lookY, int openness) {
-  // openness: 0 = closed .. 100 = fully open
-  eye.clearBuffer();
-  int h = 44 * openness / 100;
-  if (h < 3) {
-    eye.drawBox(24, 30, 80, 4);                         // closed: a line
-  } else {
-    eye.drawRBox(24, 32 - h / 2, 80, h, h < 16 ? h / 2 : 8);
-    eye.setDrawColor(0);                                // pupil (black) inside the eye
-    eye.drawDisc(64 + lookX, 32 + lookY * h / 44, 9);
-    eye.setDrawColor(1);
+// Colours (scaled by MAX_BRIGHT through setBrightness)
+constexpr uint32_t WARM = 0xFFC880;                // idle / listening / speaking: soft warm white
+constexpr uint32_t COOL = 0x60A0FF;                // thinking
+
+static uint32_t scale(uint32_t c, float k) {
+  if (k <= 0) return 0;
+  if (k > 1) k = 1;
+  return ring.Color(((c >> 16) & 0xFF) * k, ((c >> 8) & 0xFF) * k, (c & 0xFF) * k);
+}
+
+static void fill(uint32_t c) {
+  for (int i = 0; i < RING_N; i++) ring.setPixelColor(i, c);
+}
+
+// Listening: the whole ring breathes slowly
+static void listening(uint32_t t) {
+  fill(scale(WARM, 0.25f + 0.75f * (0.5f - 0.5f * cosf(t / 1600.0f * TWO_PI))));
+}
+
+// Thinking: a short comet runs around the ring
+static void thinking(uint32_t t) {
+  float head = fmodf(t / 60.0f, RING_N);
+  for (int i = 0; i < RING_N; i++) {
+    float d = fmodf(head - i + RING_N, RING_N);    // how far behind the head this pixel is
+    ring.setPixelColor(i, scale(COOL, d < 6 ? 1.0f - d / 6 : 0.04f));
   }
-  eye.sendBuffer();
 }
 
-static bool probe(TwoWire &bus, uint8_t addr, const char *name) {
-  bus.beginTransmission(addr);
-  bool found = bus.endTransmission() == 0;
-  Serial.printf("%-5s at 0x%02X: %s\n", name, addr, found ? "found" : "NOT FOUND");
-  return found;
+// Speaking: a quick, slightly irregular pulse
+static void speaking(uint32_t t) {
+  fill(scale(WARM, 0.45f + 0.35f * sinf(t / 70.0f) + 0.2f * sinf(t / 23.0f)));
 }
+
+// Attention: a bright arc pointing toward the tracked person (angle in degrees, 0 = pixel 0)
+static void attention(float angle) {
+  for (int i = 0; i < RING_N; i++) {
+    float a = i * 360.0f / RING_N;
+    float d = fabsf(fmodf(a - angle + 540.0f, 360.0f) - 180.0f);   // 0..180 from the arc centre
+    ring.setPixelColor(i, scale(WARM, d < 45 ? 1.0f - d / 60 : 0.08f));
+  }
+}
+
+// Sleep: a dim ember
+static void sleeping() { fill(scale(WARM, 0.03f)); }
 
 void setup() {
   Serial.begin(115200);
   delay(1500);                      // let native USB connect
-  Serial.println("piper-watch: face bring-up");
-
-  Wire.begin(EYES_SDA, EYES_SCL, 400000);
-  probe(Wire, 0x3C, "left");
-  probe(Wire, 0x3D, "right");
-
-  eyeL.setI2CAddress(0x3C << 1);
-  eyeR.setI2CAddress(0x3D << 1);
-  for (U8G2 *d : {(U8G2 *)&eyeL, (U8G2 *)&eyeR}) {
-    d->begin();
-    d->setBusClock(400000);
-  }
+  Serial.println("piper-watch: face (LED ring) bring-up");
+  ring.begin();
+  ring.setBrightness(MAX_BRIGHT);
+  ring.clear();
+  ring.show();
   Serial.printf("PSRAM: %u KB\n", (unsigned)(ESP.getPsramSize() / 1024));
 }
 
 void loop() {
-  static uint32_t nextBlink = millis() + 2500, nextLook = 0;
-  static int lookX = 0, lookY = 0;
+  static const char *names[] = {"listening", "thinking", "speaking", "attention", "sleeping"};
+  static int last = -1;
   uint32_t now = millis();
-
-  if (now >= nextLook) {                       // glance somewhere new now and then
-    lookX = random(-22, 23);
-    lookY = random(-8, 9);
-    nextLook = now + random(800, 2500);
+  int state = (now / 5000) % 5;
+  if (state != last) {
+    Serial.printf("state: %s\n", names[state]);
+    last = state;
   }
-  if (now >= nextBlink) {                      // quick blink
-    for (int o : {60, 20, 0, 20, 60, 100}) {
-      drawEye(eyeL, lookX, lookY, o);
-      drawEye(eyeR, lookX, lookY, o);
-      delay(18);
-    }
-    nextBlink = now + random(2500, 6000);
+  switch (state) {
+    case 0: listening(now); break;
+    case 1: thinking(now); break;
+    case 2: speaking(now); break;
+    case 3: attention(60.0f * sinf(now / 1500.0f)); break;   // the arc sweeps as if following someone
+    default: sleeping(); break;
   }
-  drawEye(eyeL, lookX, lookY, 100);
-  drawEye(eyeR, lookX, lookY, 100);
-  delay(30);
+  ring.show();
+  delay(20);
 }

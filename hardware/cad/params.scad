@@ -48,28 +48,22 @@ sts_horn_d   = 20;               // EST: horn diameter
 sts_horn_h   = 3;
 
 // --- Pan-only head on a neck (no tilt motor) ----------------------------------------
-head_size    = [100, 40, 90];    // width, depth (final ~60), height - eyes over the camera, no mouth
+head_size    = [105, 45, 105];   // round face: diameter, depth (final ~45), diameter
 head_tilt    = 15;               // fixed upward tilt, set by the swappable wedge
 neck_out     = 40;               // EST: chamfered square neck, outside
 neck_in      = 28;               // inside opening: camera USB plug + ~10 x 2 mm silicone wires
-nose_d       = 16;               // EST: round lens opening in the face (chamfered inside)
 
-// --- Eye OLEDs: 1.3" SH1106 128x64 I2C, Hosyond white (vendor mounting drawing) -------
-// Mounts glass-forward against the back of the face plate; pins point backwards.
-eye_board    = [35.5, 33.7];     // board width x height
-eye_holes    = [30.3, 28.0];     // mounting-hole centre spacing (across, up-down)
-eye_hole_d   = 3.0;              // EST: hole diameter (M2.5 screws; check on arrival)
-eye_t        = [1.6, 1.2];       // [glass thickness, board thickness] (2.8 total)
-eye_glass    = [34.5, 23.0];     // EST: standard 1.3" panel outline
-eye_active   = [29.42, 14.70];   // standard 1.3" active area (128 x 64)
-eye_header   = [4, 2.54];        // 4 pins at 2.54 mm, centred on the top edge, pointing back
+// --- Face LED ring: 24-LED WS2812-type ring (measured / vendor) ------------------------
+// Through-hole pads (2x 5 V, 2x GND, DIN, DOUT); wires can leave from either side.
+ring_od      = 65.6;             // outer diameter
+ring_id      = 52.3;             // inner diameter
+ring_t       = 3.2;              // PCB (1.6) + 5050 LEDs
+ring_n       = 24;               // LEDs, 15 deg apart (~7.7 mm)
 
-// Display mounting: no screws. Stepped pillars on the back of the face plate locate the
-// board through its holes; a dab of hot glue on each pin tip holds it (and peels off).
-mount_pin_d   = eye_hole_d - 0.3;          // 2.7  pin through the mounting hole
-mount_boss_d  = 5.0;                       // standoff the board rests on
-mount_boss_h  = eye_t[0] + 0.2;            // 1.8  glass sits 0.2 mm clear of the face
-mount_pin_out = 1.5;                       // pin sticks out past the board for the glue
+// Diffuser in front of the LEDs (ring_diffuser.scad), pressed into the face flush
+diff_t       = 2.0;              // thickness
+diff_w       = 6.5;              // radial width
+diff_clr     = 0.15;             // press fit, each side
 
 // --- Logitech C920X, housing partly stripped (photos: cam_front.jpg, cam_top.jpg) ---
 // Seen from above it is a lozenge: flat glossy front face, rounded back, rounded ends
