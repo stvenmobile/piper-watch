@@ -48,7 +48,7 @@ sts_horn_d   = 20;               // EST: horn diameter
 sts_horn_h   = 3;
 
 // --- Pan-only head on a neck (no tilt motor) ----------------------------------------
-head_size    = [100, 40, 118];   // width, depth (final ~60), height - taller face: 19 mm margins above the eyes and below the mouth
+head_size    = [100, 40, 110];   // width, depth (final ~60), height - 15 mm margins above the eyes and below the mouth
 head_tilt    = 15;               // fixed upward tilt, set by the swappable wedge
 neck_out     = 40;               // EST: chamfered square neck, outside
 neck_in      = 28;               // inside opening: camera USB plug + ~10 x 2 mm silicone wires
