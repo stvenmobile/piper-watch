@@ -14,7 +14,8 @@ include <../params.scad>
 // ---- overall --------------------------------------------------------------------
 W       = head_size[0];      // 100  face width
 H       = head_size[2];      // 114  face height
-corner_r = 10;               // top corners and the chin's bottom corners are rounded with this radius
+corner_r = 10;               // the chin's bottom corners are rounded with this radius
+top_r    = 25;               // top corners: big enough to follow the eye ovals (even ~12-14 mm margin)
 chin_r   = 40;               // the corners where the chin starts (150 deg, so they need a bigger radius to show)
 chin_x  = 15;                // chin: bottom corners cut as 30-60-90 triangles -
 chin_y  = chin_x * tan(60);  //   15 mm in along the bottom, ~26 mm up the side
@@ -54,8 +55,8 @@ cradle_dep = 15;             // cradle reaches this far back (camera slides in f
 boss_d     = 7.5;            // around an M3 heat-set insert (4.1 mm bore)
 jaw        = [W/2 - chin_x, -H/2];                 // where the chin cut meets the bottom edge
 bosses = [
-    [[ 44, H/2 - 9], [ 1,  1]],                     // top corners, clear of the eye boards
-    [[-44, H/2 - 9], [-1,  1]],
+    [[ 44, 30], [ 1, 0]],                           // beside the eye boards, below the round top
+    [[-44, 30], [-1, 0]],
     [[ 31, -H/2 + 7], [ 4, -7] / norm([4, -7])],    // bottom, tucked into the jaw corners
     [[-31, -H/2 + 7], [-4, -7] / norm([4, -7])],
 ];
@@ -66,7 +67,7 @@ module outline2d(inset = 0) {          // face outline: 30-60-90 chin, every cor
     // to its two edges
     pts = [[-W/2 + chin_x, -H/2], [W/2 - chin_x, -H/2], [W/2, -H/2 + chin_y],
            [W/2, H/2], [-W/2, H/2], [-W/2, -H/2 + chin_y]];
-    rs  = [corner_r, corner_r, chin_r, corner_r, corner_r, chin_r];
+    rs  = [corner_r, corner_r, chin_r, top_r, top_r, chin_r];
     n = len(pts);
     function unit(v) = v / norm(v);
     function arc(i) = let(
