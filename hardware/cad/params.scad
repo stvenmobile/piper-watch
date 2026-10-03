@@ -47,12 +47,12 @@ sts_shaft_x  = 11.5;             // EST: output shaft centre from the near end
 sts_horn_d   = 20;               // EST: horn diameter
 sts_horn_h   = 3;
 
-// --- Tilt bearings: a 608ZZ in each cheek, carrying the head on two 8 mm steel axles ---
-// (M8 bolt or 8 mm pin). The servo drives one side through a misalignment-tolerant
-// coupling. Wires do NOT pass through the pivots: they loop out of the back of the head
-// and down into the turret (fine for the +/-30 degree tilt range).
-brg_608      = [8, 22, 7];       // [bore, outside, width]
-axle_d       = 8;                // steel axle (M8 bolt / 8 mm pin)
+// --- Pan-only head on a neck (no tilt motor) ----------------------------------------
+head_size    = [100, 40, 100];   // EST: width, depth, height of the faceted head
+head_tilt    = 15;               // fixed upward tilt, set by the swappable wedge
+neck_out     = 40;               // EST: chamfered square neck, outside
+neck_in      = 28;               // inside opening: camera USB plug + ~10 x 2 mm silicone wires
+nose_d       = 16;               // EST: round lens opening in the face (chamfered inside)
 
 // --- Logitech C920X, housing partly stripped (photos: cam_front.jpg, cam_top.jpg) ---
 // Seen from above it is a lozenge: flat glossy front face, rounded back, rounded ends

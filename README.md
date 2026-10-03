@@ -1,13 +1,15 @@
 # Piper-Watch
 
 **Piper-Watch** is the eyes of [piper-assistant](https://github.com/stvenmobile/piper_assistant):
-a desktop pan/tilt robot head that lets the assistant look around, find and follow
-faces, and recognise the people it knows. The head has a face in three sections: two small
+a desktop robot head that turns to look around, finds and follows
+faces, and recognises the people it knows. The head has a face in three sections: two small
 OLED **eyes** on top, the camera as the **nose** in the middle, and a wide OLED **mouth** below.
 
 All the thinking happens on an **NVIDIA Jetson Orin NX** in a separate enclosure. Piper-Watch
 itself is a compact two-part unit: a **shallow cylindrical base** (power, an ESP32-S3 controller,
-the pan servo) carrying a lazy Susan, and a **head** on top that pans and tilts. Anything richer
+the pan servo) carrying a lazy Susan, and a **head** on a short neck that turns left and right.
+There is deliberately **no tilt motor**: the head is fixed at a 15° upward angle by a swappable
+wedge, which suits seated conversation. Anything richer
 than eyes - text, status, the camera view - goes on the Jetson's dashboard web page.
 
 > **Status:** design phase. The servos are on order; nothing is built yet.
@@ -17,7 +19,8 @@ than eyes - text, status, the camera view - goes on the Jetson's dashboard web p
 ## Goals and non-goals
 
 **Goals**
-- Smooth, quiet pan/tilt tracking of a person's face, without stepping or buzzing while holding still.
+- Smooth, quiet tracking of a person's face (pan), without stepping or buzzing while holding still.
+- Simple and stable: one servo, no tilt joint, everything wired inside.
 - Face detection and recognition running entirely locally on the Jetson.
 - A friendly physical presence: a face whose eyes look where the camera looks and whose mouth
   moves when Piper speaks.
@@ -36,7 +39,7 @@ than eyes - text, status, the camera view - goes on the Jetson's dashboard web p
 
 ```text
  ┌─────────────────────── Jetson Orin NX (own enclosure + own PSU) ───────────────────────┐
- │  Vision: capture → face detection → recognition → tracking → pan/tilt targets          │
+ │  Vision: capture → face detection → recognition → tracking → pan target + eye gaze     │
  │  piper-assistant: speech in/out (Piper TTS), dialogue, events                          │
  │  Dashboard web page: camera view + boxes/names/contours (replaces the vector display)  │
  └──────────────┬───────────────────────────────────────────────┬─────────────────────────┘
@@ -51,8 +54,8 @@ than eyes - text, status, the camera view - goes on the Jetson's dashboard web p
  │          ▼                                           │
  │  Waveshare Bus Servo Adapter (A) ── 12 V ──┐         │
  │          │ servo bus (daisy-chained)        │         │
- │          ├── STS3215 #1  PAN  (ID 1)        │         │
- │          └── STS3215 #2  TILT (ID 2)        │         │
+ │          └── STS3215  PAN  (ID 1)          │         │
+ │                                            │         │
  │                                            │         │
  │  12 V / 5 A brick ── fuse ── star point ───┴── 5 V / 3 A buck ── USB hub power │
  └──────────────────────────────────────────────────────┘
@@ -75,12 +78,13 @@ The roles are:
 | **ESP32-S3 DevKitC-1 N16R8** (16 MB flash, 8 MB octal PSRAM, native USB) | controller: servo bus, eyes, link to the Jetson | have |
 | 2× **1.3" SH1106 OLED**, 128×64, I2C (4-pin) | the eyes | have |
 | **2.08" SH1122 OLED**, 256×64, 16 grey levels, white, 4-wire SPI (7 pins); module 75.5 × 19.35 × 5.9 mm, active area 51.18 × 12.78 mm | the mouth | ordering |
-| 2× **Feetech STS3215, 12 V / 30 kg·cm** serial bus servos: 360° magnetic encoder (4096 steps, 0.088°), position/load/voltage/temperature feedback, 1 Mbps half-duplex TTL bus | pan and tilt | **ordered** |
+| **Feetech STS3215, 12 V / 30 kg·cm** serial bus servo: 360° magnetic encoder (4096 steps, 0.088°), position/load/voltage/temperature feedback, 1 Mbps half-duplex TTL bus (2 ordered; the second is a spare) | pan | **ordered** |
 | Waveshare **Bus Servo Adapter (A)**: 9–12.6 V input, powers the servo bus and converts it to plain TX/RX for the ESP32 | servo bus interface | needed |
 | Logitech **C920X**, housing partly stripped (94 × 24.1 × 29 mm) | camera - the head's "nose" | have |
 | **SP-200** USB speakerphone (5 V): 4-mic array, hardware echo cancellation, USB Audio Class | microphone/speaker, connected to the Jetson | have |
 | 5.5" (140 mm) aluminium lazy Susan bearing | pan base, carries all vertical load | have / needed |
-| 2× 608ZZ bearings, 2 short 8 mm steel axles (M8 bolts or pins), 3D-printed base, turret, cheeks and head | tilt axis, enclosure | 608 have; camera pod fit-tested |
+| 3D-printed base, turntable plate, hollow neck, 15° wedge, and a two-part head (face front + screw-on back) | enclosure | camera pod fit-tested |
+| Silicone hook-up wire, ~2 mm, very flexible (6 colours) | display wiring through the neck | have |
 | **12 V / 5 A** power brick, inline 5 A fuse, 1000 µF / 25 V capacitor | head power | needed |
 | **5 V / 3 A** buck converter | USB hub power | needed |
 | **FE1.1s 4-port USB 2.0 hub board** (~$5–7) with external 5V/GND pads and a cuttable "Disable USB Power" jumper (e.g. [Circuitneato](https://circuitneato.com/how-to-use-the-fe1-1s-usb-hub/), or generic "FE1.1s hub module" listings) | one cable to the Jetson | needed |
@@ -94,7 +98,7 @@ through the Bus Servo Adapter, with no converter in that path. Only the 5 V USB 
 needs a buck converter.
 
 ```text
-12 V / 5 A brick ── 5 A fuse ──┬── 1000 µF ── Bus Servo Adapter (A) ── STS3215 pan + tilt
+12 V / 5 A brick ── 5 A fuse ──┬── 1000 µF ── Bus Servo Adapter (A) ── STS3215 pan servo
                                │
                                └── 5 V / 3 A buck ── FE1.1s hub (5V pads) ──┬── ESP32-S3 (native USB) ── 3.3 V → OLED eyes
                                                                             └── C920X camera
@@ -124,18 +128,17 @@ GND: all grounds meet at one star point at the brick input.
 
 | Load | Typical | Peak |
 |---|---|---|
-| 2× STS3215 at 12 V, holding | ~0.2 A | |
-| 2× STS3215 at 12 V, moving | ~0.5–1.5 A | ~5–6 A if both stall |
+| STS3215 at 12 V, holding | ~0.1 A | |
+| STS3215 at 12 V, moving | ~0.3–0.8 A | ~3 A if it stalls |
 | ESP32-S3 + three OLEDs (5 V) | ~0.2 A | |
 | C920X camera (5 V) | ~0.4 A | ~0.5 A |
-| **12 V input total** | **~0.5–2 A** | **~6 A** |
+| **12 V input total** | **~0.4–1.2 A** | **~3.5 A** |
 
-Normal tracking stays well inside 5 A. The peak only happens if both servos stall at
-once (jammed, or pushing against a hard stop). Protection:
+Normal tracking stays well inside 5 A, and even a full stall of the single servo (jammed, or
+pushing against a hard stop) stays under it. Protection:
 - Set each servo's **protection current and overload limits** in its EEPROM (see Servo setup),
   so a stall is cut back long before it threatens the brick.
 - The **5 A fuse** protects the wiring if something does go wrong.
-- If you prefer headroom over settings, a 12 V / 6–8 A brick costs about the same.
 
 **The 1000 µF capacitor** at the adapter input absorbs current spikes when the servos
 start moving, so the 12 V line doesn't dip.
@@ -165,8 +168,8 @@ strapping pins 0, 3, 45, 46.
 
 **The eyes get one I2C bus each.** SH1106 modules normally share address 0x3C, so two on one
 bus would clash; two buses also let both eyes update at the same time. **The mouth has its own
-SPI bus.** The display wires run about 40-50 cm, from the base, through the pan centre and the tilt
-pivot (about 11 thin wires plus the camera cable), so:
+SPI bus.** The display wires run about 40-50 cm, from the base up through the lazy Susan and the
+neck into the head (about 11 thin wires plus the camera cable), so:
 - run each eye's I2C bus at **400 kHz** (try 1 MHz once it works), and the mouth's SPI at
   **4-8 MHz** (a full frame still takes only 5-10 ms);
 - twist each data wire with a ground wire, or use a thin multi-core cable;
@@ -180,18 +183,16 @@ The adapter handles the half-duplex direction switching, so the ESP32 just uses 
 
 ## Servo setup (one-time)
 
-1. **Give each servo its own ID.** New STS3215s all ship as ID 1, so connect them **one at a time**:
-   leave the pan servo as **ID 1**, and set the tilt servo to **ID 2**. Use Feetech's FD software,
-   or the Bus Servo Adapter's USB mode, or a small ESP32 sketch. Only then daisy-chain them.
+1. **ID:** the pan servo stays at the factory **ID 1** (the spare can be set to ID 2 if it is ever
+   added). Use Feetech's FD software, the Bus Servo Adapter's USB mode, or a small ESP32 sketch.
 2. **Zero before assembly, then centre.** Before fitting a horn or coupling, power each servo and
-   command it to **2048 (mid position)**. Only then attach the turntable coupling / camera pod with
-   the head pointing **straight ahead and level**. That way the mechanism's centre is the servo's
+   command it to **2048 (mid position)**. Only then attach the turntable coupling with the head
+   pointing **straight ahead**. That way the mechanism's centre is the servo's
    centre and nothing is under strain at rest. Afterwards, fine-tune with the middle-position
-   calibration so that **2048 = straight ahead / level** exactly. The bench firmware has a
+   calibration so that **2048 = straight ahead** exactly. The bench firmware has a
    `center` command for this.
 3. **Angle limits in the servo's EEPROM**, so they hold even if the software misbehaves:
    - **Pan:** about ±150° from centre (the camera cable sets the real limit; see Mechanics).
-   - **Tilt:** **±30°** (the mechanism clears ±40°, so the limit can be widened without reprinting).
 4. **Protection:** set the protection current, overload torque and temperature limits, and enable
    the overload behaviour that drops torque instead of fighting.
 5. **Speed and acceleration:** set sensible defaults. The ESP32 overrides them per move.
@@ -202,10 +203,10 @@ Library: Feetech's **SCServo** (`SMS_STS` class) for Arduino-ESP32, at 1 Mbps.
 
 ## Motion control
 
-- The Jetson sends **targets** (pan/tilt angle plus a speed hint) at up to 30–50 Hz.
+- The Jetson sends **targets** (pan angle plus a speed hint) at up to 30–50 Hz.
 - The ESP32 clamps them to the soft limits, smooths them (a velocity and acceleration
   limit, so tracking looks natural rather than snappy), and writes goal position, speed
-  and acceleration to both servos in one **SYNC WRITE** packet.
+  and acceleration to the servo.
 - The ESP32 reads back **actual position, load, voltage and temperature** at about 50 Hz,
   timestamps them, and reports them to the Jetson. The Jetson uses the timestamp to work out
   where the camera was pointing when each video frame was taken. This is what keeps tracking
@@ -235,10 +236,10 @@ Library: Feetech's **SCServo** (`SMS_STS` class) for Arduino-ESP32, at 1 Mbps.
 | Direction | Message | Contents |
 |---|---|---|
 | Jetson → ESP32 | `HEARTBEAT` | sequence, Jetson time |
-| Jetson → ESP32 | `LOOK` | pan°, tilt°, max speed, mode (track / glance / rest) |
+| Jetson → ESP32 | `LOOK` | pan°, max speed, mode (track / glance / rest) |
 | Jetson → ESP32 | `FACE` | expression (idle, listening, thinking, speaking, happy, surprised, sleepy, …), gaze x/y, optional speech level for the mouth |
 | Jetson → ESP32 | `CONFIG` | soft limits, smoothing, eye brightness, etc. |
-| ESP32 → Jetson | `STATUS` | actual pan/tilt, load, voltage, temperature, ESP32 time, flags |
+| ESP32 → Jetson | `STATUS` | actual pan, load, voltage, temperature, ESP32 time, flags |
 | ESP32 → Jetson | `EVENT` | watchdog/fault, boot |
 
 The message set stays small: no video or vector data crosses this link.
@@ -281,10 +282,12 @@ boxes and names - goes on the Jetson's **dashboard web page**.
 - **Recognition:** **ArcFace** embeddings (InsightFace), matched against a local gallery.
   **Enrolment** is a short guided capture of several angles. Embeddings stay on the Jetson, and
   a "forget me" command deletes a person.
-- **Tracking:** keep a track ID per face. Turn the face's position in the image into pan/tilt
-  targets using the camera's field of view and the head pose *at the time of that frame*
-  (from `STATUS`). Add a deadband in the middle of the image so the head isn't constantly
-  making tiny corrections.
+- **Tracking:** keep a track ID per face. Turn the face's **horizontal** position into a pan
+  target using the camera's field of view and the head pose *at the time of that frame* (from
+  `STATUS`), with a deadband so the head isn't constantly making tiny corrections. **Vertically**
+  there is no motor: the camera's ±21° view around its fixed 15° tilt covers seated faces, the
+  eyes' pupils glance up or down toward the face, and the Jetson can crop the 1080p frame to
+  centre on it.
 - **Behaviour (piper-assistant):** who to look at (speaker, newcomer, recognised person),
   idle glances, a rest pose, and eye expressions that match the conversation.
 
@@ -292,36 +295,32 @@ boxes and names - goes on the Jetson's **dashboard web page**.
 
 ## Mechanics
 
-- **Pan:** the lazy Susan carries all of the head's weight. The pan servo only *turns* it,
-  through a coupling at the centre, so there's no sideways load on the servo shaft.
-- **Base:** a shallow cylinder about 15 cm across and 8 cm tall, a little larger than the
-  lazy Susan. It holds the ESP32-S3, Bus Servo Adapter, 5 V buck and USB hub, with the pan servo
-  in the middle and the power input and USB cable at the back.
-- **Head:** the camera pod grown into a face, about 95-100 mm wide × 95-100 mm tall × 30 mm deep,
-  in three sections: eye windows on top, the camera (nose) in the middle, the mouth window below.
-  Built as a **front face plate** with the three windows plus a **back shell** holding the camera
-  cradle and display mounts, screwed together. The tilt axis runs through the camera, so the view
-  stays steady when the head nods and the weight above and below the axis roughly balances.
-- **Tilt:** a turret on the turntable with two cheeks; the head pivots between them on
-  **a bearing in each cheek**, so the bearings carry the pod and the servo only turns it:
-  - **A 608ZZ (8 × 22 × 7) in each cheek**, on short **8 mm steel axles** (M8 bolts or pins) set
-    into the head - steel, not printed, since the axles are the most stressed point of the head.
-  - **Servo side:** the STS3215 drives the head through a **misalignment-tolerant coupling** (pins
-    in slots), never rigidly - a rigid joint plus the servo's own bearings would over-constrain
-    the axis and bind. The bearings carry the head; the servo only turns it.
-  - **Wires go around the pivots, not through them:** the camera cable and the display cable leave
-    the back of the head and hang in a loose **service loop** down into the turret, then pass
-    through the lazy Susan's 89 mm opening into the base.
-  - **Range:** soft limits **±30°** (the head rests a little above level, about +10-15°, to meet a
-    seated person's eyes); the mechanism physically clears **±40°**.
-  - Keep the camera's centre of mass on the tilt axis so the servo isn't holding a constant load.
-  - Bearing seats are press fits; a small seat coupon sets the exact bore for this printer.
-- **Cables:** two cables run from the base to the head - the camera's USB cable and one display
-  cable (slim stranded patch cable, 8 cores: 3.3 V, GND, eyes SDA/SCL, mouth SPI clock/data/DC/RES).
-  Through the lazy Susan they have a **service loop** sized for ±150° of pan, and behind the head a
-  loose loop for the ±30° of tilt. Soft limits keep them from winding further. No connectors in the
-  moving sections; locking JST-PH plugs at the head. Avoid slip rings for USB 2.0.
-- **Noise:** the STS3215s are quiet when holding still. If movement noise still reaches the
+Pan only - no tilt motor. Bottom to top:
+
+- **Base:** a shallow cylinder about 146 mm across and 8 cm tall, just larger than the lazy Susan.
+  It holds the ESP32-S3, Bus Servo Adapter, 5 V buck and USB hub, with the pan servo in the middle
+  and the power input and USB cable at the back. Its top has the raised plinth (outer ring only)
+  with M5 heat-set inserts.
+- **Pan:** the lazy Susan carries all the weight above it. The pan servo only *turns* the
+  turntable plate (on the inner ring) through a coupling at the centre, so there's no sideways
+  load on the servo shaft. Soft limits about ±150°.
+- **Neck:** a short hollow, chamfered square column (about 40 × 40 mm outside, **28 × 28 mm inside**)
+  on the turntable plate. Every wire to the head runs inside it.
+- **Wedge:** a small printed block between neck and head, hollow for the wires, that sets the
+  head's fixed **15° upward tilt** for seated conversation. To change the angle, print another
+  wedge (10°, 20°, ...) and swap it - two or three screws. There's no hinge, so nothing can creep.
+- **Head:** about 100 × 100 mm, 40 mm deep, faceted (chamfered edges), in two parts:
+  - **Front (the face):** carries everything. Two **eye windows** on top, a small **round "nose"
+    opening** for the camera lens in the middle (about 16 mm, chamfered inside so it doesn't clip
+    the camera's view), and the **mouth window** below. The OLEDs and the camera mount to its back.
+  - **Back cover:** encloses the electronics and wiring and **screws onto the front** (M3 screws into
+    heat-set inserts). Assembly and repair: mount the parts to the face, plug in, feed the wires
+    down through the wedge and neck, screw on the back.
+- **Cables:** the camera's USB cable plus the display wiring (2 mm silicone hook-up wire: 3.3 V,
+  GND, eyes SDA/SCL, mouth SPI clock/data/DC/RES) run from the head down the neck, through the lazy
+  Susan's 89 mm opening, into the base, with a **service loop** in the base for the ±150° of pan.
+  Nothing is visible from outside. Avoid slip rings for USB 2.0.
+- **Noise:** the STS3215 is quiet when holding still. If movement noise still reaches the
   speakerphone, have piper-assistant pause or flag speech recognition while the head moves.
 
 ---
@@ -345,7 +344,8 @@ repository is public.
 
 1. **Bench:** ESP32-S3 + Bus Servo Adapter + one servo, plus the three OLEDs. Set IDs, read position,
    move by serial command; bring up both eyes and the mouth.
-2. **Head v1:** printed base, turret, cheeks and head; both servos, limits, watchdog, `STATUS` reporting.
+2. **Head v1:** printed base, turntable plate, neck, wedge and two-part head; pan servo, limits,
+   watchdog, `STATUS` reporting.
 3. **Face:** expressions, blinking, gaze that leads the motion, a talking mouth, and the `FACE` message.
 4. **Vision:** detection and tracking on the Jetson closing the loop through `LOOK`.
 5. **Recognition:** enrolment, gallery, names on the dashboard and in the assistant.
@@ -356,4 +356,6 @@ repository is public.
 - Final pan range, which depends on the cable routing.
 - Face layout: eye spacing and window sizes relative to the camera nose and the mouth
   (needs caliper measurements of the OLED boards and their active areas).
+- Eye bus: both eyes on one I2C bus (0x3C / 0x3D via the modules' address resistor) or one bus
+  each - depends on whether the eye modules have the address-select resistor.
 - Pan drive: central direct drive or offset belt (affects cable routing through the base).
