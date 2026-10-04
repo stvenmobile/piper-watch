@@ -77,8 +77,9 @@ ring_n       = 24;               // LEDs, 15 deg apart (~7.7 mm)
 // Diffuser in front of the LEDs (ring_diffuser.scad), pressed into the face flush
 diff_t       = 2.0;              // thickness
 diff_w       = 6.5;              // radial width
-diff_clr     = [0.25, 0.25];     // [inner, outer] clearance each side. Fit test 3: the LED pocket fits
-                                 //   perfectly, but the diffuser (0.15 / 0.15) bound at both edges
+diff_clr     = [0.25, 0.45];     // [inner, outer] clearance each side. Fit test 3: diffuser 0.15/0.15 bound
+                                 //   at both edges. Then 0.25/0.25 printed 53.2 / 64.5 but the stand's seat
+                                 //   printed 52.2 / 64.2 (outer wall at the bed shrinks) -> outer 0.45
 
 // --- Logitech C920X, housing partly stripped (photos: cam_front.jpg, cam_top.jpg) ---
 // Seen from above it is a lozenge: flat glossy front face, rounded back, rounded ends
