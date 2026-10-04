@@ -32,6 +32,13 @@ front_t    = 2.5;                           // front plate in the middle
 comp_pocket = [44, 22];                     // clear area for the board's front parts (stays inside
                                             //   the chamber's inner wall, so no light leaks in)
 lens_hole  = 16.5;                          // square: the ~15 mm lens holder passes through
+// print 1 fit: the mics and two coils on the board's front kept it off the back face
+mic_d      = 6.1;                           // MEASURED
+mic_gap    = 69.2;                          // MEASURED: between the mics' inner edges
+mic_notch  = [mic_d + 0.7, 5.8 + 0.5];      // [diameter, depth]: mics stand 5.8 proud of the board
+coil_cut   = [4, 5];                        // extends the clear pocket 4 mm left (seen from the back),
+                                            //   from the mics' centreline to 5 mm above it
+coil_depth = 4.5;                           // coils ~3.3 tall + clearance (stays behind the ring PCB)
 
 // ---- snap tabs ------------------------------------------------------------------------------
 tab_x      = [-18, 18];                     // tab positions along the board (top and bottom edges)
@@ -52,6 +59,13 @@ module puck() {
         cutouts();                                                  // the face's ring optics
         // clear pocket for the board's front parts, from the front plate back
         translate([0, 0, front_t]) linear_extrude(z_board) square(comp_pocket, center = true);
+        // the two coils on the board's front: a bay off the left side of the pocket (as seen
+        // from the back, i.e. -x), from the mics' centreline up 5 mm
+        translate([-comp_pocket[0] / 2 - coil_cut[0], -0.5, z_board - coil_depth])
+            cube([coil_cut[0] + 1, coil_cut[1] + 1, coil_depth + 1]);
+        // semicircular notches for the microphones (they also index the board side to side)
+        for (sx = [-1, 1]) translate([sx * (mic_gap / 2 + mic_d / 2), 0, z_board - mic_notch[1]])
+            cylinder(d = mic_notch[0], h = mic_notch[1] + 1, $fn = 48);
         // lens holder opening through the front plate (small chamfer at the face)
         translate([0, 0, -0.01]) linear_extrude(front_t + 0.02, scale = lens_hole / (lens_hole + 1.6))
             square(lens_hole + 1.6, center = true);
@@ -59,7 +73,7 @@ module puck() {
 }
 
 module tabs() {
-    h = board_t + 0.2;                       // board sits under the lip with a little play
+    h = board_t + 0.2 + 0.6;                 // board + play + 0.6 for solder joints on its front (print 1)
     for (x = tab_x, s = [-1, 1]) translate([x - tab_len / 2, 0, 0]) {
         y_in = s * (board[1] / 2 + board_clr);                    // tab's inner face
         // upright, just outside the board edge
