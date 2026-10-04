@@ -6,8 +6,8 @@
 //   * LED ring: pushed in from the back into its pocket (power pads at the top, data at the
 //     bottom - their pins come straight out the back, clear of the camera board).
 //   * Camera board (80 x 22, bare): snaps onto the back between four small tabs, lens side
-//     forward, 1.8 mm clear of the ring's back. The lens holder pokes forward through a square
-//     opening, so its height doesn't matter yet. Route the USB wires from the board's front
+//     forward, 5.8 mm behind the ring's back, so the lens (14.0 mm tall) sits 0.5 mm behind the
+//     face; only its round barrel passes through the front plate. Route the USB wires from the board's front
 //     connector round its long edge to the back (gap between the tabs in the middle).
 //   * Stem: ends in a 1/4"-20 nut pocket for a camera tripod, or plugs into eye_test_foot.scad.
 //
@@ -20,8 +20,11 @@ ring_clr   = 0.25;
 ring_back  = 2.0 + 3.5 + ring_t;            // diffuser + air gap + ring = 8.7: back of the ring PCB
 board      = [80, 22];                      // bare C920 board (measured)
 board_t    = 1.6;                           // EST
-board_gap  = 1.8;                           // ring back -> board front (small parts on the board's front)
-z_board    = ring_back + board_gap;         // 10.5: board front = back face of the puck
+lens_h     = 14.0;                          // MEASURED: board top -> front of the lens
+block_h    = 10.6;                          // MEASURED: board top -> top of the lens holder's square block
+lens_recess = 0.5;                          // lens sits this far behind the face (protected)
+z_board    = lens_h + lens_recess;          // 14.5: board front = back face of the puck
+board_gap  = z_board - ring_back;           // 5.8: ring back -> board front
 puck_r     = ring_od / 2 + ring_clr + 0.05 + 2.4;   // wall round the ring pocket
 front_t    = 2.5;                           // front plate in the middle
 comp_pocket = [44, 22];                     // clear area for the board's front parts (stays inside
@@ -88,4 +91,5 @@ union() {
     cylinder(d = ring_od, h = ring_t); translate([0, 0, -1]) cylinder(d = ring_id, h = ring_t + 2);
 }
 %translate([-board[0] / 2, -board[1] / 2, z_board]) cube([board[0], board[1], board_t]);
-%translate([0, 0, z_board - 8]) linear_extrude(8) square(15, center = true);   // lens holder (EST height)
+%translate([0, 0, z_board - block_h]) linear_extrude(block_h) square(15, center = true);   // lens holder block
+%translate([0, 0, z_board - lens_h]) cylinder(d = 9.5, h = lens_h - block_h);              // lens barrel
