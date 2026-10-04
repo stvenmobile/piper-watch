@@ -41,7 +41,9 @@ coil_cut   = [4, 5];                        // extends the clear pocket 4 mm lef
 coil_depth = 4.5;                           // coils ~3.3 tall + clearance (stays behind the ring PCB)
 
 // ---- snap tabs ------------------------------------------------------------------------------
-tab_x      = [-18, 18];                     // tab positions along the board (top and bottom edges)
+tab_x      = [-18, 18];                     // top-edge tab positions along the board
+bot_inset  = 3.1;                           // MEASURED: along the middle, the board's bottom edge is
+                                            //   cut back this far - one bottom tab, centred, catches it
 tab_len    = 6;
 tab_w      = 1.2;                           // thin, so they flex
 tab_lip    = 0.5;                           // hooks over the board's back
@@ -72,16 +74,28 @@ module puck() {
     }
 }
 
-module tabs() {
-    h = board_t + 0.2 + 1.0;                 // board + play + 1.0 for solder joints on its front (print 1)
-    for (x = tab_x, s = [-1, 1]) translate([x - tab_len / 2, 0, 0]) {
-        y_in = s * (board[1] / 2 + board_clr);                    // tab's inner face
+module tab(x, s, y_in, h) {                   // one snap tab; s = +1 top edge, -1 bottom edge
+    translate([x - tab_len / 2, 0, 0]) {
         // upright, just outside the board edge
         translate([0, s > 0 ? y_in : y_in - tab_w, z_board]) cube([tab_len, tab_w, h + 0.8]);
         // lip over the board's back; its top is chamfered so the board pushes past it
         rotate([90, 0, 90]) linear_extrude(tab_len)               // 2D: (y, z), extruded along x
             polygon([[y_in, z_board + h], [y_in - s * tab_lip, z_board + h], [y_in, z_board + h + 0.8]]);
     }
+}
+
+module tabs() {
+    h = board_t + 0.2 + 1.0;                 // board + play + 1.0 for solder joints on its front (print 1)
+    for (x = tab_x) tab(x, 1, board[1] / 2 + board_clr, h);                 // top edge: two tabs
+    y_bot = -(board[1] / 2 + board_clr) + bot_inset;                       // bottom edge: one, centred
+    tab(0, -1, y_bot, h);
+    // its base: the centre is over the clear pocket, so a bracket grows from the pocket's bottom
+    // wall (y = -pocket/2). It starts deep enough to stay out of the lens's view cone, with a
+    // 45 deg underside so it prints without supports.
+    wall = -comp_pocket[1] / 2;
+    rotate([90, 0, 90]) translate([0, 0, -tab_len / 2]) linear_extrude(tab_len)   // 2D: (y, z)
+        polygon([[wall - 0.5, z_board], [y_bot - tab_w, z_board], [y_bot - tab_w, z_board - 1.5],
+                 [wall - 0.5, z_board - 1.5 - (y_bot - tab_w - wall + 0.5)]]);
 }
 
 module stem() {
