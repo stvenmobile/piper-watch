@@ -27,8 +27,8 @@ flange_out = 2.2;                       // flanges stand this far proud of the t
 
 // ---- plate, tube and where the belt runs (lazy Susan + base geometry) ----------------------
 plate_t    = 8;
-m5_hole    = 5.0;                       // snug on the M5 bolts (first print's 6.4 insert bores had ~1 mm of play);
-                                        //   if a bolt won't pass, run a 5 mm drill through
+m5_hole    = 6.0;                       // prints ~5.2 for the M5 bolts: the first print's 6.4 bores measured 5.6
+                                        //   (~0.8 mm undersize) and had ~1 mm of play
 m5_nut     = [8.0 + 0.3, 3.5];          // nut pocket [across flats + clearance, depth] (M5 nut: 8 AF, 4 thick)
 plate_d    = top_plate_d;               // 112.6: touches the inner ring only
 hollow_d   = 50;                        // cable passage
