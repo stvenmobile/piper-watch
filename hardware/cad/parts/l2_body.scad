@@ -30,7 +30,8 @@ corner_xy = half - 9;            // deck screws (match drive_deck.scad)
 // ---- display (JC4827W543, measured from its STEP model + spec) ---------------------------------
 disp_board  = [120.7, 70.2];
 disp_holes  = [112.6, 62.1];
-disp_glass_t = 5.0;              // glass/backlight in front of the board
+disp_glass_t = 3.6;              // glass/backlight in front of the board: MEASURED on the fit test (the
+                                 //   STEP model's 5.0 left the glass 1.4 mm off the wall)
 disp_active = [95.04, 53.86];
 disp_win    = disp_active + [2, 2];      // 1 mm round the active area
 disp_zc     = (z_bot + 0) / 2;           // board (and glass) centred on the whole front face incl. the deck: -45
@@ -94,10 +95,11 @@ module adds() {
 }
 
 module cuts() {
-    // display window, chamfered on the outside
+    // display window: a 45 deg bevel through the whole wall, from the face down to the glass
+    // (fit test: the opening at the glass is right - the border is even all round)
     translate([0, half + 0.01, disp_zc + disp_win_dz]) rotate([90, 0, 0]) hull() {
-        linear_extrude(0.01) square(disp_win + [1.6, 1.6], center = true);
-        translate([0, 0, 0.8]) linear_extrude(l2_wall) square(disp_win, center = true);
+        linear_extrude(0.01) square(disp_win + [2, 2] * (l2_wall + 0.02), center = true);
+        translate([0, 0, l2_wall + 0.02]) linear_extrude(0.01) square(disp_win, center = true);
     }
     // display post screws (M3 heat-set inserts from behind)
     for (sx = [-1, 1], sz = [-1, 1]) translate([sx * disp_holes[0] / 2, inner - disp_glass_t - 0.01, disp_zc + sz * disp_holes[1] / 2])
