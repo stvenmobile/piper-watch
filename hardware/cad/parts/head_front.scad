@@ -28,6 +28,8 @@ cam_cy  = 0;                 // camera, lens, ring and face all share one centre
 // ---- LED ring and its light path (ring and diffuser sizes: params.scad) ------------
 ring_clr   = 0.25;           // pocket clearance, each side (fit test 1: 0.3 too loose)
 seat_tight = 0.05;           // diffuser seat narrowed this much each side (fit test 1: too loose)
+outer_ease = 0.05;           // fit test 2: both snug -> outer diameters of the ring pocket and the
+                             //   diffuser seat 0.1 mm larger (0.05 each side); inner diameters unchanged
 mix_gap    = 3.5;            // air between diffuser and LED tops: lets the light spread
 chamber_w  = 5.7;            // light chamber width (radial): 5 mm LEDs (~0.3 clear each side); the
                              //   PCB (6.65 wide) rests on the ~0.48 mm ledges either side
@@ -136,7 +138,7 @@ module cutouts() {
     translate([0, cam_cy, -0.01]) cylinder(d1 = nose_d + 2 * flare, d2 = nose_d, h = z_cam + 0.02, $fn = 120);
     // diffuser seat, open at the face
     translate([0, 0, -0.01]) linear_extrude(diff_t + 0.01)
-        annulus(ring_r - diff_w / 2 + seat_tight, ring_r + diff_w / 2 - seat_tight);
+        annulus(ring_r - diff_w / 2 + seat_tight, ring_r + diff_w / 2 - seat_tight + outer_ease);
     // light chamber, down to the PCB: the LEDs sit in it and the PCB rests on its edges (the
     // seat in front is wider, so the diffuser rests on them too). Minus the spokes, which
     // fall between LEDs.
@@ -147,7 +149,7 @@ module cutouts() {
     // ring pocket, open at the back - also through the cradle's lips, so the ring can go in
     // from behind (before the camera)
     translate([0, 0, z_pcb]) linear_extrude(z_cam + cradle_dep + 1)
-        annulus(ring_id / 2 - ring_clr, ring_od / 2 + ring_clr);
+        annulus(ring_id / 2 - ring_clr, ring_od / 2 + ring_clr + outer_ease);
 }
 
 difference() {
