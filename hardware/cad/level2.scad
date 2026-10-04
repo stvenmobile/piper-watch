@@ -35,7 +35,7 @@ mp_T      = 20;             // motor pulley teeth
 mp_belt_c = 13 + 7.1 / 2;   // MEASURED: pulley pushed fully down on the motor, its toothed section
                             //   (7.1 wide; the belt is a standard 6 mm) runs 13..20.1 above the face
 bracket_t = 3;              // motor plate thickness; the pulley passes down through its centre hole
-z_motor_face  = z_belt - mp_belt_c;          // -28.25
-z_bracket_top = z_motor_face + bracket_t;    // -25.25
-z_motor_bottom = z_motor_face - nema[1];     // -61.65
+z_motor_face  = z_belt - mp_belt_c;          // -28.55
+z_bracket_top = z_motor_face + bracket_t;    // -25.55
+z_motor_bottom = z_motor_face - nema[1];     // -61.95
 z_mp_top  = z_motor_face + 13 + 7.1 + 1;     // ~-7.45 (EST: top flange ~1 mm thick)
