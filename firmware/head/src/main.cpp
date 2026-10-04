@@ -1,86 +1,154 @@
-// Piper-Watch controller - face bring-up skeleton for the ESP32-S3.
-// The face is a 24-LED WS2812-type ring around the camera lens (data on RING_DATA, through a
-// 3.3 V -> 5 V level shifter). This demo cycles through the ring's states every few seconds;
-// the pan stepper and the Jetson link (FACE message) come next (see README roadmap).
+// Piper-Watch controller (ESP32-S3) - phase 1: the Jetson link and the light ring.
+//
+// Link: newline-delimited JSON over the native USB serial port (/dev/ttyACM0 on the Jetson).
+//   Jetson -> ESP32
+//     {"t":"HEARTBEAT","seq":812}                         at least every second
+//     {"t":"FACE","state":"listening","mood":"warm","attention":-20}   (mood/attention optional;
+//                                                          "attention":null clears it)
+//     {"t":"CONFIG","max_brightness":64,"ring_offset":0}  (any subset)
+//   ESP32 -> Jetson
+//     {"t":"STATUS", ...}                                 twice a second
+//     {"t":"EVENT","what":"boot"|"watchdog"|"link"}       when they happen
+// Unknown messages and fields are ignored, so either side can be updated first.
+//
+// Watchdog: no HEARTBEAT for 3 s -> the ring drops to a dim amber "offline" ember (and, from
+// phase 2, the motor stops).
+//
+// The ring (24 LEDs on RING_DATA via a 74AHCT125 level shifter) is mirrored on the board's own
+// RGB LED (BOARD_RGB) as the average colour, so it can be watched on the bench before the ring
+// is wired.
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <Adafruit_NeoPixel.h>
+#include "ring.h"
 
-constexpr int RING_N = 24;
-constexpr uint8_t MAX_BRIGHT = 64;                 // ~25%: plenty behind a diffuser, ~250 mA max
-Adafruit_NeoPixel ring(RING_N, RING_DATA, NEO_GRB + NEO_KHZ800);
+#define FW_VERSION "0.2.0"
 
-// Colours (scaled by MAX_BRIGHT through setBrightness)
-constexpr uint32_t WARM = 0xFFC880;                // idle / listening / speaking: soft warm white
-constexpr uint32_t COOL = 0x60A0FF;                // thinking
+constexpr uint32_t WATCHDOG_MS = 3000;
+constexpr uint32_t STATUS_MS = 500;
+constexpr uint32_t FRAME_MS = 20;                    // 50 fps
 
-static uint32_t scale(uint32_t c, float k) {
-  if (k <= 0) return 0;
-  if (k > 1) k = 1;
-  return ring.Color(((c >> 16) & 0xFF) * k, ((c >> 8) & 0xFF) * k, (c & 0xFF) * k);
+Adafruit_NeoPixel ringLeds(ring::N, RING_DATA, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel boardLed(1, BOARD_RGB, NEO_GRB + NEO_KHZ800);
+
+ring::Face face;                                     // what the Jetson asked for
+uint8_t maxBrightness = 64;                          // ~25%: plenty behind the diffuser
+float ringOffsetDeg = 0;                             // where LED 0 sits (0 = top, clockwise)
+uint32_t lastHeartbeat = 0, heartbeatSeq = 0, framesDropped = 0;
+bool linkUp = false;
+
+// ---- outgoing --------------------------------------------------------------------------------
+static void sendEvent(const char *what) {
+  JsonDocument d;
+  d["t"] = "EVENT";
+  d["what"] = what;
+  if (strcmp(what, "boot") == 0) d["fw"] = FW_VERSION;
+  serializeJson(d, Serial);
+  Serial.print('\n');
 }
 
-static void fill(uint32_t c) {
-  for (int i = 0; i < RING_N; i++) ring.setPixelColor(i, c);
+static void sendStatus() {
+  JsonDocument d;
+  d["t"] = "STATUS";
+  d["fw"] = FW_VERSION;
+  d["up"] = millis();
+  d["link"] = linkUp;
+  d["hb"] = heartbeatSeq;
+  d["state"] = ring::stateName(face.state);
+  d["mood"] = ring::moodName(face.mood);
+  if (face.has_attention) d["attention"] = face.attention_deg; else d["attention"] = nullptr;
+  d["bad"] = framesDropped;                          // lines that weren't valid JSON
+  serializeJson(d, Serial);
+  Serial.print('\n');
 }
 
-// Listening: the whole ring breathes slowly
-static void listening(uint32_t t) {
-  fill(scale(WARM, 0.25f + 0.75f * (0.5f - 0.5f * cosf(t / 1600.0f * TWO_PI))));
-}
+// ---- incoming ----------------------------------------------------------------------------------
+static void handle(const char *line) {
+  JsonDocument d;
+  if (deserializeJson(d, line)) { framesDropped++; return; }
+  const char *t = d["t"] | "";
 
-// Thinking: a short comet runs around the ring
-static void thinking(uint32_t t) {
-  float head = fmodf(t / 60.0f, RING_N);
-  for (int i = 0; i < RING_N; i++) {
-    float d = fmodf(head - i + RING_N, RING_N);    // how far behind the head this pixel is
-    ring.setPixelColor(i, scale(COOL, d < 6 ? 1.0f - d / 6 : 0.04f));
+  if (strcmp(t, "HEARTBEAT") == 0) {
+    heartbeatSeq = d["seq"] | heartbeatSeq;
+    lastHeartbeat = millis();
+    if (!linkUp) {
+      linkUp = true;
+      if (face.state == ring::State::Offline) face.state = ring::State::Idle;
+      sendEvent("link");
+    }
+  } else if (strcmp(t, "FACE") == 0) {
+    face.state = ring::parseState(d["state"] | (const char *)nullptr, face.state);
+    face.mood = ring::parseMood(d["mood"] | (const char *)nullptr, face.mood);
+    // "attention": <deg> sets it, "attention": null clears it, no "attention" key leaves it alone
+    for (JsonPairConst kv : d.as<JsonObjectConst>()) {
+      if (strcmp(kv.key().c_str(), "attention") != 0) continue;
+      if (kv.value().is<float>()) { face.has_attention = true; face.attention_deg = kv.value(); }
+      else face.has_attention = false;
+    }
+  } else if (strcmp(t, "CONFIG") == 0) {
+    if (d["max_brightness"].is<int>()) {
+      maxBrightness = constrain((int)d["max_brightness"], 0, 255);
+      ringLeds.setBrightness(maxBrightness);
+      boardLed.setBrightness(maxBrightness);
+    }
+    if (d["ring_offset"].is<float>()) ringOffsetDeg = d["ring_offset"];
   }
 }
 
-// Speaking: a quick, slightly irregular pulse
-static void speaking(uint32_t t) {
-  fill(scale(WARM, 0.45f + 0.35f * sinf(t / 70.0f) + 0.2f * sinf(t / 23.0f)));
-}
-
-// Attention: a bright arc pointing toward the tracked person (angle in degrees, 0 = pixel 0)
-static void attention(float angle) {
-  for (int i = 0; i < RING_N; i++) {
-    float a = i * 360.0f / RING_N;
-    float d = fabsf(fmodf(a - angle + 540.0f, 360.0f) - 180.0f);   // 0..180 from the arc centre
-    ring.setPixelColor(i, scale(WARM, d < 45 ? 1.0f - d / 60 : 0.08f));
+static void readSerial() {
+  static char buf[512];
+  static size_t len = 0;
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n' || c == '\r') {
+      if (len) { buf[len] = 0; handle(buf); len = 0; }
+    } else if (len < sizeof(buf) - 1) {
+      buf[len++] = c;
+    } else {                                         // overlong line: drop it
+      len = 0;
+      framesDropped++;
+    }
   }
 }
 
-// Sleep: a dim ember
-static void sleeping() { fill(scale(WARM, 0.03f)); }
+// ---- output ------------------------------------------------------------------------------------
+static void drawFrame() {
+  ring::RGB px[ring::N];
+  ring::Face shown = face;
+  if (!linkUp) shown.state = ring::State::Offline;
+  ring::render(shown, millis(), ringOffsetDeg, px);
+
+  uint32_t r = 0, g = 0, b = 0;
+  for (int i = 0; i < ring::N; i++) {
+    ringLeds.setPixelColor(i, px[i].r, px[i].g, px[i].b);
+    r += px[i].r; g += px[i].g; b += px[i].b;
+  }
+  ringLeds.show();
+  boardLed.setPixelColor(0, r / ring::N, g / ring::N, b / ring::N);   // bench mirror
+  boardLed.show();
+}
 
 void setup() {
   Serial.begin(115200);
-  delay(1500);                      // let native USB connect
-  Serial.println("piper-watch: face (LED ring) bring-up");
-  ring.begin();
-  ring.setBrightness(MAX_BRIGHT);
-  ring.clear();
-  ring.show();
-  Serial.printf("PSRAM: %u KB\n", (unsigned)(ESP.getPsramSize() / 1024));
+  Serial.setTxTimeoutMs(0);                          // never block if the Jetson isn't reading
+  ringLeds.begin();
+  boardLed.begin();
+  ringLeds.setBrightness(maxBrightness);
+  boardLed.setBrightness(maxBrightness);
+  delay(300);
+  sendEvent("boot");
 }
 
 void loop() {
-  static const char *names[] = {"listening", "thinking", "speaking", "attention", "sleeping"};
-  static int last = -1;
+  static uint32_t nextFrame = 0, nextStatus = 0;
   uint32_t now = millis();
-  int state = (now / 5000) % 5;
-  if (state != last) {
-    Serial.printf("state: %s\n", names[state]);
-    last = state;
+  readSerial();
+
+  if (linkUp && now - lastHeartbeat > WATCHDOG_MS) {
+    linkUp = false;
+    sendEvent("watchdog");
   }
-  switch (state) {
-    case 0: listening(now); break;
-    case 1: thinking(now); break;
-    case 2: speaking(now); break;
-    case 3: attention(60.0f * sinf(now / 1500.0f)); break;   // the arc sweeps as if following someone
-    default: sleeping(); break;
-  }
-  ring.show();
-  delay(20);
+  if ((int32_t)(now - nextFrame) >= 0) { nextFrame = now + FRAME_MS; drawFrame(); }
+  if ((int32_t)(now - nextStatus) >= 0) { nextStatus = now + STATUS_MS; sendStatus(); }
+  delay(1);
 }
