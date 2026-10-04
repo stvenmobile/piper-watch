@@ -73,7 +73,7 @@ module puck() {
 }
 
 module tabs() {
-    h = board_t + 0.2 + 0.6;                 // board + play + 0.6 for solder joints on its front (print 1)
+    h = board_t + 0.2 + 1.0;                 // board + play + 1.0 for solder joints on its front (print 1)
     for (x = tab_x, s = [-1, 1]) translate([x - tab_len / 2, 0, 0]) {
         y_in = s * (board[1] / 2 + board_clr);                    // tab's inner face
         // upright, just outside the board edge
