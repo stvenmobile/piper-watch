@@ -7,6 +7,6 @@ include <../params.scad>
 ring_r = (ring_od + ring_id) / 4;              // radius of the LED centres
 
 difference() {
-    cylinder(r = ring_r + diff_w / 2 - diff_clr, h = diff_t, $fn = 180);
-    translate([0, 0, -1]) cylinder(r = ring_r - diff_w / 2 + diff_clr, h = diff_t + 2, $fn = 180);
+    cylinder(r = ring_r + diff_w / 2 - diff_clr[1], h = diff_t, $fn = 180);
+    translate([0, 0, -1]) cylinder(r = ring_r - diff_w / 2 + diff_clr[0], h = diff_t + 2, $fn = 180);
 }

@@ -33,6 +33,8 @@ outer_ease = 0.05;           // fit test 2: both snug -> outer diameters of the 
 mix_gap    = 3.5;            // air between diffuser and LED tops: lets the light spread
 chamber_w  = 5.7;            // light chamber width (radial): 5 mm LEDs (~0.3 clear each side); the
                              //   PCB (6.65 wide) rests on the ~0.48 mm ledges either side
+lip_w      = 5.1;            // the chamber's first lip_h mm is this narrow, so the (narrower, fit test 3)
+lip_h      = 0.6;            //   diffuser rests on ~0.45 mm ledges instead of 0.15
 spoke_w    = 1.6;            // spokes across the chamber, between LEDs
 spokes     = [90 + 7.5, 210 + 7.5, 330 + 7.5];   // half a pitch off the vertical
 ring_r     = (ring_od + ring_id) / 4;          // 29.5: radius of the LED centres
@@ -139,10 +141,14 @@ module cutouts() {
     // diffuser seat, open at the face
     translate([0, 0, -0.01]) linear_extrude(diff_t + 0.01)
         annulus(ring_r - diff_w / 2 + seat_tight, ring_r + diff_w / 2 - seat_tight + outer_ease);
-    // light chamber, down to the PCB: the LEDs sit in it and the PCB rests on its edges (the
-    // seat in front is wider, so the diffuser rests on them too). Minus the spokes, which
-    // fall between LEDs.
-    translate([0, 0, diff_t - 0.01]) linear_extrude(z_pcb - diff_t + 0.02) difference() {
+    // light chamber, down to the PCB: the LEDs sit in it and the PCB rests on its edges. Its
+    // first lip_h is narrower, so the diffuser rests on a ledge. Minus the spokes, which fall
+    // between LEDs.
+    translate([0, 0, diff_t - 0.01]) linear_extrude(lip_h + 0.02) difference() {
+        annulus(ring_r - lip_w / 2, ring_r + lip_w / 2);
+        for (a = spokes) rotate(a) translate([ring_r, 0]) square([chamber_w + 2, spoke_w], center = true);
+    }
+    translate([0, 0, diff_t + lip_h]) linear_extrude(z_pcb - diff_t - lip_h + 0.01) difference() {
         annulus(ring_r - chamber_w / 2, ring_r + chamber_w / 2);
         for (a = spokes) rotate(a) translate([ring_r, 0]) square([chamber_w + 2, spoke_w], center = true);
     }
