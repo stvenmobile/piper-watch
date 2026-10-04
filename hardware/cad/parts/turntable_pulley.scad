@@ -2,8 +2,8 @@
 // top of the Jetson, and PLA would creep under belt tension).
 //
 //   * The PLATE sits on the lazy Susan's inner ring and turns with it. Four M5 flat-head screws
-//     come up through the ring's countersunk holes into heat-set inserts in the plate. The neck
-//     mounts on top (later).
+//     come up through the ring's countersunk holes and through the plate, with nuts held in hex
+//     pockets on the plate's top. The neck mounts on top (later).
 //   * Under it, a hollow TUBE drops through the bearing into the base, with the cables to the
 //     head running down its middle.
 //   * At the bottom of the tube, a 100-tooth GT2 PULLEY driven by the NEMA17's 20-tooth pulley
@@ -26,7 +26,10 @@ flange_h   = 1.6;
 flange_out = 2.2;                       // flanges stand this far proud of the tooth tips
 
 // ---- plate, tube and where the belt runs (lazy Susan + base geometry) ----------------------
-plate_t    = 8;                         // holds the 7 mm deep M5 inserts
+plate_t    = 8;
+m5_hole    = 5.0;                       // snug on the M5 bolts (first print's 6.4 insert bores had ~1 mm of play);
+                                        //   if a bolt won't pass, run a 5 mm drill through
+m5_nut     = [8.0 + 0.3, 3.5];          // nut pocket [across flats + clearance, depth] (M5 nut: 8 AF, 4 thick)
 plate_d    = top_plate_d;               // 112.6: touches the inner ring only
 hollow_d   = 50;                        // cable passage
 tube_od    = 2 * R_od + 2;              // between plate and teeth (passes the 84.8 deck opening)
@@ -43,9 +46,9 @@ z_teeth1   = z_belt + belt_zone / 2;
 clamp_a    = 180;                       // clamp position (deg); the motor is at 0 when the head looks ahead
 clamp_half = 6 * 360 / pulley_T;        // 21.6: the belt leaves the teeth here (on a tooth space)
 slot_len   = 10;                        // 5 teeth of grip per end
-slot_clr   = [0.05, 0.15];              // [land side, back side] clearance around the belt's backing
-                                        //   test arc 1: channel 0.83 (0.1/0.1, 1.38 belt) - belt only half in
-                                        //   test arc 2: channel 1.10 (0.05/0.3) - all the way in, a bit loose
+slot_clr   = [0.05, 0.3];               // [land side, back side] clearance around the belt's backing
+                                        //   test arc 1: channel 0.83 - belt only half in
+                                        //   test arc 2: channel 1.10 (this) - FITS, no looseness; 1.25 - loose
 clamp_r    = 35.5;                      // clamp block outer radius
 module ring_pulley_2d() {
     // tooth tips with one groove per tooth; groove = rounded GT2 tooth space
@@ -109,9 +112,12 @@ module turntable_pulley(back_clr = [slot_clr[1], slot_clr[1]]) {
         translate([0, 0, -1]) cylinder(d = hollow_d, h = 100, $fn = 120);
         // clamp slots, open at the top, down to the lower flange
         translate([0, 0, z_teeth0]) linear_extrude(belt_zone + flange_out + 1) clamp_slots_2d(back_clr);
-        // M5 heat-set inserts from the underside (the side on the lazy Susan's inner ring)
+        // M5 through-holes; hex nut pockets in the plate's top (on the bed as printed)
         for (i = [0 : ls_holes - 1]) rotate(ls_inner_rot + i * 360 / ls_holes)
-            translate([ls_inner_bc / 2, 0, plate_t - insert_m5[1]]) cylinder(d = insert_m5[0], h = insert_m5[1] + 0.01, $fn = 32);
+            translate([ls_inner_bc / 2, 0, 0]) {
+                translate([0, 0, -1]) cylinder(d = m5_hole, h = plate_t + 2, $fn = 32);
+                translate([0, 0, -0.01]) rotate(30) cylinder(d = m5_nut[0] / cos(30), h = m5_nut[1], $fn = 6);
+            }
     }
 }
 
