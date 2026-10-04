@@ -32,10 +32,10 @@ nema_shaft = 17.5;          // MEASURED shaft length above the face
 nema_holes = 31;            // M3 screw spacing on its face
 nema_boss = 22;             // centring boss on its face (dia), ~2 tall
 mp_T      = 20;             // motor pulley teeth
-mp_belt_c = 13 + 6.5 / 2;   // MEASURED: pulley pushed fully down on the motor, the belt (6.5 wide) runs
-                            //   13..19.5 above the motor face -> centre 16.25 above it
+mp_belt_c = 13 + 7.1 / 2;   // MEASURED: pulley pushed fully down on the motor, its toothed section
+                            //   (7.1 wide; the belt is a standard 6 mm) runs 13..20.1 above the face
 bracket_t = 3;              // motor plate thickness; the pulley passes down through its centre hole
 z_motor_face  = z_belt - mp_belt_c;          // -28.25
 z_bracket_top = z_motor_face + bracket_t;    // -25.25
 z_motor_bottom = z_motor_face - nema[1];     // -61.65
-z_mp_top  = z_motor_face + 13 + 6.5 + 1;     // ~-7.75 (EST: top flange 1 mm above the belt)
+z_mp_top  = z_motor_face + 13 + 7.1 + 1;     // ~-7.45 (EST: top flange ~1 mm thick)
