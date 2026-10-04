@@ -1,11 +1,12 @@
 // Test arc for the turntable pulley (~15 min, PETG): a slice of the real part's tooth band with
 // BOTH belt-clamp slots, on a thin base so it prints the same way (base on the bed, teeth up).
 // The two slots have different clearances behind the belt:
-//   * slot WITHOUT the notch in the base: 0.3 mm (the value used in the real part)
-//   * slot WITH the notch in the base:    0.45 mm (looser)
+//   * slot WITHOUT the notch in the base: 0.15 mm -> 0.95 mm channel (the value in the real part)
+//   * slot WITH the notch in the base:    0.20 mm -> 1.00 mm channel
 // Check: press the belt end down into each slot from the top - it should go in with firm thumb
 // pressure and not pull out by hand. Tell me which one is right (or both too tight / loose).
-// Test arc 1 (one slot, 0.1 mm, belt assumed 1.38 thick) was too tight; the teeth fitted.
+// History (channel for the belt's 0.75 mm backing): arc 1 0.83 - only half in; arc 2 1.10 /
+// 1.25 - in, a bit loose. The teeth fitted from arc 1 on.
 use <turntable_pulley.scad>
 include <../params.scad>
 
@@ -18,7 +19,7 @@ notch_a = 180 + clamp_half + 6;              // marks the looser slot (s = +1, a
 module wedge() { polygon(concat([[0, 0]], [for (a = [a0 : 1 : a1]) 60 * [cos(a), sin(a)]])); }
 
 intersection() {
-    translate([0, 0, -z_cut]) turntable_pulley(back_clr = [0.3, 0.45]);
+    translate([0, 0, -z_cut]) turntable_pulley(back_clr = [0.15, 0.20]);
     linear_extrude(50) wedge();
     cylinder(r = 50, h = 50);
 }

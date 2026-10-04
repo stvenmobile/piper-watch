@@ -43,8 +43,9 @@ z_teeth1   = z_belt + belt_zone / 2;
 clamp_a    = 180;                       // clamp position (deg); the motor is at 0 when the head looks ahead
 clamp_half = 6 * 360 / pulley_T;        // 21.6: the belt leaves the teeth here (on a tooth space)
 slot_len   = 10;                        // 5 teeth of grip per end
-slot_clr   = [0.05, 0.3];               // [land side, back side] clearance around the belt's backing
-                                        //   (test arc 1 with 0.1/0.1 and a 1.38 belt was too tight)
+slot_clr   = [0.05, 0.15];              // [land side, back side] clearance around the belt's backing
+                                        //   test arc 1: channel 0.83 (0.1/0.1, 1.38 belt) - belt only half in
+                                        //   test arc 2: channel 1.10 (0.05/0.3) - all the way in, a bit loose
 clamp_r    = 35.5;                      // clamp block outer radius
 module ring_pulley_2d() {
     // tooth tips with one groove per tooth; groove = rounded GT2 tooth space
