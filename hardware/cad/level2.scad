@@ -27,14 +27,15 @@ motor_a   = -45;            // direction of the motor from the centre: back-righ
 motor_C   = 46;             // nominal centre distance; the bracket slides +/- tension_travel (42..50:
                             //   at 41 the motor pulley would touch the ring pulley's flange)
 tension_travel = 4;
-nema      = [42.3, 23];     // pancake NEMA17: square, body length
+nema      = [42.3, 33.4];   // NEMA17 (MEASURED body length; not a pancake): square, body length
+nema_shaft = 17.5;          // MEASURED shaft length above the face
 nema_holes = 31;            // M3 screw spacing on its face
 nema_boss = 22;             // centring boss on its face (dia), ~2 tall
 mp_T      = 20;             // motor pulley teeth
-mp_len    = 16;             // motor pulley overall length (EST: 7 hub + 1 + 7 teeth + 1)
-mp_teeth_c = 11.5;          // pulley bottom -> centre of its teeth (EST)
-z_mp_bottom = z_belt - mp_teeth_c;       // -23.5
-bracket_t = 3;              // motor plate thickness
-z_bracket_top = z_mp_bottom - 1;         // -24.5: motor plate top (pulley hub 1 mm above it)
-z_motor_face  = z_bracket_top - bracket_t;   // -27.5
-z_motor_bottom = z_motor_face - nema[1];     // -50.5
+mp_belt_c = 13 + 6.5 / 2;   // MEASURED: pulley pushed fully down on the motor, the belt (6.5 wide) runs
+                            //   13..19.5 above the motor face -> centre 16.25 above it
+bracket_t = 3;              // motor plate thickness; the pulley passes down through its centre hole
+z_motor_face  = z_belt - mp_belt_c;          // -28.25
+z_bracket_top = z_motor_face + bracket_t;    // -25.25
+z_motor_bottom = z_motor_face - nema[1];     // -61.65
+z_mp_top  = z_motor_face + 13 + 6.5 + 1;     // ~-7.75 (EST: top flange 1 mm above the belt)

@@ -1,12 +1,13 @@
-// Motor bracket - hangs the pancake NEMA17 (shaft up) under the drive deck so its 20 T pulley
+// Motor bracket - hangs the NEMA17 (shaft up) under the drive deck so its 20 T pulley
 // lines up with the turntable pulley's teeth. Two M3 screws from above the deck, through its
 // radial slots, into heat-set inserts in the bracket's far wall: slide it outward to tension the
-// belt. The motor screws to the plate from above (4 x M3) before the bracket goes in.
+// belt. The motor screws to the plate from above (4 x M3) before the bracket goes in; its pulley
+// then goes on, pushed fully down through the plate's centre hole onto the motor.
 //
 // Also carries the HOMING SENSOR: an A3144-type Hall sensor lying face-up in a pocket on the
 // plate, under the turntable pulley's bottom edge. A small magnet glued under the pulley (on the
 // flat ring of its bottom face, ~28 mm from the centre, on the motor side when the head looks
-// straight ahead) passes ~3.5 mm above it at home. Its leads run along a groove to the side.
+// straight ahead) passes ~4 mm above it at home. Its leads run along a groove to the side.
 //
 // Modelled in place (deck frame, see level2.scad) with the plate at the bottom.
 // PRINT as modelled: plate on the bed, walls up, no supports. PETG.
@@ -53,5 +54,5 @@ rotate(motor_a) translate([motor_C, 0, 0]) bracket();
 // ghosts (not printed): motor and its pulley
 %rotate(motor_a) translate([motor_C, 0, 0]) {
     translate([-nema[0] / 2, -nema[0] / 2, z_motor_bottom]) cube([nema[0], nema[0], nema[1]]);
-    translate([0, 0, z_mp_bottom]) cylinder(d = 16, h = mp_len);
+    translate([0, 0, z_motor_face]) cylinder(d = 16, h = z_mp_top - z_motor_face);
 }
