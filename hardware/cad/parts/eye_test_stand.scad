@@ -19,9 +19,11 @@ use <head_front.scad>
 ring_clr   = 0.25;
 ring_back  = 2.0 + 3.5 + ring_t;            // diffuser + air gap + ring = 8.7: back of the ring PCB
 board      = [80, 22];                      // bare C920 board (measured)
-board_t    = 1.6;                           // EST
+board_t    = 1.3;                           // MEASURED
 lens_h     = 14.0;                          // MEASURED: board top -> front of the lens
 block_h    = 10.6;                          // MEASURED: board top -> top of the lens holder's square block
+// also MEASURED: block 14 x 14; lens barrel 9 dia (11 across its four small flanges); front:
+//   connector 6 tall (allow 8 with wires), microphones 5.8; back: tallest part 3.0 (ground solder)
 lens_recess = 0.5;                          // lens sits this far behind the face (protected)
 z_board    = lens_h + lens_recess;          // 14.5: board front = back face of the puck
 board_gap  = z_board - ring_back;           // 5.8: ring back -> board front
@@ -91,5 +93,5 @@ union() {
     cylinder(d = ring_od, h = ring_t); translate([0, 0, -1]) cylinder(d = ring_id, h = ring_t + 2);
 }
 %translate([-board[0] / 2, -board[1] / 2, z_board]) cube([board[0], board[1], board_t]);
-%translate([0, 0, z_board - block_h]) linear_extrude(block_h) square(15, center = true);   // lens holder block
-%translate([0, 0, z_board - lens_h]) cylinder(d = 9.5, h = lens_h - block_h);              // lens barrel
+%translate([0, 0, z_board - block_h]) linear_extrude(block_h) square(14, center = true);   // lens holder block
+%translate([0, 0, z_board - lens_h]) cylinder(d = 11, h = lens_h - block_h);               // lens barrel (with flanges)
