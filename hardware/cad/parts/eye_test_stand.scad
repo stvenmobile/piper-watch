@@ -32,6 +32,9 @@ front_t    = 2.5;                           // front plate in the middle
 comp_pocket = [44, 22];                     // clear area for the board's front parts (stays inside
                                             //   the chamber's inner wall, so no light leaks in)
 lens_hole  = 16.5;                          // square: the ~15 mm lens holder passes through
+lens_d     = 11;                            // MEASURED: lens barrel across its four small flanges
+window_clr = 2;                             // clearance round the lens in the face window (print 2:
+                                            //   the face's big flared cone showed the board and wires)
 // print 1 fit: the mics and two coils on the board's front kept it off the back face
 mic_d      = 6.1;                           // MEASURED
 mic_gap    = 69.2;                          // MEASURED: between the mics' inner edges
@@ -84,6 +87,17 @@ module tab(x, s, y_in, h) {                   // one snap tab; s = +1 top edge, 
     }
 }
 
+// fills the face's big flared opening (sized for the housed camera) back in, leaving a round
+// window just round the lens, with a small chamfer
+module window_bezel() {
+    w = lens_d + 2 * window_clr;
+    difference() {
+        cylinder(r = 17, h = front_t, $fn = 120);
+        translate([0, 0, -0.01]) cylinder(d1 = w + 1.0, d2 = w, h = 0.5 + 0.01, $fn = 96);
+        translate([0, 0, 0.49]) cylinder(d = w, h = front_t, $fn = 96);
+    }
+}
+
 module tabs() {
     h = board_t + 0.2 + 1.0;                 // board + play + 1.0 for solder joints on its front (print 1)
     for (x = tab_x) tab(x, 1, board[1] / 2 + board_clr, h);                 // top edge: two tabs
@@ -112,6 +126,7 @@ module stem() {
 
 union() {
     puck();
+    window_bezel();
     tabs();
     stem();
 }
