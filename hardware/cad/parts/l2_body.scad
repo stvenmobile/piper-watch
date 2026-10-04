@@ -30,8 +30,8 @@ corner_xy = half - 9;            // deck screws (match drive_deck.scad)
 // ---- display (JC4827W543, measured from its STEP model + spec) ---------------------------------
 disp_board  = [120.7, 70.2];
 disp_holes  = [112.6, 62.1];
-disp_glass_t = 3.6;              // glass/backlight in front of the board: MEASURED on the fit test (the
-                                 //   STEP model's 5.0 left the glass 1.4 mm off the wall)
+disp_glass_t = 4.4;              // glass/backlight in front of the board: MEASURED on the fit test (the
+                                 //   STEP model's 5.0 left the glass 0.6 mm off the wall; now flush)
 disp_active = [95.04, 53.86];
 disp_win    = disp_active + [2, 2];      // 1 mm round the active area
 disp_zc     = (z_bot + 0) / 2;           // board (and glass) centred on the whole front face incl. the deck: -45
