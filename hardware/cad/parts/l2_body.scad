@@ -33,7 +33,9 @@ disp_holes  = [112.6, 62.1];
 disp_glass_t = 5.0;              // glass/backlight in front of the board
 disp_active = [95.04, 53.86];
 disp_win    = disp_active + [2, 2];      // 1 mm round the active area
-disp_zc     = (z_bot + 0) / 2;           // centred on the whole front face incl. the deck: -45
+disp_zc     = (z_bot + 0) / 2;           // board (and glass) centred on the whole front face incl. the deck: -45
+disp_win_dz = 2.8;               // the active area sits this far ABOVE the board's centre (vendor photo:
+                                 //   top margin ~3.9, bottom ~9.6 - the wide margin is at the bottom)
 
 // ---- back panel ------------------------------------------------------------------------------
 switch_cut  = [28, 10];          // XW-604B snap-in cut-out
@@ -93,7 +95,7 @@ module adds() {
 
 module cuts() {
     // display window, chamfered on the outside
-    translate([0, half + 0.01, disp_zc]) rotate([90, 0, 0]) hull() {
+    translate([0, half + 0.01, disp_zc + disp_win_dz]) rotate([90, 0, 0]) hull() {
         linear_extrude(0.01) square(disp_win + [1.6, 1.6], center = true);
         translate([0, 0, 0.8]) linear_extrude(l2_wall) square(disp_win, center = true);
     }
