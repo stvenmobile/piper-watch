@@ -8,6 +8,13 @@ line_w      = 0.45;              // extrusion width
 wall        = 4 * line_w;        // 1.8 mm: minimum for load-bearing walls
 bed         = [225, 225, 225];   // build volume
 clr_hole    = 0.30;              // added to bolt hole diameters - measured: +0.3 is the smallest free fit (coupon, 2026-10-01)
+// FIT CALIBRATION, PLA (fit_calibration.scad, 2026-10-04; 15% gyroid, 4 walls, current Bambu PLA
+// profile - deliberately NOT changed, so the fits already tuned stay valid):
+//   holes print ~0.4 small on the diameter (4..15 mm); pins/outer edges ~0.1 small;
+//   X/Y scale ~-0.45% (80 -> 79.6 / 79.7); Z true (+0.05 on 26).
+cal_hole   = 0.4;                // add to a hole's diameter to get it as drawn
+cal_edge   = 0.1;                // add to an outside dimension
+cal_xy     = 1.0045;             // scale long X/Y distances (bolt circles, spans) by this
 hole_shrink = 0.6;               // MEASURED on the turntable pulley (PLA, 15% gyroid, 4 walls): a 6.0 hole printed 5.4.
                                  //   Larger PLA parts: draw a hole this much bigger than the size you want.
 clr_fit     = 0.35;              // gap for parts that slide/rotate against each other (a little looser than clr_hole)

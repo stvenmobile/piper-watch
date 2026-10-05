@@ -34,7 +34,9 @@ module drive_deck() {
         // centre hole: the pulley hangs through; reach the inner ring's bolts from below
         translate([0, 0, -deck_t - 1]) cylinder(d = deck_hole, h = deck_t + plinth_h + 2, $fn = 180);
         // lazy Susan outer-ring bolts + nut pockets underneath
-        for (i = [0 : ls_holes - 1]) rotate(i * 360 / ls_holes) translate([ls_outer_bc / 2, 0, 0]) {
+        // the bolt circle is scaled up by the printer's measured X/Y shrinkage, so the holes land
+        // on the metal bearing's holes (128 mm -> drawn 128.6, prints ~128)
+        for (i = [0 : ls_holes - 1]) rotate(i * 360 / ls_holes) translate([ls_outer_bc * cal_xy / 2, 0, 0]) {
             translate([0, 0, -deck_t - 1]) cylinder(d = m5_clear, h = deck_t + plinth_h + 2, $fn = 32);
             translate([0, 0, -deck_t - 0.01]) rotate(30) cylinder(d = m5_nut[0] / cos(30), h = m5_nut[1], $fn = 6);
         }
