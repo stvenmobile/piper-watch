@@ -107,12 +107,13 @@ module tabs() {
     y_bot = -(board[1] / 2 + board_clr) + bot_inset;
     tab(0, -1, y_bot, h, hook_len, hook_w, hook_lip);
     // its base: the centre is over the clear pocket, so a bracket grows from the pocket's bottom
-    // wall (y = -pocket/2). It starts deep enough to stay out of the lens's view cone, with a
-    // 45 deg underside so it prints without supports.
+    // wall (y = -pocket/2) under the hook's FULL width (print 3 feedback: it only reached ~1 mm
+    // out). Nothing behind the lens can be in its view (the lens is 0.5 mm from the face) and the
+    // board's edge is cut back here, so it's free space. 45 deg underside: prints unsupported.
     wall = -comp_pocket[1] / 2;
     rotate([90, 0, 90]) translate([0, 0, -hook_len / 2]) linear_extrude(hook_len)   // 2D: (y, z)
-        polygon([[wall - 0.5, z_board], [y_bot - hook_w, z_board], [y_bot - hook_w, z_board - 1.5],
-                 [wall - 0.5, z_board - 1.5 - (y_bot - hook_w - wall + 0.5)]]);
+        polygon([[wall - 0.5, z_board], [y_bot, z_board], [y_bot, z_board - 1.5],
+                 [wall - 0.5, z_board - 1.5 - (y_bot - wall + 0.5)]]);
 }
 
 module stem() {
