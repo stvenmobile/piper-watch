@@ -49,7 +49,10 @@ bot_inset  = 3.1;                           // MEASURED: along the middle, the b
                                             //   cut back this far - one bottom tab, centred, catches it
 tab_len    = 6;
 tab_w      = 1.2;                           // thin, so they flex
-tab_lip    = 0.5;                           // hooks over the board's back
+tab_lip    = 1.0;                           // hooks over the board's back (print 4: 0.5 -> 1.0, a surer grip)
+tab_ch     = 1.6;                           // lip lead-in chamfer height: lip/ch = 0.625, the same
+                                            //   push-past angle the 0.5 lip had with 0.8
+tab_fillet = 1.2;                           // base fillets, outside (print 4: stronger roots)
 board_clr  = 0.15;                          // each side, top/bottom
 
 // ---- stem -------------------------------------------------------------------------------------
@@ -77,13 +80,24 @@ module puck() {
     }
 }
 
-module tab(x, s, y_in, h, len = tab_len, w = tab_w, lip = tab_lip) {   // s = +1 top edge, -1 bottom
+// s = +1 top edge, -1 bottom. ch = height of the lip's lead-in chamfer. fillet = radius of the
+// concave fillet where the upright meets the surface it stands on - OUTSIDE only (the board-side
+// face must stay square: the board's edge sits right against it).
+module tab(x, s, y_in, h, len = tab_len, w = tab_w, lip = tab_lip, ch = 0.8, fillet = tab_fillet) {
+    y_out = y_in + s * w;                                         // the upright's outer face
     translate([x - len / 2, 0, 0]) {
         // upright, just outside the board edge
-        translate([0, s > 0 ? y_in : y_in - w, z_board]) cube([len, w, h + 0.8]);
+        translate([0, s > 0 ? y_in : y_in - w, z_board]) cube([len, w, h + ch]);
         // lip over the board's back; its top is chamfered so the board pushes past it
         rotate([90, 0, 90]) linear_extrude(len)                   // 2D: (y, z), extruded along x
-            polygon([[y_in, z_board + h], [y_in - s * lip, z_board + h], [y_in, z_board + h + 0.8]]);
+            polygon([[y_in, z_board + h], [y_in - s * lip, z_board + h], [y_in, z_board + h + ch]]);
+        // fillet at the base, outside
+        if (fillet > 0) rotate([90, 0, 90]) linear_extrude(len)
+            difference() {
+                translate([s > 0 ? y_out - 0.01 : y_out - fillet, z_board - 0.01])
+                    square([fillet + 0.01, fillet + 0.01]);
+                translate([y_out + s * fillet, z_board + fillet]) circle(r = fillet, $fn = 48);
+            }
     }
 }
 
@@ -100,7 +114,7 @@ module window_bezel() {
 
 module tabs() {
     h = board_t + 0.2 + 1.0;                 // board + play + 1.0 for solder joints on its front (print 1)
-    for (x = tab_x) tab(x, 1, board[1] / 2 + board_clr, h);                 // top edge: two flexing tabs
+    for (x = tab_x) tab(x, 1, board[1] / 2 + board_clr, h, ch = tab_ch);    // top edge: two flexing tabs
     // bottom edge: one RIGID hook, centred (print 3: a thin flexing tab snapped off). Fit the board
     // by hooking its bottom edge under it first, then press the top edge past the top tabs.
     // print 4: at 2.4 thick it was too stiff to spring out for the board - halved to 1.2, taken
