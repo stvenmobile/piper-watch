@@ -103,7 +103,9 @@ module tabs() {
     for (x = tab_x) tab(x, 1, board[1] / 2 + board_clr, h);                 // top edge: two flexing tabs
     // bottom edge: one RIGID hook, centred (print 3: a thin flexing tab snapped off). Fit the board
     // by hooking its bottom edge under it first, then press the top edge past the top tabs.
-    hook_len = 10; hook_w = 2.4; hook_lip = 0.8;
+    // print 4: at 2.4 thick it was too stiff to spring out for the board - halved to 1.2, taken
+    // off the BACK (tab() keeps the board-side face at y_bot, so the hook position is unchanged).
+    hook_len = 10; hook_w = 1.2; hook_lip = 0.8;
     y_bot = -(board[1] / 2 + board_clr) + bot_inset;
     tab(0, -1, y_bot, h, hook_len, hook_w, hook_lip);
     // its base: the centre is over the clear pocket, so a bracket grows from the pocket's bottom
