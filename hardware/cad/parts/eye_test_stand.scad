@@ -5,14 +5,17 @@
 //
 //   * LED ring: pushed in from the back into its pocket (power pads at the top, data at the
 //     bottom - their pins come straight out the back, clear of the camera board).
-//   * Camera board (80 x 22, bare): snaps onto the back between four small tabs, lens side
-//     forward, 5.8 mm behind the ring's back, so the lens (14.0 mm tall) sits 0.5 mm behind the
-//     face; only its round barrel passes through the front plate. Route the USB wires from the board's front
-//     connector round its long edge to the back (gap between the tabs in the middle).
+//   * Camera board (80 x 22, bare): lies on the back face, lens side forward, 5.8 mm behind the
+//     ring's back, so the lens (14.0 mm tall) sits 0.5 mm behind the face; only its round barrel
+//     passes through the front plate. Held by eye_cam_bracket.scad, a U-channel across its middle
+//     with two M3 screws into heat-set inserts (print 5: replaces the snap tabs, which were hard
+//     to fit and broke). Route the USB wires from the board's front connector round its top
+//     edge, clear of the bracket (it covers the middle 10 mm).
 //   * Stem: ends in a 1/4"-20 nut pocket for a camera tripod, or plugs into eye_test_foot.scad.
 //
 // PRINT face-down (as modelled: front face on the bed), no supports. The stem lies flat.
 include <../params.scad>
+include <eye_cam_bracket_dims.scad>
 use <head_front.scad>
 
 // ---- ring / board positions (match head_front.scad) --------------------------------------
@@ -43,7 +46,14 @@ coil_cut   = [4, 5];                        // extends the clear pocket 4 mm lef
                                             //   from the mics' centreline to 5 mm above it
 coil_depth = 4.5;                           // coils ~3.3 tall + clearance (stays behind the ring PCB)
 
-// ---- snap tabs ------------------------------------------------------------------------------
+// ---- bracket mounting ---------------------------------------------------------------------------
+snap_tabs  = false;                         // print 5: the bracket replaced the snap tabs below
+insert_extra = 1.0;                         // insert bore this much deeper than the insert
+boss_clr   = 1.0;                           // the boss stays this far below the board's bottom edge
+boss_w     = br_w + 2;                      // a little wider than the bracket
+boss_depth = insert_m3[1] + insert_extra + 1.5;   // solid below the back face round the insert
+
+// ---- snap tabs (unused since print 5) -----------------------------------------------------------
 tab_x      = [-18, 18];                     // top-edge tab positions along the board
 bot_inset  = 3.1;                           // MEASURED: along the middle, the board's bottom edge is
                                             //   cut back this far - one bottom tab, centred, catches it
@@ -144,12 +154,34 @@ module stem() {
     }
 }
 
-union() {
-    puck();
-    window_bezel();
-    tabs();
-    stem();
+// fills the component pocket below the board's (cut-back) bottom edge, round the lower insert,
+// and seats the bracket's lower leg; 45 deg underside so it prints without supports
+module bracket_boss() {
+    wall = -comp_pocket[1] / 2;
+    top  = br_pcb_bot - boss_clr;                                 // -8.4
+    rotate([90, 0, 90]) translate([0, 0, -boss_w / 2]) linear_extrude(boss_w)   // 2D: (y, z)
+        polygon([[wall - 0.5, z_board], [top, z_board], [top, z_board - boss_depth],
+                 [wall - 0.5, z_board - boss_depth - (top - wall + 0.5)]]);
 }
+
+module insert_holes() {
+    for (y = br_holes_y) translate([0, y, z_board - insert_m3[1] - insert_extra])
+        cylinder(d = insert_m3[0], h = insert_m3[1] + insert_extra + 1, $fn = 40);
+}
+
+difference() {
+    union() {
+        puck();
+        window_bezel();
+        if (snap_tabs) tabs();
+        bracket_boss();
+        stem();
+    }
+    insert_holes();
+}
+
+// ghost: the bracket in place
+%translate([0, 0, z_board]) cam_bracket();
 
 // ghosts (not printed): LED ring and camera board
 %translate([0, 0, ring_back - ring_t]) difference() {
