@@ -13,9 +13,10 @@
 // PRINT as modelled: underside on the bed (the nut pockets open onto it), no supports. PETG.
 include <../level2.scad>
 
-m3_clear = 3.6;                       // drawn; prints ~3.0-3.3 (hole_shrink)
-m5_clear = 6.0;                       // drawn; prints ~5.4 (confirmed on the turntable pulley)
-m5_nut   = [8.0 + 0.3, 4.0];          // pocket: across flats + clearance, depth
+m3_clear = 3.4 + cal_hole;            // prints ~3.35 (PETG): an M3 slides through
+m5_clear = 6.0;                       // prints ~5.4 PLA (turntable pulley) / ~5.55 PETG: M5 + a little play
+m5_nut   = [8.0 + cal_hole + 0.2, 4.0];   // pocket for an 8.0 AF nut: across flats, depth - prints ~8.2
+                                      //   (bed side: the squashed first layer makes it a bit tighter)
 corner_screw = l2_size[0] / 2 - 9;    // corner screw positions (x and y)
 slot_u   = 31;                        // bracket screws: radial offset from the motor axis
 slot_v   = 12;                        //   and either side of the motor's radial line

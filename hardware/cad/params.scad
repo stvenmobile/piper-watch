@@ -8,13 +8,17 @@ line_w      = 0.45;              // extrusion width
 wall        = 4 * line_w;        // 1.8 mm: minimum for load-bearing walls
 bed         = [225, 225, 225];   // build volume
 clr_hole    = 0.30;              // added to bolt hole diameters - measured: +0.3 is the smallest free fit (coupon, 2026-10-01)
-// FIT CALIBRATION, PLA (fit_calibration.scad, 2026-10-04; 15% gyroid, 4 walls, current Bambu PLA
-// profile - deliberately NOT changed, so the fits already tuned stay valid):
-//   holes print ~0.4 small on the diameter (4..15 mm); pins/outer edges ~0.1 small;
-//   X/Y scale ~-0.45% (80 -> 79.6 / 79.7); Z true (+0.05 on 26).
-cal_hole   = 0.4;                // add to a hole's diameter to get it as drawn
-cal_edge   = 0.1;                // add to an outside dimension
-cal_xy     = 1.0045;             // scale long X/Y distances (bolt circles, spans) by this
+// FIT CALIBRATION (fit_calibration.scad; 15% gyroid, 4 walls, 5 top/bottom; Bambu profiles with
+// NO slicer compensation - the CAD compensates). Pick the material the part is printed in:
+material   = "PETG";             // "PETG" = Bambu PETG Basic (base parts), "PLA" = Bambu PLA Basic
+//   PLA  (2026-10-04): holes ~0.4 small on the diameter (4..15 mm); pins/outer edges ~0.1 small;
+//                      X/Y -0.45% (80 -> 79.6 / 79.7); Z true.
+//   PETG (2026-10-07): holes 0.29..0.48 small (mean 0.39; 4..6 mm ~0.46, 8..15 mm ~0.32);
+//                      pins 0.19..0.22 small; X/Y -0.30% (79.74 / 79.78); Z true (30.02);
+//                      first layer slightly squashed (4.00 plate -> 4.11).
+cal_hole   = 0.4;                                    // add to a hole's diameter to get it as drawn
+cal_edge   = material == "PLA" ? 0.1 : 0.2;          // add to an outside dimension
+cal_xy     = material == "PLA" ? 1.0045 : 1.0030;    // scale long X/Y distances (bolt circles, spans)
 hole_shrink = 0.6;               // MEASURED on the turntable pulley (PLA, 15% gyroid, 4 walls): a 6.0 hole printed 5.4.
                                  //   Larger PLA parts: draw a hole this much bigger than the size you want.
 clr_fit     = 0.35;              // gap for parts that slide/rotate against each other (a little looser than clr_hole)

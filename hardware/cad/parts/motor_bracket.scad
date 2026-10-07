@@ -13,7 +13,7 @@
 // PRINT as modelled: plate on the bed, walls up, no supports. PETG.
 include <../level2.scad>
 
-m3_clear  = 3.6;
+m3_clear  = 3.4 + cal_hole;               // prints ~3.35 (PETG): M3 slides through
 plate_u   = [-nema[0] / 2 - 0.5, 35];     // plate extent along the radial line (motor frame)
 half_v    = 27;                           // half-width across it
 side_wall = 5.5;                          // side walls, |v| = half_v - side_wall .. half_v
