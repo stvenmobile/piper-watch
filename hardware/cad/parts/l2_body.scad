@@ -3,7 +3,7 @@
 //   FRONT  the JC4827W543 4.3" display: window over its active area; the board's four corner
 //          ears screw (M3) to posts behind the wall, holding the glass against it.
 //   BACK   (left)  XW-604B snap-in rocker switch on a 1.5 mm patch (its clips need a thin panel),
-//                  panel-mount barrel jack (7.8 mm hole) on a 2.0 mm patch with a flat nut seat
+//                  panel-mount barrel jack: 7.8 mm hole in the full wall (body inside, washer + nut outside)
 //          (right) cable exit, low under the motor: Jetson 19 V, ESP32 USB, camera USB
 //          (big enough for a USB-A plug and the barrel plug to pass), two zip-tie anchors
 //   LEFT   ESP32-S3 breakout (70 x 80, holes 32 x 72.5) standing 5 mm off the wall, USB to the back
@@ -45,7 +45,6 @@ switch_xz   = [-50, -26];        // centre (x, z) on the back wall
 switch_patch = 1.5;              // wall thickness for its clips
 jack_d      = 7.8;
 jack_xz     = [-50, -58];
-jack_patch  = 2.0;
 exit_slot   = [32, 16];          // cable exit (w x h), rounded
 exit_xz     = [22, z_floor + 3 + 8];
 
@@ -120,11 +119,9 @@ module cuts() {
         translate([-switch_cut[0] / 2, -1, -switch_cut[1] / 2]) cube([switch_cut[0], l2_wall + 2, switch_cut[1]]);
         translate([-switch_cut[0] / 2 - 4, switch_patch, -switch_cut[1] / 2 - 4]) cube([switch_cut[0] + 8, l2_wall, switch_cut[1] + 8]);
     }
-    // barrel jack: hole + thinned patch with a flat round nut seat
-    translate([jack_xz[0], -half, jack_xz[1]]) rotate([-90, 0, 0]) {
+    // barrel jack: plain hole - body inside, lock washer + nut on the outside face
+    translate([jack_xz[0], -half, jack_xz[1]]) rotate([-90, 0, 0])
         translate([0, 0, -1]) cylinder(d = jack_d, h = l2_wall + 2, $fn = 48);
-        translate([0, 0, jack_patch]) cylinder(d = 15, h = l2_wall, $fn = 48);
-    }
     // cable exit
     translate([exit_xz[0], -half - 1, exit_xz[1]]) rotate([-90, 0, 0]) linear_extrude(l2_wall + 2)
         offset(r = 6) square(exit_slot - [12, 12], center = true);
