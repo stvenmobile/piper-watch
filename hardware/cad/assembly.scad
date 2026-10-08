@@ -58,8 +58,8 @@ translate([0, 0, z_l2]) {
 }
 
 // ---- head (turns with pan): CONCEPT v4 - concepts/head_brow_concept.scad ---------------------------
-// A 135 x 95 x 70 rounded box straight on the turntable plate (no neck): the camera in a half-
-// cylinder brow on top (fixed 18 deg up), two round GC9A01 eyes, a 2.23" OLED mouth.
+// A 135 x 70 head straight on the turntable plate (no neck), one arch seen from the side: the camera
+// in the arch (fixed 18 deg up), two round GC9A01 eyes, a 2.23" OLED mouth.
 rotate(pan) translate([0, 0, z_plate_top]) head_brow();
 
-echo(deck_top = z_l2, plate_top = z_plate_top, head_top = z_plate_top + 122.5, lens_height = z_plate_top + 92.5 + 22 * sin(18));
+echo(deck_top = z_l2, plate_top = z_plate_top, head_top = z_plate_top + 123, lens_height = z_plate_top + 88 + 27 * sin(18));
