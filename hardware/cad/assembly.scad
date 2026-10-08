@@ -10,7 +10,8 @@ use <parts/drive_deck.scad>
 use <parts/motor_bracket.scad>
 use <parts/turntable_pulley.scad>
 use <vitamins/lazy_susan.scad>
-use <concepts/head_brow_concept.scad>
+use <head_assembly.scad>
+include <head.scad>
 
 pan       = 0;        // head pan angle (deg) - try +/-100
 cutaway   = false;    // true: cut the front-right quarter away to see inside
@@ -54,12 +55,14 @@ translate([0, 0, z_l2]) {
     color("#0d1117") translate([0, 80 - l2_wall - 2.2, -45]) cube([105.5, 4.4, 67.3], center = true);
     // lazy Susan (bought) on the plinth; the turntable pulley turns with the head
     translate([0, 0, z_ls]) lazy_susan();
-    rotate(pan) color("#e8a33d") translate([0, 0, z_plate + plate_t]) mirror([0, 0, 1]) turntable_pulley();
+    rotate(pan - head_rot_in_pulley) color("#e8a33d") translate([0, 0, z_plate + plate_t]) mirror([0, 0, 1]) turntable_pulley();
 }
 
-// ---- head (turns with pan): CONCEPT v4 - concepts/head_brow_concept.scad ---------------------------
-// A 135 x 70 head straight on the turntable plate (no neck), one arch seen from the side: the camera
-// in the arch (fixed 18 deg up), two round GC9A01 eyes, a 2.08" 256 x 64 OLED mouth.
-rotate(pan) translate([0, 0, z_plate_top]) head_brow();
+// ---- head (turns with pan): the real head parts (head_assembly.scad) ----------------------------------
+// face, shell, floor, camera plate + strap, with the displays, camera board and ESP32 as models
+rotate(pan) translate([0, 0, z_plate_top])
+    for (b = [["face", "#eef0f2"], ["shell", "#e3e6e9"], ["floor", "#9aa3ad"], ["cam_plate", "#6d7a88"],
+              ["strap", "#55606b"], ["eyes", "#1a4fa0"], ["mouth", "#141414"], ["camera", "#202020"], ["mcu", "#1b6b3a"]])
+        color(b[1]) body(b[0]);
 
 echo(deck_top = z_l2, plate_top = z_plate_top, head_top = z_plate_top + 123, lens_height = z_plate_top + 88 + 27 * sin(18));

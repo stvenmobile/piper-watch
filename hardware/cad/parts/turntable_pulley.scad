@@ -16,6 +16,7 @@
 // it, the teeth at the top. No supports: the flanges have 45 deg chamfers underneath, and the
 // clamp slots are open at the top so the belt presses in from the end of the tube.
 include <../params.scad>
+include <../head.scad>            // the head's floor screws (floor_mounts, head_rot_in_pulley)
 
 // ---- pulley -----------------------------------------------------------------------------
 pulley_T   = 100;                       // teeth
@@ -119,6 +120,12 @@ module turntable_pulley(back_clr = [slot_clr[1], slot_clr[1]]) {
                 translate([0, 0, -1]) cylinder(d = m5_hole, h = plate_t + 2, $fn = 32);
                 translate([0, 0, -0.01]) rotate(30) cylinder(d = m5_nut[0] / cos(30), h = m5_nut[1], $fn = 6);
             }
+        // the head: M3 heat-set inserts in the plate's top for its floor's four screws
+        rotate(head_rot_in_pulley) for (m = floor_mounts) translate([m[0], m[1], -0.01])
+            cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 32);
+        // a small arrow in the top showing which way the head faces
+        rotate(head_rot_in_pulley) translate([0, 42, -0.01]) linear_extrude(0.6)
+            polygon([[-4, -3], [4, -3], [0, 4]]);
     }
 }
 

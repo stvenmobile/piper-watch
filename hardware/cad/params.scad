@@ -92,6 +92,16 @@ diff_clr     = [0.25, 0.45];     // [inner, outer] clearance each side. Fit test
                                  //   at both edges. Then 0.25/0.25 printed 53.2 / 64.5 but the stand's seat
                                  //   printed 52.2 / 64.2 (outer wall at the bed shrinks) -> outer 0.45: CONFIRMED, drops in smoothly
 
+// --- Eyes: 1.28" round TFT, 240 x 240, GC9A01, SPI (MTDELE; vendor listing - re-check on arrival).
+// The board is ROUND, concentric with the display, plus a tab carrying the 7 pins.
+eye_board_d  = 37.5;             // round board
+eye_glass_d  = 35.3;             // round glass, concentric
+eye_active_d = 32.4;             // visible (pixel) circle
+eye_tab      = [22.7, 8.0];      // pin tab: width, length beyond the circle (overall height 45.5)
+eye_t        = 3.2;              // board + glass, without pins
+eye_tab_hole_d = 2.0;            // EST: two small holes at the tab's outer corners
+eye_tab_hole_x = 9.0;            // EST: their distance either side of the centre line
+
 // --- Mouth: 2.08" white OLED, 256 x 64, SH1122, 4-wire SPI (GME25664-65; vendor drawing:
 // 2_08-white_OLED_2.jpg). X along the board's length, from the pin end; Y across.
 oled_pcb     = [75.5, 20.6];     // board
