@@ -10,11 +10,10 @@ use <parts/drive_deck.scad>
 use <parts/motor_bracket.scad>
 use <parts/turntable_pulley.scad>
 use <vitamins/lazy_susan.scad>
-use <concepts/head_box_concept.scad>
+use <concepts/head_eyes_concept.scad>
 
 pan       = 0;        // head pan angle (deg) - try +/-100
 cutaway   = false;    // true: cut the front-right quarter away to see inside
-cam_tilt  = 10;       // camera angle in the head: 0 / 10 / 20
 
 // ---- the stack (heights from the desk) ---------------------------------------------------------
 jetson    = [130.1, 121.1, 58.1];   // reComputer J4012, measured
@@ -58,9 +57,9 @@ translate([0, 0, z_l2]) {
     rotate(pan) color("#e8a33d") translate([0, 0, z_plate + plate_t]) mirror([0, 0, 1]) turntable_pulley();
 }
 
-// ---- head (turns with pan): CONCEPT v2 - concepts/head_box_concept.scad ---------------------------
-// A 135 x 95 x 70 rounded box straight on the turntable plate (no neck); the camera tilts inside
-// it to 0 / +10 / +20 deg.
-rotate(pan) translate([0, 0, z_plate_top]) head_box(cam_tilt, ghosts = false);
+// ---- head (turns with pan): CONCEPT v3 - concepts/head_eyes_concept.scad ---------------------------
+// A 135 x 95 x 70 rounded box straight on the turntable plate (no neck): two round GC9A01 eyes,
+// the camera behind a nose window below them, fixed 27 deg up.
+rotate(pan) translate([0, 0, z_plate_top]) head_eyes();
 
-echo(deck_top = z_l2, plate_top = z_plate_top, head_top = z_plate_top + 95, lens_height = z_plate_top + 47.5);
+echo(deck_top = z_l2, plate_top = z_plate_top, head_top = z_plate_top + 95, lens_height = z_plate_top + 29);
