@@ -28,9 +28,7 @@ cam_out   = 27;              // camera's front face this far from the arch's axi
 show_cone = false;
 
 // ---- eyes: GC9A01 1.28" round TFT modules --------------------------------------------------------
-eye_pcb   = [37.5, 45, 3.2];
-eye_win   = 33;
-eye_top   = 18.75;           // EST: display centre below the module's top edge
+eye_win   = 33;              // window: the 32.4 mm active circle + margin (board dims: params.scad eye_*)
 eye_dx    = 32;
 eye_z     = 55;              // modules mounted UPSIDE DOWN (header at the top, image flipped in software):
                              //   their boards then clear the mouth's below and the camera's edge above
@@ -76,7 +74,11 @@ module eye() {
         color("#101418") translate([0, -0.6, 0]) rotate([-90, 0, 0]) cylinder(d = eye_win, h = 0.6, $fn = 96);
         color("#2e6fd8") translate([0, -0.4, 0]) rotate([-90, 0, 0]) cylinder(d = 14, h = 0.5, $fn = 64);
         color("#0a0a0a") translate([0, -0.3, 0]) rotate([-90, 0, 0]) cylinder(d = 6, h = 0.5, $fn = 32);
-        color("#1a5e3a") translate([-eye_pcb[0] / 2, -eye_pcb[2], -eye_top]) cube([eye_pcb[0], eye_pcb[2] - 0.6, eye_pcb[1]]);   // upside down
+        // round board + pin tab, mounted upside down (tab up)
+        color("#1a4fa0") translate([0, -eye_t, 0]) rotate([-90, 0, 0]) linear_extrude(eye_t - 0.6) {
+            circle(d = eye_board_d, $fn = 96);
+            translate([-eye_tab[0] / 2, -eye_board_d / 2 - eye_tab[1]]) square([eye_tab[0], eye_tab[1] + 5]);
+        }
     }
 }
 
