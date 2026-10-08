@@ -92,6 +92,19 @@ diff_clr     = [0.25, 0.45];     // [inner, outer] clearance each side. Fit test
                                  //   at both edges. Then 0.25/0.25 printed 53.2 / 64.5 but the stand's seat
                                  //   printed 52.2 / 64.2 (outer wall at the bed shrinks) -> outer 0.45: CONFIRMED, drops in smoothly
 
+// --- Mouth: 2.08" white OLED, 256 x 64, SH1122, 4-wire SPI (GME25664-65; vendor drawing:
+// 2_08-white_OLED_2.jpg). X along the board's length, from the pin end; Y across.
+oled_pcb     = [75.5, 20.6];     // board
+oled_t       = 5.6;              // max, board + glass (board 1.2)
+oled_holes   = [72.0, 15.5];     // 4 x d2.5 mounting holes, centred on the board
+oled_hole_d  = 2.5;
+oled_glass   = [62.5, 20.6, 1.63];   // glass starts 7.25 from the pin end
+oled_glass_x = 7.25;
+oled_va      = [53.18, 14.78];   // visible area: starts 7.25 + 2.10 from the pin end, centred across
+oled_va_x    = 7.25 + 2.10;
+oled_aa      = [51.18, 12.78];   // active (pixel) area, 1 mm inside the visible area
+oled_va_dx   = oled_va_x + oled_va[0] / 2 - oled_pcb[0] / 2;   // -1.82: visible area's centre, off the board's
+
 // --- Logitech C920X, housing partly stripped (photos: cam_front.jpg, cam_top.jpg) ---
 // Seen from above it is a lozenge: flat glossy front face, rounded back, rounded ends
 // (the mic grilles) with a small notch where each grille meets the face.

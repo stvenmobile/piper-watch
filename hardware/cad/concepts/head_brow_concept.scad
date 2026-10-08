@@ -5,7 +5,8 @@
 //     there the lens is nearly level with a seated person's eyes, so a small tilt covers the range.
 //     (The camera is 94 mm wide - mic grilles at its ends - so it needs the full width anyway.)
 //   * EYES: two round 1.28" GC9A01 colour TFTs (their colour also shows Piper's state).
-//   * MOUTH: a 2.23" 128 x 32 OLED (SSD1305) - or the 1.3" 128 x 64 (mouth = "1.3").
+//   * MOUTH: a 2.08" 256 x 64 white OLED (SH1122, SPI - shares the eyes' bus), measured from
+//     the vendor drawing (params.scad: oled_*).
 //
 // Frame: origin at the centre of the turntable plate's top; +Y = front (face), +Z = up.
 include <../params.scad>
@@ -35,10 +36,8 @@ eye_z     = 55;              // modules mounted UPSIDE DOWN (header at the top, 
                              //   their boards then clear the mouth's below and the camera's edge above
 
 // ---- mouth: OLED -----------------------------------------------------------------------------------
-mouth     = "2.23";          // "2.23" (128 x 32) or "1.3" (128 x 64)
-m_pcb     = mouth == "2.23" ? [70, 32] : [35.5, 34];    // EST until measured
-m_win     = mouth == "2.23" ? [57, 15] : [31, 17];
-mouth_z   = 19;
+m_win     = oled_va + [0.6, 0.6];   // window: the visible area + 0.3 each side
+mouth_z   = 20;
 
 module rr2d(w, h, r) { offset(r = r) square([w - 2 * r, h - 2 * r], center = true); }
 
@@ -84,7 +83,12 @@ module eye() {
 module mouth_oled() {
     translate([0, face_y - hb_wall, mouth_z]) {
         color("#0b0b0b") translate([-m_win[0] / 2, -0.8, -m_win[1] / 2]) cube([m_win[0], 0.8, m_win[1]]);
-        color("#1d3b6e") translate([-m_pcb[0] / 2, -3.2, -m_pcb[1] / 2]) cube([m_pcb[0], 2.4, m_pcb[1]]);
+        // the module, shifted so its visible area is centred in the window (pins at the left end)
+        translate([-oled_va_dx, 0, 0]) {
+            color("#141414") translate([-oled_pcb[0] / 2 + oled_glass_x, -oled_glass[2], -oled_glass[1] / 2])
+                cube([oled_glass[0], oled_glass[2], oled_glass[1]]);
+            color("#1d3b6e") translate([-oled_pcb[0] / 2, -oled_glass[2] - 1.2, -oled_pcb[1] / 2]) cube([oled_pcb[0], 1.2, oled_pcb[1]]);
+        }
     }
 }
 
