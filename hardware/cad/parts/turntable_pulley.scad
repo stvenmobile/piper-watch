@@ -52,6 +52,19 @@ slot_clr   = [0.05, 0.3];               // [land side, back side] clearance arou
                                         //   test arc 1: channel 0.83 - belt only half in
                                         //   test arc 2: channel 1.10 (this) - FITS, no looseness; 1.25 - loose
 clamp_r    = 35.5;                      // clamp block outer radius
+
+// ---- homing magnet ----------------------------------------------------------------------------
+// A 5 x 3 mm neodymium disc in a pocket on the pulley's underside, over the motor bracket's A3144
+// Hall sensor when the head looks straight ahead (pulley angle 0 = toward the motor). The sensor
+// sits ~29 mm from the centre (motor_bracket.scad); the flat ring there runs from the 25 mm hollow
+// out to the tooth tips (31.6), so a 5 mm disc is the widest that fits. Glue it in (CA or epoxy). SOUTH pole toward the
+// sensor (the A3144 only sees south on its printed face): test it before gluing.
+magnet     = [5.0, 3.0];                // disc: diameter, thickness
+magnet_r   = 28.6;                      // pocket centre from the turntable's centre
+magnet_a   = 0;                         // over the sensor at home
+magnet_pocket = flange_out - 0.2;       // 2.0 deep: stays inside the flange - any deeper and it opens
+                                        //   into the tooth gaps. The magnet stands 1 mm proud, so it
+                                        //   passes ~3 mm over the sensor instead of 4
 module ring_pulley_2d() {
     // tooth tips with one groove per tooth; groove = rounded GT2 tooth space
     difference() {
@@ -120,6 +133,9 @@ module turntable_pulley(back_clr = [slot_clr[1], slot_clr[1]]) {
                 translate([0, 0, -1]) cylinder(d = m5_hole, h = plate_t + 2, $fn = 32);
                 translate([0, 0, -0.01]) rotate(30) cylinder(d = m5_nut[0] / cos(30), h = m5_nut[1], $fn = 6);
             }
+        // homing magnet pocket in the underside (the top as printed), magnet flush
+        rotate(magnet_a) translate([magnet_r, 0, z_teeth1 + flange_out - magnet_pocket])
+            cylinder(d = magnet[0] + 0.2 + cal_hole, h = magnet_pocket + 1, $fn = 40);
         // the head: M3 heat-set inserts in the plate's top for its floor's four screws
         rotate(head_rot_in_pulley) for (m = floor_mounts) translate([m[0], m[1], -0.01])
             cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 32);
