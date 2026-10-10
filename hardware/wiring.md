@@ -164,7 +164,12 @@ TMC2209 doesn't use. Use the two **end** pins and the two **middle** pins; leave
  pins 2 and 5 = centre taps: NOT connected (insulate if the cable has wires there)
 ```
 
-- A 4-wire cable that fills only pins 1, 3, 4 and 6 is exactly right.
+- A 4-wire cable that fills only pins 1, 3, 4 and 6 is exactly right. **This build's cable,
+  measured:** pins 1 + 3 = **red + blue**, 3.6 Ω → J3 **A1 (red), A2 (blue)**; pins 4 + 6 =
+  **green + black**, 3.6 Ω → J3 **B1 (green), B2 (black)**.
+- Wire ends in the screw terminals: crimp **bootlace ferrules** (0.34–0.5 mm² for 22–24 AWG), or
+  clamp the bare stranded wire twisted tight. Don't tin the ends with solder: the solder creeps
+  under the screw and the joint works loose.
 - **Check the pairs with a meter** before connecting: pins 1–3 read the coil's resistance (a few Ω),
   pins 4–6 the same, and there's no connection between the two pairs. If 1–3 reads open, the
   pairs are different on this motor - find the two pairs that each read a few Ω.
