@@ -57,3 +57,6 @@ hardware/cad/**/*.STP
 hardware/cad/**/*.STEP
 hardware/cad/**/*.x_t
 hardware/cad/vitamins/models/
+
+# Vendor datasheet images / diagrams - kept locally, not redistributed
+docs/stepper_wiring.png

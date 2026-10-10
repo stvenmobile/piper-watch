@@ -147,7 +147,7 @@ wire is fine for the logic and the 5 V Hall feed.
 | EN                           | ESP32 **GPIO 6**          | LOW = motor enabled                                    |
 | MS1, MS2                     | VIO (both HIGH)           | **1/16 microstepping** (the firmware will assume this) |
 | TX, RX, CLK, DIAG           | unconnected               | UART tuning can come later                             |
-| A1, A2 / B1, B2              | NEMA17 coil A / coil B    | find the pairs with a meter (≈ 2–3 Ω across a coil)    |
+| A1, A2 / B1, B2              | NEMA17 coil A / coil B    | this motor: red + green = coil A, yellow + blue = coil B (vendor diagram, kept locally); confirm with a meter (≈ 2–3 Ω across a coil) |
 
 **Current:** set Vref to about **0.7 V** (≈ 0.9 A RMS on the BTT board's formula) before connecting
 the motor. Measure between the trim pot and GND with the driver powered and the motor unplugged.
