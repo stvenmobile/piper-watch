@@ -7,7 +7,9 @@
 // Also carries the HOMING SENSOR: an A3144-type Hall sensor lying face-up in a pocket on the
 // plate, under the turntable pulley's bottom edge. A small magnet glued under the pulley (on the
 // flat ring of its bottom face, ~28 mm from the centre, on the motor side when the head looks
-// straight ahead) passes ~4 mm above it at home. Its leads run along a groove to the side.
+// straight ahead) passes ~4 mm above it at home. Its leads run straight inward along a short
+// groove to the plate's inner edge and drop down beside the motor - clear of the motor's screws
+// (a groove out to the side would cross a screw hole, and the screw head would pinch the wires).
 //
 // Modelled in place (deck frame, see level2.scad) with the plate at the bottom.
 // PRINT as modelled: plate on the bed, walls up, no supports. PETG.
@@ -43,9 +45,9 @@ module bracket() {
             cylinder(d = m3_clear, h = bracket_t + 2, $fn = 24);
         // heat-set inserts for the deck screws
         for (v = [-slot_v, slot_v]) translate([slot_u, v, z1 - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
-        // Hall sensor pocket + lead groove to the side
+        // Hall sensor pocket (leads toward the inner edge) + lead groove out over that edge
         translate([hall_u - hall[0] / 2, -hall[1] / 2, z0 + bracket_t - hall[2]]) cube([hall[0], hall[1], hall[2] + 1]);
-        translate([hall_u - 1.6, 0, z0 + bracket_t - 1.2]) cube([3.2, half_v + 1, 2]);
+        translate([plate_u[0] - 1, -hall[1] / 2, z0 + bracket_t - 1.2]) cube([hall_u - plate_u[0] + 1, hall[1], 2]);
     }
 }
 
