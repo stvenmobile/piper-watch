@@ -84,6 +84,7 @@ supply, A1/A2 = one coil, B1/B2 = the other.
 | 2 | J1 + | U1 VS | heavy | switched 19 V |
 | 3 | C1 + | U1 VS | C1's own lead | switched 19 V (C1 right at the pins) |
 | 4 | C1 − | U1 GND next to VS (motor side) | C1's own lead | ground |
+| 4a | C2 + / C2 − | J1 + / J1 − | C2's own leads | optional second capacitor at the input |
 | 5 | J1 − | ★ ground point | heavy | ground |
 | 6 | J6 GND | ★ | heavy | ground |
 | 7 | U1 GND (motor side) | ★ | heavy | ground |
@@ -131,6 +132,7 @@ J6 5V reads 5.0 V (buck set first), and no 19 V appears on any J4/J5 pin.
 | U1  | BTT TMC2209 on 2 × 8 female headers | so it can be swapped; check the pin labels against its silkscreen |
 | F1  | 6 × 30 mm (3AG) **3 A slow-blow**   | in the **panel** holder on the back wall, not on the board        |
 | C1  | 100 µF / 50 V electrolytic          | at U1's VS/GND                                                    |
+| C2  | 100 µF / 50 V electrolytic (optional) | at J1 +/−: bulk filtering where the 19 V comes in; C1 stays at U1 |
 | R1  | 10 kΩ                               | Hall OUT pull-up to 3V3                                           |
 
 Use 20 AWG wire or solder-filled tracks for the 19 V and ground runs (J1, VM, J6 19V/GND); thin
