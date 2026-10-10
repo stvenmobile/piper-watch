@@ -56,23 +56,59 @@ display; the right edge is 2.5 mm from the wall).
 
 ```text
  back of the case
-     J1 19V in (switched, fused)       J3 motor
- ┌○──[ +   − ]────────────────────[2B 2A 1A 1B]──────○┐
- │[J6 19V]                                            │
- │[   GND]                                            │
- │[   5V ]           C1      ┌ VM GND 2B 2A 1A 1B VDD GND ┐
- │ J4 ▶● STEP                │          TMC2209           │
- │     ● DIR                 └ EN MS1 MS2 PDN UART CLK STEP DIR ┘
- │     ● EN
- │     ● HALL
- │     ● 3V3
- │     ● GND
- │ J5 ▶● 5V      R1 10k       ★ board ground point
- │     ● GND
- │     ● OUT                                          │
- └○───────────────────────────────────────────────────○┘
+     J6 buck            J1 19V in (switched, fused)        J3 motor
+ ┌○──[19V GND 5V]──────[ +   − ]──────────────────[2B 2A 1A 1B]──○┐
+ │                                                                 │
+ │ J4 ▶● STEP          C1      ┌ VM GND 2B 2A 1A 1B VDD GND ┐      │
+ │     ● DIR                   │          TMC2209           │      │
+ │     ● EN                    └ EN MS1 MS2 PDN UART CLK STEP DIR ┘│
+ │     ● HALL                                                      │
+ │     ● 3V3                                                       │
+ │     ● GND                                                       │
+ │ J5 ▶● 5V      R1 10k       ★ board ground point                 │
+ │     ● GND                                                       │
+ │     ● OUT                                                       │
+ └○───────────────────────────────────────────────────────────────○┘
      front (display)          ▶ = pin 1 (mark it on the board and on the housing)
 ```
+
+### Point-to-point wiring list
+
+Heavy = 20–22 AWG (19 V, ground and motor current); light = 24–30 AWG (logic). TMC2209 pins are
+its female header's solder pins.
+
+| # | From | To | Wire | Net |
+|---|---|---|---|---|
+| 1 | J1 + | J6 19V | heavy | switched 19 V |
+| 2 | J1 + | U1 VM | heavy | switched 19 V |
+| 3 | C1 + | U1 VM | C1's own lead | switched 19 V (C1 right at the pins) |
+| 4 | C1 − | U1 GND (motor side, next to VM) | C1's own lead | ground |
+| 5 | J1 − | ★ ground point | heavy | ground |
+| 6 | J6 GND | ★ | heavy | ground |
+| 7 | U1 GND (motor side) | ★ | heavy | ground |
+| 8 | U1 GND (logic side, next to VDD) | ★ | light | ground |
+| 9 | J4 GND | ★ | light | ground |
+| 10 | J5 GND | ★ | light | ground |
+| 11 | U1 2B | J3 2B | heavy | motor |
+| 12 | U1 2A | J3 2A | heavy | motor |
+| 13 | U1 1A | J3 1A | heavy | motor |
+| 14 | U1 1B | J3 1B | heavy | motor |
+| 15 | J6 5V | J5 5V | light | 5 V (Hall only) |
+| 16 | J4 3V3 | U1 VDD | light | 3V3 |
+| 17 | U1 VDD | U1 MS1 | light | 3V3 (1/16 step) |
+| 18 | U1 MS1 | U1 MS2 | light | 3V3 (1/16 step) |
+| 19 | J4 3V3 | R1 (one end) | light | 3V3 |
+| 20 | R1 (other end) | J4 HALL | light | Hall signal (pull-up) |
+| 21 | J5 OUT | J4 HALL | light | Hall signal |
+| 22 | J4 STEP | U1 STEP | light | step |
+| 23 | J4 DIR | U1 DIR | light | direction |
+| 24 | J4 EN | U1 EN | light | enable (LOW = on) |
+
+Leave U1's PDN, UART and CLK unconnected. Optional: a 10 kΩ from U1 EN to 3V3 keeps the motor
+disabled while the ESP32 boots (its pins float until the firmware sets them).
+
+Before plugging in U1: power J1 alone and check with a meter that U1's VM socket pin reads 19 V,
+J6 5V reads 5.0 V (buck set first), and no 19 V appears on any J4/J5 pin.
 
 **Headers and Dupont housings (J4, J5):**
 
@@ -83,14 +119,6 @@ display; the right edge is 2.5 mm from the wall).
 - Leave a little slack so a tug pulls on the bundle, not the pins.
 - J1, J3 and J6 stay screw terminals: the 19 V current and a motor plug that could work loose with
   the driver powered (which can kill the TMC2209) don't belong on Dupont pins.
-
-Connections not shown above (insulated wire on the underside):
-
-- **Ground → the board's ground point (★):** J1 −, J6 GND, both TMC2209 GND pins, C1 −, J4 GND, J5 GND.
-- **3V3** (from the ESP32 via J4): TMC2209 VDD, MS1, MS2 (1/16 microstepping), and R1's top end.
-- **Signals:** J4 STEP/DIR/EN → TMC2209 STEP/DIR/EN; J5 OUT → J4 HALL, with R1 from that line to 3V3.
-- **5 V:** J6 5V → J5 5V.
-- **Motor:** TMC2209 2B/2A/1A/1B → J3 (straight up, same order).
 
 | Ref | Part                                | Notes                                                             |
 | --- | ----------------------------------- | ----------------------------------------------------------------- |
