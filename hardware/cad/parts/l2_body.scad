@@ -7,7 +7,9 @@
 //          (right) cable exit, low under the motor: Jetson 19 V, ESP32 USB, camera USB
 //          (big enough for a USB-A plug and the barrel plug to pass), two zip-tie anchors
 //   LEFT   ESP32-S3 breakout (70 x 80, holes 32 x 72.5) standing 5 mm off the wall, USB to the back
-//   FLOOR  bosses (M2.5 inserts) for a 50 x 70 perfboard (stepper driver + 100 uF, fuse clips,
+//   FLOOR  19 V split block (2-way barrier strip, 36 x 21.5, M3.5 spade screws) back-left near the
+//          jack and switch: two low bosses with M3 inserts; its − side is the common ground.
+//          Bosses (M2.5 inserts) for a 50 x 70 perfboard (stepper driver + 100 uF, fuse clips,
 //          terminal blocks) in the
 //          front-right; bosses for the 19 -> 5 V buck (Seloky LM2596S, 66 x 36, holes 54 x 31) in
 //          the front-left, input end to the back; four screws down into the skirt
@@ -66,6 +68,15 @@ buck_c      = [-35, 28];         // centre: clear of the breakout (x > -60), the
                                  //   the display's back (y < 66); input terminals face the back
 buck_boss_h = 6;                 // its underside has pin stubs (~3 mm)
 
+// ---- floor: 19 V split block (2-way barrier terminal strip), back-left by the jack and switch ---
+tb_size     = [36, 21.5, 13];    // length (x), base width (y), height (spec sheet)
+tb_holes    = 28.5;              // EST from the spec sheet (9.5 + 9.5 + 9.5) - MEASURE the 4 mm holes' centres
+tb_c        = [-38, -46];        // centre: ~21 mm to the back wall for the spades + wire bends (jack and
+                                 //   switch leads on its back side); the Jetson
+                                 //   and perfboard leads leave from its front side; clear of the corner
+                                 //   post, the skirt screw at (-71, -45), the buck (y > -5) and the breakout (x < -60)
+tb_boss_h   = 3;                 // floor 3 + boss 3 = room for a 5 mm M3 insert
+
 // ---- body <-> skirt screws: along the sides, outside the reComputer (x +/-65) -------------------
 skirt_pts   = [[-71, -45], [-71, 45], [71, -45], [71, 5]];   // clear of the breakout (left, |y| < 40),
                                  //   the perfboard (right front) and the motor (right back)
@@ -95,6 +106,9 @@ module adds() {
     // buck bosses
     for (sx = [-1, 1], sy = [-1, 1]) translate([buck_c[0] + sx * buck_holes[0] / 2, buck_c[1] + sy * buck_holes[1] / 2, z_floor - 0.01])
         cylinder(d = 7, h = buck_boss_h + 0.01, $fn = 32);
+    // split-block bosses
+    for (sx = [-1, 1]) translate([tb_c[0] + sx * tb_holes / 2, tb_c[1], z_floor - 0.01])
+        cylinder(d = 8, h = tb_boss_h + 0.01, $fn = 32);
     // zip-tie anchors beside the cable exit: little arches on the floor
     for (x = [exit_xz[0] - exit_slot[0] / 2 - 8, exit_xz[0] + exit_slot[0] / 2 + 8])
         translate([x, -inner + 10, z_floor - 0.01]) difference() {
@@ -135,6 +149,9 @@ module cuts() {
     // buck boss holes (M3 inserts)
     for (sx = [-1, 1], sy = [-1, 1]) translate([buck_c[0] + sx * buck_holes[0] / 2, buck_c[1] + sy * buck_holes[1] / 2, z_floor + buck_boss_h - insert_m3[1]])
         cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
+    // split-block boss holes (M3 inserts; the strip's 4 mm holes take M3 screws + washers)
+    for (sx = [-1, 1]) translate([tb_c[0] + sx * tb_holes / 2, tb_c[1], z_floor + tb_boss_h - insert_m3[1]])
+        cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
     // deck screw inserts in the corner posts
     for (sx = [-1, 1], sy = [-1, 1]) translate([sx * corner_xy, sy * corner_xy, z_top - insert_m3[1]])
         cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
@@ -158,4 +175,5 @@ l2_body();
 %translate([-inner + brk_standoff + 6, 0, brk_zc]) cube([12, 80, 70], center = true);
 %translate([pb_c[0], pb_c[1], z_floor + pb_boss_h + 0.8]) cube([70, 50, 1.6], center = true);
 %translate([buck_c[0], buck_c[1], z_floor + buck_boss_h + 7]) cube([buck_board[0], buck_board[1], 14], center = true);
+%translate([tb_c[0], tb_c[1], z_floor + tb_boss_h + tb_size[2] / 2]) cube(tb_size, center = true);
 %rotate(motor_a) translate([motor_C - nema[0] / 2, -nema[0] / 2, z_motor_bottom]) cube([nema[0], nema[0], nema[1]]);

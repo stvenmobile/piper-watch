@@ -16,7 +16,7 @@ is never turned on).
                                                   └──► J1 + / − ──► J2 out ──► rocker switch ──► J2 ret ──► F1 3 A slow ──► VM rail
                                                                                                      ├─ TMC2209 VM (+100 µF) ──► J3 ──► NEMA17
                                                                                                      └─ J6 VM/GND ──► LM2596 buck (floor) ──► J6 5V
-        J1 − = the perfboard's star ground
+        split block − = the COMMON GROUND (Jetson −, jack −, perfboard J1 −)
 
  USB to the Jetson (data, and power for the boards' logic):
    • head XIAO ESP32-S3   - eyes + mouth          (through the turntable's hollow)
@@ -29,8 +29,10 @@ goes to the Jetson, the other to the perfboard's J1. The switch and fuse cover *
 side** (stepper and buck). The Jetson's feed never passes through the perfboard or the switch, so switching the head off never pulls the Jetson's power; it's protected by the
 19 V supply's own current limit.
 
-All grounds are common. The perfboard has one star point that every ground returns to: the
-board's J1 − (back to the split block), the buck's input and output, the TMC2209's motor and logic grounds, and
+All grounds are common. The system's **common ground** is the split block's − terminal: the jack's
+−, the Jetson's − and the perfboard's J1 − all land there. On the perfboard, one ground point (★)
+gathers the board's grounds and returns to the split block through J1 −: the buck's input and
+output, the TMC2209's motor and logic grounds, and
 the base ESP32's GND. The ground is never switched or fused.
 
 ---
@@ -45,8 +47,8 @@ sits on four M2.5 inserts (holes 66 × 46).
 
 | From | To | Notes |
 |---|---|---|
-| Jack + / − | floor split block | 20 AWG; the Jetson's spade leads land here too |
-| Split block + / − | J1 + / J1 − | 20 AWG, spade at the block end; J1 − is the perfboard's **star ground** |
+| Jack + / − | floor split block + / − | 16–20 AWG, spade terminals (M3.5 screws); the Jetson's spade leads land here too |
+| Split block + / − | J1 + / J1 − | 20 AWG, spade at the block end; the split block's − is the **common ground** |
 | J1 + | J2 **out** → rocker switch → J2 **ret** | two 20 AWG wires to the back panel |
 | J2 ret | **F1** (6 × 30 mm, **3 A slow-blow**, in PCB clips) → **VM rail** | |
 | VM rail | TMC2209 **VM** | short, 20–22 AWG |
