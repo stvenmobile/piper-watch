@@ -35,7 +35,11 @@ mp_T      = 20;             // motor pulley teeth
 mp_belt_c = 13 + 7.1 / 2;   // MEASURED: pulley pushed fully down on the motor, its toothed section
                             //   (7.1 wide; the belt is a standard 6 mm) runs 13..20.1 above the face
 bracket_t = 3;              // motor plate thickness; the pulley passes down through its centre hole
-z_motor_face  = z_belt - mp_belt_c;          // -28.55
-z_bracket_top = z_motor_face + bracket_t;    // -25.55
-z_motor_bottom = z_motor_face - nema[1];     // -61.95
-z_mp_top  = z_motor_face + 13 + 7.1 + 1;     // ~-7.45 (EST: top flange ~1 mm thick)
+bracket_drop = 3;           // the motor hangs this much LOWER than "pulley pushed fully down" needs:
+                            //   on the first build the ring pulley sat ~2 mm below the motor pulley,
+                            //   so the motor pulley now starts ~1 mm low and is raised on the shaft
+                            //   to line the belt up (a few mm of adjustment either way)
+z_motor_face  = z_belt - mp_belt_c - bracket_drop;   // -31.55
+z_bracket_top = z_motor_face + bracket_t;    // -28.55
+z_motor_bottom = z_motor_face - nema[1];     // -64.95
+z_mp_top  = z_motor_face + bracket_drop + 13 + 7.1 + 1;   // ~-7.45 (pulley raised to the belt; EST top flange ~1 mm)

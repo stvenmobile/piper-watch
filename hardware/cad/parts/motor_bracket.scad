@@ -7,7 +7,8 @@
 // Also carries the HOMING SENSOR: an A3144-type Hall sensor lying face-up in a pocket on the
 // plate, under the turntable pulley's bottom edge. A small magnet glued under the pulley (on the
 // flat ring of its bottom face, ~28 mm from the centre, on the motor side when the head looks
-// straight ahead) passes ~4 mm above it at home. Its leads run straight inward along a short
+// straight ahead) passes ~4 mm above it at home. The sensor sits on a pad bracket_drop (3 mm) tall,
+// so lowering the motor for belt adjustment didn't move it away from the magnet. Its leads run straight inward along a short
 // groove to the plate's inner edge and drop down beside the motor - clear of the motor's screws
 // (a groove out to the side would cross a screw hole, and the screw head would pinch the wires).
 //
@@ -25,6 +26,7 @@ far_wall  = [27, 35];                     // far wall (u range): takes the two d
 slot_u    = 31; slot_v = 12;              // must match drive_deck.scad
 hall      = [3.4 + 0.4, 4.0 + 0.4, 1.6];  // A3144 TO-92 lying flat: [u, v, depth]
 hall_u    = -17;                          // ~28 mm from the turntable's centre
+hall_pad  = [hall[0] + 4, hall[1] + 4];   // raised pad under the sensor (u, v), from the plate's inner edge
 
 module bracket() {
     z0 = z_motor_face;                    // plate underside = motor face
@@ -38,6 +40,8 @@ module bracket() {
                 cube([plate_u[1] - side_u0, side_wall, z1 - z0]);
             // far wall
             translate([far_wall[0], -half_v, z0]) cube([far_wall[1] - far_wall[0], 2 * half_v, z1 - z0]);
+            // pad under the Hall sensor: keeps it at its original height under the magnet
+            translate([plate_u[0], -hall_pad[1] / 2, z0]) cube([hall_u + hall_pad[0] / 2 - plate_u[0], hall_pad[1], bracket_t + bracket_drop]);
         }
         // motor centring boss and its four screws
         translate([0, 0, z0 - 1]) cylinder(d = nema_boss + 1, h = bracket_t + 2, $fn = 64);
@@ -46,8 +50,8 @@ module bracket() {
         // heat-set inserts for the deck screws
         for (v = [-slot_v, slot_v]) translate([slot_u, v, z1 - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
         // Hall sensor pocket (leads toward the inner edge) + lead groove out over that edge
-        translate([hall_u - hall[0] / 2, -hall[1] / 2, z0 + bracket_t - hall[2]]) cube([hall[0], hall[1], hall[2] + 1]);
-        translate([plate_u[0] - 1, -hall[1] / 2, z0 + bracket_t - 1.2]) cube([hall_u - plate_u[0] + 1, hall[1], 2]);
+        translate([hall_u - hall[0] / 2, -hall[1] / 2, z0 + bracket_t + bracket_drop - hall[2]]) cube([hall[0], hall[1], hall[2] + 1]);
+        translate([plate_u[0] - 1, -hall[1] / 2, z0 + bracket_t + bracket_drop - 1.2]) cube([hall_u - plate_u[0] + 1, hall[1], 2]);
     }
 }
 
