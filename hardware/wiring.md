@@ -147,7 +147,29 @@ wire is fine for the logic and the 5 V Hall feed.
 | EN                           | ESP32 **GPIO 6**          | LOW = motor enabled                                    |
 | MS1, MS2                     | VIO (both HIGH)           | **1/16 microstepping** (the firmware will assume this) |
 | TX, RX, CLK, DIAG           | unconnected               | UART tuning can come later                             |
-| A1, A2 / B1, B2              | NEMA17 coil A / coil B    | this motor: red + green = coil A, yellow + blue = coil B (vendor diagram, kept locally); confirm with a meter (≈ 2–3 Ω across a coil) |
+| A1, A2 / B1, B2              | NEMA17 coil A / coil B    | see **The motor's 6-pin connector** below |
+
+### The motor's 6-pin connector
+
+This NEMA17 has a **6-pin** socket: each coil has a centre tap, which a bipolar driver like the
+TMC2209 doesn't use. Use the two **end** pins and the two **middle** pins; leave the other two
+(the centre taps) unconnected.
+
+```text
+ motor socket, pins 1-6:   [ 1   2   3   4   5   6 ]
+                             A   tap  A   B  tap  B
+                             │        │   │       │
+ coil A = pins 1 + 3 ────────┴────────┘   │       │     → J3 A1, A2
+ coil B = pins 4 + 6 ─────────────────────┴───────┘     → J3 B1, B2
+ pins 2 and 5 = centre taps: NOT connected (insulate if the cable has wires there)
+```
+
+- A 4-wire cable that fills only pins 1, 3, 4 and 6 is exactly right.
+- **Check the pairs with a meter** before connecting: pins 1–3 read the coil's resistance (a few Ω),
+  pins 4–6 the same, and there's no connection between the two pairs. If 1–3 reads open, the
+  pairs are different on this motor - find the two pairs that each read a few Ω.
+- Wrong way round? Swap the two wires of **one** coil (e.g. A1 ↔ A2) or flip DIR in firmware.
+  Never swap a wire between coils.
 
 **Current:** set Vref to about **0.7 V** (≈ 0.9 A RMS on the BTT board's formula) before connecting
 the motor. Measure between the trim pot and GND with the driver powered and the motor unplugged.
