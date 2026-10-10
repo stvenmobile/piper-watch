@@ -4,13 +4,12 @@
 //   * XW-604B rocker: snaps into the 28 x 10 cut-out, its clips grip the 1.5 mm patch
 //   * barrel jack (5.5 x 2.1 IP68, M12): 12 mm hole in the full 2.5 mm wall, flange + gasket
 //     outside, nut inside - goes in without forcing, nut pulls the gasket flat
-//   * fuse holder (6 x 30 mm): double-D hole - slides in, doesn't turn, ring nut tightens flat
 // PRINT outer face down (as modelled here), no supports. PETG, same settings as the body.
 use <l2_body.scad>
 
 margin = 12;                       // wall kept round the two features
 x0 = -50 - 18 - margin / 2;        // switch / jack centre x = -50; switch cut-out is 28 wide (+8 patch)
-x1 = -20 + 7.5 + margin;          // ... to past the fuse holder (centre x = -20)
+x1 = -50 + 18 + margin / 2;
 z0 = -58 - 9 - margin;             // jack centre z -58 (flange / nut ~18 across) ...
 z1 = -26 + 9 + margin;             // ... switch centre z -26 (patch 18 tall)
 

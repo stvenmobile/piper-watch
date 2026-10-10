@@ -27,6 +27,7 @@ clr_fit     = 0.35;              // gap for parts that slide/rotate against each
 m3          = 3.0;
 m4          = 4.0;
 insert_m3   = [4.1, 5.0];        // heat-set insert bore [diameter, depth] - coupon "M3a" confirmed
+insert_m25  = [3.6, 4.5];        // EST - M2.5 inserts (~3.5 OD): print a coupon before the body
 insert_m4   = [5.6, 6.0];        // coupon "M4a" confirmed
 m5          = 5.0;
 insert_m5   = [6.4, 7.0];        // EST - confirm with parts/m5_coupon.scad

@@ -11,13 +11,12 @@ is never turned on).
 ## Overview
 
 ```text
- BACK PANEL                              PERFBOARD (Level 2 floor)
- 19 V ── jack + ──► J1 BLOCK A (always on) ──┬───────────────────────────────► Jetson DC in
-                                             └──► rocker switch ──► panel fuse (3 A slow) ─┐
-                                                                                           ▼
-                                                        J2 BLOCK B (switched, fused) ──┬─ TMC2209 VM (+100 µF) ──► NEMA17
-                                                                                       └─ LM2596 buck ──► 5 V rail
-        jack − ──────────────────────────────────► star ground (J1 −)
+ BACK PANEL                   PERFBOARD (70 x 50, Level 2 floor)
+ 19 V ── jack + ──► J1 + (always on) ──┬──────────────────────────────────────► Jetson DC in
+                                       └──► rocker switch ──► J2 + ──► F1 3 A slow ──► VM rail
+                                                                                       ├─ TMC2209 VM (+100 µF) ──► NEMA17
+                                                                                       └─ J6 ──► LM2596 buck (floor) ──► J7 5 V
+        jack − ─────────────────────► J1 − = star ground
 
  USB to the Jetson (data, and power for the boards' logic):
    • head XIAO ESP32-S3   - eyes + mouth          (through the turntable's hollow)
@@ -25,7 +24,7 @@ is never turned on).
    • base ESP32-S3        - stepper, Hall sensor  (stays in Level 2)
 ```
 
-The switch and fuse cover **only the head side** (stepper and buck). The Jetson is fed from block A,
+The switch and fuse cover **only the head side** (stepper and buck). The Jetson is fed from J1,
 before the switch, so switching the head off never pulls the Jetson's power; it's protected by the
 19 V supply's own current limit.
 
@@ -37,32 +36,33 @@ the base ESP32's GND. The ground is never switched or fused.
 
 ## 1. Perfboard: stepper driver + power (Level 2 floor)
 
+The perfboard carries the fuse, the TMC2209 and the terminals. The buck is the larger Seloky
+LM2596S (66 × 36, with voltmeter) on its own M3 bosses beside it, wired to J6/J7. The perfboard
+sits on four M2.5 inserts (holes 66 × 46).
+
 ### Power
 
 | From | To | Notes |
 |---|---|---|
-| Jack + | J1 + (block A) | 20 AWG; the Jetson's + leaves J1 too |
-| J1 + | rocker switch → **panel fuse holder** (6 × 30 mm, **3 A slow-blow**) → J2 + (block B) | all on the back panel, 20 AWG; the fuse holder's **end** contact to the switch, its **side** contact to J2, so the exposed end of an unscrewed cap isn't live |
+| Jack + | J1 + | 20 AWG; the Jetson's + leaves J1 too |
+| J1 + | rocker switch → J2 + | 20 AWG, on the back panel |
 | Jack − | J1 − = perfboard **star ground** | 20 AWG; the Jetson's − leaves here too |
-| J2 + | perfboard **VM rail** | |
+| J2 + | **F1** (6 × 30 mm, **3 A slow-blow**, in PCB clips) → **VM rail** | |
 | VM rail | TMC2209 **VM** | short, 20–22 AWG |
 | VM rail ↔ star ground | **100 µF / 50 V** electrolytic (35 V is the minimum) | right at the driver's VM/GND pins, polarity! |
-| VM rail | LM2596 **IN+** | |
-| star ground | LM2596 **IN−** | |
-| LM2596 **OUT+** | perfboard **5 V rail** | **set to 5.0 V with a meter before connecting anything** |
-| LM2596 **OUT−** | star ground | (IN− and OUT− are the same on the LM2596) |
+| VM rail / star ground | J6 → LM2596 **IN+ / IN−** | |
+| LM2596 **OUT+ / OUT−** | J7 → perfboard **5 V rail** / star ground | **set to 5.0 V with a meter before connecting anything** |
 
 ### Layout (70 × 50 perfboard) and parts
 
 ```text
  back of the case
  ┌──────────────────────────────────────────────┐
- │ [J1 19V in/Jetson]  [J2 switched]   [J5 Hall]│
- │                                              │
- │   ┌─ LM2596 mini (43 × 21) ─┐   ★ star gnd   │
- │   └─────────────────────────┘                │
- │   C1 ║   ┌─ TMC2209 (socket) ─┐   R1         │
- │          └────────────────────┘              │
+ │ [J1 19V/Jetson] [J2 sw]  ═[ F1 6x30 fuse ]═   │
+ │                                               │
+ │  C1 ║   ┌─ TMC2209 (socket) ─┐   ★ star gnd   │
+ │          └────────────────────┘   R1          │
+ │ [J6 buck in] [J7 5V in]           [J5 Hall]   │
  │ [J3 motor 1A 1B 2A 2B]   [J4 ESP32 STEP DIR EN 3V3 GND]
  └──────────────────────────────────────────────┘
 ```
@@ -70,17 +70,18 @@ the base ESP32's GND. The ground is never switched or fused.
 | Ref | Part | Notes |
 |---|---|---|
 | J1 | 2-way 5.08 mm screw terminal | 19 V in from the jack (+, −); the Jetson's lead shares it |
-| J2 | 2-way 5.08 mm screw terminal | + from the panel fuse (− is spare / not needed) |
+| J2 | 2-way 5.08 mm screw terminal | + back from the switch (− is spare) |
 | J3 | 4-way terminal or JST-XH 4 | motor coils |
 | J4 | 5-way 2.54 mm header or terminal | to the base ESP32 |
 | J5 | 3-way 2.54 mm header | Hall sensor (5 V, GND, OUT) |
+| J6 | 2-way terminal | to the buck's input |
+| J7 | 2-way terminal | from the buck's output |
 | U1 | BTT TMC2209 on 2 × 8 female headers | so it can be swapped |
-| U2 | LM2596 mini buck (43 × 21) | stand it on its pins or on short wire legs |
+| F1 | 6 × 30 mm (3AG) **3 A slow-blow** in two PCB clips | drill the holes out to ~1.3 mm; clip end-stops to the outside so it can't walk out |
 | C1 | 100 µF / 50 V electrolytic | at U1's VM/GND |
 | R1 | 10 kΩ | Hall OUT pull-up to 3V3 |
-| F1 | 6 × 30 mm (3AG) **3 A slow-blow** | in the **panel** holder on the back wall, not on the board |
 
-Use 20 AWG wire or solder-filled tracks for the 19 V and ground runs (J1, J2, VM, buck IN); thin
+Use 20 AWG wire or solder-filled tracks for the 19 V and ground runs (J1, J2, F1, VM, J6); thin
 wire is fine for the logic and the 5 V Hall feed.
 
 ### TMC2209 (BTT, STEP/DIR mode) ↔ base ESP32-S3

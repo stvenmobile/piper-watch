@@ -3,13 +3,12 @@
 //   FRONT  the JC4827W543 4.3" display: window over its active area; the board's four corner
 //          ears screw (M3) to posts behind the wall, holding the glass against it.
 //   BACK   (left)  XW-604B snap-in rocker switch on a 1.5 mm patch (its clips need a thin panel),
-//                  5.5 x 2.1 IP68 panel jack (M12 thread, 12 mm hole): flange + gasket outside, nut inside,
-//                  6 x 30 mm panel FUSE holder (double-D hole: 15 dia, flats 12.2 apart) - fuses the
-//                  switched head side only (switch -> fuse -> block B); the Jetson's feed is unswitched
+//                  5.5 x 2.1 IP68 panel jack (M12 thread, 12 mm hole): flange + gasket outside, nut inside
 //          (right) cable exit, low under the motor: Jetson 19 V, ESP32 USB, camera USB
 //          (big enough for a USB-A plug and the barrel plug to pass), two zip-tie anchors
 //   LEFT   ESP32-S3 breakout (70 x 80, holes 32 x 72.5) standing 5 mm off the wall, USB to the back
-//   FLOOR  bosses for a 50 x 70 perfboard (stepper driver + 100 uF, buck, terminal blocks) in the
+//   FLOOR  bosses (M2.5 inserts) for a 50 x 70 perfboard (stepper driver + 100 uF, fuse clips,
+//          terminal blocks) in the
 //          front-right; bosses for the 19 -> 5 V buck (Seloky LM2596S, 66 x 36, holes 54 x 31) in
 //          the front-left, input end to the back; four screws down into the skirt
 //   CORNERS posts with M3 inserts for the drive deck's screws
@@ -47,10 +46,6 @@ switch_xz   = [-50, -26];        // centre (x, z) on the back wall
 switch_patch = 1.5;              // wall thickness for its clips
 jack_d      = 12.3 + cal_hole;  // 12 mm thread + 0.3 clearance; prints ~12.3
 jack_xz     = [-50, -58];
-fuse_d      = 15.0 + cal_hole;   // panel fuse holder: round hole ...
-fuse_flats  = 12.2 + 0.3;        // ... with two flats this far apart (stops it turning)
-fuse_xz     = [-20, -42];        // its ring nut (~20 across) clears the switch's recess and the
-                                 //   motor; the holder reaches ~34 mm inside
 exit_slot   = [32, 16];          // cable exit (w x h), rounded
 exit_xz     = [22, z_floor + 3 + 8];
 
@@ -60,7 +55,7 @@ brk_zc      = z_floor + 3 + 35;  // board 70 tall, 3 above the floor
 brk_standoff = 5;
 
 // ---- floor: 50 x 70 perfboard, front-right ----------------------------------------------------
-pb_holes    = [66, 46];          // x, y hole spacing (2 mm in from the edges): the 70 side runs left-right
+pb_holes    = [66, 46];          // x, y hole spacing MEASURED (M2.5 holes): the 70 side runs left-right
 pb_c        = [40, 36];          // centre (x, y): clear of the display's back (y < 66) and the motor (y > -2)
 pb_boss_h   = 6;
 
@@ -128,18 +123,15 @@ module cuts() {
     // barrel jack: plain hole in the full wall - flange + gasket outside, nut inside
     translate([jack_xz[0], -half, jack_xz[1]]) rotate([-90, 0, 0])
         translate([0, 0, -1]) cylinder(d = jack_d, h = l2_wall + 2, $fn = 48);
-    // fuse holder: double-D hole
-    translate([fuse_xz[0], -half - 1, fuse_xz[1]]) rotate([-90, 0, 0]) linear_extrude(l2_wall + 2)
-        intersection() { circle(d = fuse_d, $fn = 64); square([fuse_flats, fuse_d + 1], center = true); }
     // cable exit
     translate([exit_xz[0], -half - 1, exit_xz[1]]) rotate([-90, 0, 0]) linear_extrude(l2_wall + 2)
         offset(r = 6) square(exit_slot - [12, 12], center = true);
     // breakout boss holes (M3 inserts)
     for (sy = [-1, 1], sz = [-1, 1]) translate([-inner + brk_standoff - insert_m3[1] + 0.01, sy * brk_holes[0] / 2, brk_zc + sz * brk_holes[1] / 2])
         rotate([0, 90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1], $fn = 24);
-    // perfboard boss holes (M3 inserts)
-    for (sx = [-1, 1], sy = [-1, 1]) translate([pb_c[0] + sx * pb_holes[0] / 2, pb_c[1] + sy * pb_holes[1] / 2, z_floor + pb_boss_h - insert_m3[1]])
-        cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
+    // perfboard boss holes (M2.5 inserts)
+    for (sx = [-1, 1], sy = [-1, 1]) translate([pb_c[0] + sx * pb_holes[0] / 2, pb_c[1] + sy * pb_holes[1] / 2, z_floor + pb_boss_h - insert_m25[1]])
+        cylinder(d = insert_m25[0], h = insert_m25[1] + 1, $fn = 24);
     // buck boss holes (M3 inserts)
     for (sx = [-1, 1], sy = [-1, 1]) translate([buck_c[0] + sx * buck_holes[0] / 2, buck_c[1] + sy * buck_holes[1] / 2, z_floor + buck_boss_h - insert_m3[1]])
         cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
