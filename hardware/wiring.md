@@ -57,11 +57,11 @@ display; the right edge is 2.5 mm from the wall).
 ```text
  back of the case
      J6 buck            J1 19V in (switched, fused)        J3 motor
- ┌○──[19V GND 5V]──────[ +   − ]──────────────────[2B 2A 1A 1B]──○┐
+ ┌○──[19V GND 5V]──────[ +   − ]──────────────────[A1 A2 B1 B2]──○┐
  │                                                                 │
- │ J4 ▶● STEP          C1      ┌ VM GND 2B 2A 1A 1B VDD GND ┐      │
+ │ J4 ▶● STEP          C1      ┌ GND VIO B2 B1 A1 A2 GND VS ┐  pot │
  │     ● DIR                   │          TMC2209           │      │
- │     ● EN                    └ EN MS1 MS2 PDN UART CLK STEP DIR ┘│
+ │     ● EN                    └ DIR STEP CLK TX RX MS2 MS1 EN ┘     │
  │     ● HALL                                                      │
  │     ● 3V3                                                       │
  │     ● GND                                                       │
@@ -75,27 +75,28 @@ display; the right edge is 2.5 mm from the wall).
 ### Point-to-point wiring list
 
 Heavy = 20–22 AWG (19 V, ground and motor current); light = 24–30 AWG (logic). TMC2209 pins are
-its female header's solder pins.
+its female header's solder pins, named as on the BTT board: VS = motor supply (VM), VIO = logic
+supply, A1/A2 = one coil, B1/B2 = the other.
 
 | # | From | To | Wire | Net |
 |---|---|---|---|---|
 | 1 | J1 + | J6 19V | heavy | switched 19 V |
-| 2 | J1 + | U1 VM | heavy | switched 19 V |
-| 3 | C1 + | U1 VM | C1's own lead | switched 19 V (C1 right at the pins) |
-| 4 | C1 − | U1 GND (motor side, next to VM) | C1's own lead | ground |
+| 2 | J1 + | U1 VS | heavy | switched 19 V |
+| 3 | C1 + | U1 VS | C1's own lead | switched 19 V (C1 right at the pins) |
+| 4 | C1 − | U1 GND next to VS (motor side) | C1's own lead | ground |
 | 5 | J1 − | ★ ground point | heavy | ground |
 | 6 | J6 GND | ★ | heavy | ground |
 | 7 | U1 GND (motor side) | ★ | heavy | ground |
-| 8 | U1 GND (logic side, next to VDD) | ★ | light | ground |
+| 8 | U1 GND next to VIO (logic side) | ★ | light | ground |
 | 9 | J4 GND | ★ | light | ground |
 | 10 | J5 GND | ★ | light | ground |
-| 11 | U1 2B | J3 2B | heavy | motor |
-| 12 | U1 2A | J3 2A | heavy | motor |
-| 13 | U1 1A | J3 1A | heavy | motor |
-| 14 | U1 1B | J3 1B | heavy | motor |
+| 11 | U1 A1 | J3 A1 | heavy | motor, coil A |
+| 12 | U1 A2 | J3 A2 | heavy | motor, coil A |
+| 13 | U1 B1 | J3 B1 | heavy | motor, coil B |
+| 14 | U1 B2 | J3 B2 | heavy | motor, coil B |
 | 15 | J6 5V | J5 5V | light | 5 V (Hall only) |
-| 16 | J4 3V3 | U1 VDD | light | 3V3 |
-| 17 | U1 VDD | U1 MS1 | light | 3V3 (1/16 step) |
+| 16 | J4 3V3 | U1 VIO | light | 3V3 |
+| 17 | U1 VIO | U1 MS1 | light | 3V3 (1/16 step) |
 | 18 | U1 MS1 | U1 MS2 | light | 3V3 (1/16 step) |
 | 19 | J4 3V3 | R1 (one end) | light | 3V3 |
 | 20 | R1 (other end) | J4 HALL | light | Hall signal (pull-up) |
@@ -104,10 +105,10 @@ its female header's solder pins.
 | 23 | J4 DIR | U1 DIR | light | direction |
 | 24 | J4 EN | U1 EN | light | enable (LOW = on) |
 
-Leave U1's PDN, UART and CLK unconnected. Optional: a 10 kΩ from U1 EN to 3V3 keeps the motor
+Leave U1's CLK, TX, RX and the DIAG pins unconnected. Optional: a 10 kΩ from U1 EN to 3V3 keeps the motor
 disabled while the ESP32 boots (its pins float until the firmware sets them).
 
-Before plugging in U1: power J1 alone and check with a meter that U1's VM socket pin reads 19 V,
+Before plugging in U1: power J1 alone and check with a meter that U1's VS socket pin reads 19 V,
 J6 5V reads 5.0 V (buck set first), and no 19 V appears on any J4/J5 pin.
 
 **Headers and Dupont housings (J4, J5):**
@@ -129,7 +130,7 @@ J6 5V reads 5.0 V (buck set first), and no 19 V appears on any J4/J5 pin.
 | J6  | 3-way 5.08 mm screw terminal        | to the buck: 19V (switched, fused), GND out; 5V back              |
 | U1  | BTT TMC2209 on 2 × 8 female headers | so it can be swapped; check the pin labels against its silkscreen |
 | F1  | 6 × 30 mm (3AG) **3 A slow-blow**   | in the **panel** holder on the back wall, not on the board        |
-| C1  | 100 µF / 50 V electrolytic          | at U1's VM/GND                                                    |
+| C1  | 100 µF / 50 V electrolytic          | at U1's VS/GND                                                    |
 | R1  | 10 kΩ                               | Hall OUT pull-up to 3V3                                           |
 
 Use 20 AWG wire or solder-filled tracks for the 19 V and ground runs (J1, VM, J6 19V/GND); thin
@@ -139,18 +140,18 @@ wire is fine for the logic and the 5 V Hall feed.
 
 | TMC2209 pin                  | Goes to                   | Notes                                                  |
 | ---------------------------- | ------------------------- | ------------------------------------------------------ |
-| VM / GND (motor side)        | VM rail / board ground    |                                                        |
-| VIO (VDD) / GND (logic side) | ESP32 **3V3** / ESP32 GND | logic at 3.3 V: no level shifting needed               |
+| VS (VM) / GND (motor side)   | VM rail / board ground    |                                                        |
+| VIO / GND (logic side)       | ESP32 **3V3** / ESP32 GND | logic at 3.3 V: no level shifting needed               |
 | STEP                         | ESP32 **GPIO 4**          |                                                        |
 | DIR                          | ESP32 **GPIO 5**          |                                                        |
 | EN                           | ESP32 **GPIO 6**          | LOW = motor enabled                                    |
 | MS1, MS2                     | VIO (both HIGH)           | **1/16 microstepping** (the firmware will assume this) |
-| PDN/UART, CLK, INDEX, DIAG   | unconnected               | UART tuning can come later                             |
-| 1A, 1B / 2A, 2B              | NEMA17 coil 1 / coil 2    | find the pairs with a meter (≈ 2–3 Ω across a coil)    |
+| TX, RX, CLK, DIAG           | unconnected               | UART tuning can come later                             |
+| A1, A2 / B1, B2              | NEMA17 coil A / coil B    | find the pairs with a meter (≈ 2–3 Ω across a coil)    |
 
 **Current:** set Vref to about **0.7 V** (≈ 0.9 A RMS on the BTT board's formula) before connecting
 the motor. Measure between the trim pot and GND with the driver powered and the motor unplugged.
-Never plug or unplug the motor while VM is live.
+Never plug or unplug the motor while VS (19 V) is live.
 
 ### Homing sensor (A3144 Hall, on the motor bracket)
 
