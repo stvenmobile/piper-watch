@@ -10,7 +10,7 @@
 //          (big enough for a USB-A plug and the barrel plug to pass), two zip-tie anchors
 //   LEFT   ESP32-S3 breakout (70 x 80, holes 32 x 72.5) standing 5 mm off the wall, USB to the back
 //   FLOOR  19 V split block (2-way barrier strip, 36 x 21.5, M3.5 spade screws) back-left near the
-//          jack and switch: two low bosses with M3 inserts; its − side is the common ground.
+//          jack and switch: a low pad at each end with two M3 inserts; its − side is the common ground.
 //          Bosses (M2.5 inserts) for a 50 x 70 perfboard (stepper driver + 100 uF,
 //          terminal blocks) in the
 //          front-right; bosses for the 19 -> 5 V buck (Seloky LM2596S, 66 x 36, holes 54 x 31) in
@@ -76,7 +76,7 @@ buck_boss_h = 6;                 // its underside has pin stubs (~3 mm)
 
 // ---- floor: 19 V split block (2-way barrier terminal strip), back-left by the jack and switch ---
 tb_size     = [36, 21.5, 13];    // length (x), base width (y), height (spec sheet)
-tb_holes    = 28.5;              // EST from the spec sheet (9.5 + 9.5 + 9.5) - MEASURE the 4 mm holes' centres
+tb_holes    = [28.7, 8.8];       // MEASURED: four 4 mm holes, two at each end - along x, across y
 tb_c        = [-38, -46];        // centre: ~21 mm to the back wall for the spades + wire bends (jack and
                                  //   switch leads on its back side); the Jetson
                                  //   and perfboard leads leave from its front side; clear of the corner
@@ -113,8 +113,8 @@ module adds() {
     for (sx = [-1, 1], sy = [-1, 1]) translate([buck_c[0] + sx * buck_holes[0] / 2, buck_c[1] + sy * buck_holes[1] / 2, z_floor - 0.01])
         cylinder(d = 7, h = buck_boss_h + 0.01, $fn = 32);
     // split-block bosses
-    for (sx = [-1, 1]) translate([tb_c[0] + sx * tb_holes / 2, tb_c[1], z_floor - 0.01])
-        cylinder(d = 8, h = tb_boss_h + 0.01, $fn = 32);
+    for (sx = [-1, 1]) translate([tb_c[0] + sx * tb_holes[0] / 2, tb_c[1], z_floor - 0.01])
+        hull() for (sy = [-1, 1]) translate([0, sy * tb_holes[1] / 2, 0]) cylinder(d = 8, h = tb_boss_h + 0.01, $fn = 32);
     // zip-tie anchors beside the cable exit: little arches on the floor
     for (x = [exit_xz[0] - exit_slot[0] / 2 - 8, exit_xz[0] + exit_slot[0] / 2 + 8])
         translate([x, -inner + 10, z_floor - 0.01]) difference() {
@@ -159,7 +159,7 @@ module cuts() {
     for (sx = [-1, 1], sy = [-1, 1]) translate([buck_c[0] + sx * buck_holes[0] / 2, buck_c[1] + sy * buck_holes[1] / 2, z_floor + buck_boss_h - insert_m3[1]])
         cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
     // split-block boss holes (M3 inserts; the strip's 4 mm holes take M3 screws + washers)
-    for (sx = [-1, 1]) translate([tb_c[0] + sx * tb_holes / 2, tb_c[1], z_floor + tb_boss_h - insert_m3[1]])
+    for (sx = [-1, 1], sy = [-1, 1]) translate([tb_c[0] + sx * tb_holes[0] / 2, tb_c[1] + sy * tb_holes[1] / 2, z_floor + tb_boss_h - insert_m3[1]])
         cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
     // deck screw inserts in the corner posts
     for (sx = [-1, 1], sy = [-1, 1]) translate([sx * corner_xy, sy * corner_xy, z_top - insert_m3[1]])
