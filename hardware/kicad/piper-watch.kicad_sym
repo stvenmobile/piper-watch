@@ -143,7 +143,7 @@
 (property "Value" "GC9A01_Module" (at 0 -6.35 0) (effects (font (size 1.27 1.27))))
 (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
 (property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
-(property "Description" "1.28 in round 240 x 240 TFT, GC9A01, SPI (check the module's pin labels; BL may be absent)" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "1.28 in round 240 x 240 TFT, GC9A01, SPI; 7 pins, no backlight pin (backlight always on)" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
 (symbol "GC9A01_Module_0_1" (rectangle (start -7.62 7.62) (end 7.62 -5.08) (stroke (width 0.254) (type default)) (fill (type background))))
 (symbol "GC9A01_Module_1_1"
 (pin passive line (at -10.16 5.08 0) (length 2.54) (name "VCC" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
@@ -153,7 +153,6 @@
 (pin passive line (at 10.16 5.08 180) (length 2.54) (name "DC" (effects (font (size 1.27 1.27)))) (number "5" (effects (font (size 1.27 1.27)))))
 (pin passive line (at 10.16 2.54 180) (length 2.54) (name "CS" (effects (font (size 1.27 1.27)))) (number "6" (effects (font (size 1.27 1.27)))))
 (pin passive line (at 10.16 0 180) (length 2.54) (name "RST" (effects (font (size 1.27 1.27)))) (number "7" (effects (font (size 1.27 1.27)))))
-(pin passive line (at 10.16 -2.54 180) (length 2.54) (name "BL" (effects (font (size 1.27 1.27)))) (number "8" (effects (font (size 1.27 1.27)))))
 ))
 (symbol "SH1122_OLED" (pin_names (offset 1.016)) (exclude_from_sim no) (in_bom yes) (on_board yes)
 (property "Reference" "U" (at 0 8.89 0) (effects (font (size 1.27 1.27))))

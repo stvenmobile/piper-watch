@@ -2,7 +2,7 @@
 // straight from l2_body.scad (so it's identical to the real print) - to check before the long
 // body print:
 //   * XW-604B rocker: snaps into the 28 x 10 cut-out, its clips grip the 1.5 mm patch
-//   * barrel jack (5.5 x 2.1 IP68, M12): 12 mm hole in the full 2.5 mm wall, flange + gasket
+//   * barrel jack (5.5 x 2.1 IP68, 11.2 mm thread): 11.5 mm hole in the full 2.5 mm wall, flange + gasket
 //     outside, nut inside - goes in without forcing, nut pulls the gasket flat
 //   * fuse holder (6 x 30 mm): double-D hole - slides in, doesn't turn, ring nut tightens flat
 // PRINT outer face down (as modelled here), no supports. PETG, same settings as the body.

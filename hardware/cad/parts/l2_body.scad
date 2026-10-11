@@ -3,7 +3,7 @@
 //   FRONT  the JC4827W543 4.3" display: window over its active area; the board's four corner
 //          ears screw (M3) to posts behind the wall, holding the glass against it.
 //   BACK   (left)  XW-604B snap-in rocker switch on a 1.5 mm patch (its clips need a thin panel),
-//                  5.5 x 2.1 IP68 panel jack (M12 thread, 12 mm hole): flange + gasket outside, nut inside,
+//                  5.5 x 2.1 IP68 panel jack (11.2 mm thread, flange 14.1, nut 13.6 AF, 21 mm behind the flange): flange + gasket outside, nut inside,
 //                  6 x 30 mm panel FUSE holder (double-D hole: 15 dia, flats 12.2 apart): split block
 //                  -> fuse -> switch -> perfboard J1 (the head side only; the Jetson is unswitched)
 //          (right) cable exit, low under the motor: Jetson 19 V, ESP32 USB, camera USB
@@ -48,7 +48,7 @@ disp_win_dz = 2.8;               // the active area sits this far ABOVE the boar
 switch_cut  = [28, 10];          // XW-604B snap-in cut-out
 switch_xz   = [-50, -26];        // centre (x, z) on the back wall
 switch_patch = 1.5;              // wall thickness for its clips
-jack_d      = 12.3 + cal_hole;  // 12 mm thread + 0.3 clearance; prints ~12.3
+jack_d      = 11.2 + 0.3 + cal_hole;  // MEASURED thread 11.2 OD (sold as M12) + 0.3: no wobble before the nut is on
 jack_xz     = [-50, -58];
 fuse_d      = 15.0 + cal_hole;   // panel fuse holder: round hole ...
 fuse_flats  = 12.2 + 0.3;        // ... with two flats this far apart (stops it turning)

@@ -213,9 +213,8 @@ together at start-up.
 | CS left eye                                           | D3       | 4    | CS                | –                  | –                   |
 | CS right eye                                          | D4       | 5    | –                 | CS                 | –                   |
 | CS mouth                                              | D5       | 6    | –                 | –                  | CS (pin 7)          |
-| Eye backlight (only if the modules have a BL/BLK pin) | D6       | 43   | BL                | BL                 | –                   |
 
-Free: D2 (GPIO 3), D7 (GPIO 44) and D9 (GPIO 8). GPIO 3 is an ESP32-S3 strapping pin, so it's
+Free: D2 (GPIO 3), D6 (GPIO 43), D7 (GPIO 44) and D9 (GPIO 8). GPIO 3 is an ESP32-S3 strapping pin, so it's
 deliberately left unused. "Left" and "right" are as seen from the front.
 
 ### Notes
@@ -232,7 +231,7 @@ deliberately left unused. "Left" and "right" are as seen from the front.
 - **SPI speed:** the GC9A01 runs happily at 40–80 MHz and the SH1122 at about 10 MHz. The firmware
   sets each device's speed, so they share the bus without trouble.
 - **Check the labels:** confirm each module's pin labels on arrival. Some GC9A01 modules have a
-  BL/BLK backlight pin; others tie the backlight on.
+  BL/BLK backlight pin; others tie the backlight on. **These modules (measured): 7 pins, VCC GND SCL SDA DC CS RST - no BL, so D6 is free.**
 - **Image orientation:** the eyes are mounted upside down, so the firmware rotates their image 180°.
 
 ---

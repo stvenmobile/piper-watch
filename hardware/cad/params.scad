@@ -95,13 +95,13 @@ diff_clr     = [0.25, 0.45];     // [inner, outer] clearance each side. Fit test
 
 // --- Eyes: 1.28" round TFT, 240 x 240, GC9A01, SPI (MTDELE; vendor listing - re-check on arrival).
 // The board is ROUND, concentric with the display, plus a tab carrying the 7 pins.
-eye_board_d  = 37.5;             // round board
-eye_glass_d  = 35.3;             // round glass, concentric
+eye_board_d  = 37.8;             // round board - MEASURED
+eye_glass_d  = 35.7;             // round glass, concentric - MEASURED
 eye_active_d = 32.4;             // visible (pixel) circle
-eye_tab      = [22.7, 8.0];      // pin tab: width, length beyond the circle (overall height 45.5)
-eye_t        = 3.2;              // board + glass, without pins
-eye_tab_hole_d = 2.0;            // EST: two small holes at the tab's outer corners
-eye_tab_hole_x = 9.0;            // EST: their distance either side of the centre line
+eye_tab      = [22.5, 7.6];      // pin tab: width, length beyond the circle - MEASURED (11.3 from where it meets the circle; overall 45.4)
+eye_t        = 3.8;              // board + glass, without pins - MEASURED
+eye_tab_hole_d = 2.0;            // MEASURED: two holes in the tab ...
+eye_tab_hole_x = 9.5;            // MEASURED: ... 19 mm apart
 
 // --- Mouth: 2.08" white OLED, 256 x 64, SH1122, 4-wire SPI (GME25664-65; vendor drawing:
 // 2_08-white_OLED_2.jpg). X along the board's length, from the pin end; Y across.
