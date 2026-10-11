@@ -31,7 +31,7 @@ GX0 = BX + (BW - (NI - 1) * 2.54) / 2               # hole (0, 0)
 GY0 = BY + (BH - (NJ - 1) * 2.54) / 2
 MOUNT = [(BX + 2, BY + 2), (BX + 68, BY + 2), (BX + 2, BY + 48), (BX + 68, BY + 48)]   # 66 x 46
 HEAVY, LIGHT = 0.6, 0.3
-STAR = (9, 5)                                      # the board ground point (a solder joint, drawn as a via)
+STAR = (11, 5)                                     # the board ground point (a solder joint, drawn as a via)
 
 
 def G(i, j):
@@ -45,24 +45,23 @@ def V(p):
 # ref: (grid hole of pad 1, rotation in degrees) - matches the board as built: J6, J1, J3 along the
 # back edge (screw openings facing it), J4 and J5 down the left edge, the driver in the middle
 PLACE = {
-    "J6": ((5, 2), 180), "J1": ((11, 2), 180), "J3": ((21, 2), 180),
+    "J6": ((5, 2), 180), "J1": ((11, 2), 180), "J3": ((21, 2), 180),   # left to right: J6 5V GND 19V, J1 + -, J3 A2 A1 B1 B2
     "J4": ((0, 7), 0), "J5": ((0, 14), 0),
-    # driver standing with its rows vertical: logic pins (EN..DIR) in column 6 facing J4, power pins
-    # (VS GND A2 A1 B1 B2 VIO GND) in column 11, VS right under J1 +
-    "U1": ((11, 13), 180),
-    "C1": ((14, 5), 270), "C2": ((3, 5), 270),   # + at the top, - two holes below
-    "R1": ((2, 15), 0), "R2": ((7, 15), 0),
+    # driver right under J3 and C1, power row on top: VS GND A2 A1 B1 B2 VIO GND (left to right),
+    # so the four coil wires go straight up to J3 in order; logic row (EN .. DIR) underneath
+    "U1": ((21, 9), 270),
+    "C1": ((14, 7), 90),                         # C1: + right above VS, - above it
+    "R1": ((2, 15), 0), "R2": ((9, 16), 0),
 }
 
 # connections in routing order: (net, heavy?, pad, pad) - pads as "REF.PIN" or "STAR"; a new
 # connection may land on any wire already laid for its net
 ROUTES = [
-    ("+19V_SW", True, "J1.1", "U1.8"), ("+19V_SW", True, "C1.1", "U1.8"), ("+19V_SW", True, "J6.1", "J1.1"),
-    ("+19V_SW", True, "C2.1", "J6.1"),
-    ("GND", True, "J1.2", "U1.7"), ("GND", True, "STAR", "U1.7"), ("GND", True, "C1.2", "STAR"),
-    ("GND", True, "J6.2", "STAR"), ("GND", True, "C2.2", "STAR"),
-    ("/Level 2 drive/MOT_A1", True, "U1.5", "J3.1"), ("/Level 2 drive/MOT_A2", True, "U1.6", "J3.2"),
-    ("/Level 2 drive/MOT_B1", True, "U1.4", "J3.3"), ("/Level 2 drive/MOT_B2", True, "U1.3", "J3.4"),
+    ("/Level 2 drive/MOT_A2", True, "U1.6", "J3.4"), ("/Level 2 drive/MOT_A1", True, "U1.5", "J3.3"),
+    ("/Level 2 drive/MOT_B1", True, "U1.4", "J3.2"), ("/Level 2 drive/MOT_B2", True, "U1.3", "J3.1"),
+    ("+19V_SW", True, "J1.2", "U1.8"), ("+19V_SW", True, "C1.1", "U1.8"), ("+19V_SW", True, "J6.1", "J1.2"),
+    ("GND", True, "J1.1", "STAR"), ("GND", True, "STAR", "U1.7"), ("GND", True, "C1.2", "STAR"),
+    ("GND", True, "J6.2", "STAR"),
     ("/Level 2 drive/HALL", False, "J5.3", "J4.4"), ("/Level 2 drive/HALL", False, "R1.2", "J4.4"),
     ("GND", False, "J4.6", "STAR"), ("GND", False, "J5.2", "STAR"),
     ("/Level 2 drive/STEP", False, "J4.1", "U1.15"), ("/Level 2 drive/DIR", False, "J4.2", "U1.16"),
