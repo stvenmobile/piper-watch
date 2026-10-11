@@ -25,8 +25,30 @@ GLOBAL = {"GND", "+19V", "+19V_FUSED", "+19V_SW", "+5V"}
 TWO_PIN = {"Device:R", "Device:C_Polarized", "Device:Fuse"}
 
 
-def uid():
-    return str(uuid.uuid4())
+_seq = [0]
+
+
+def uid(key=None):
+    """Deterministic UUIDs, so re-running gives the same files and the PCB can refer to symbols."""
+    if key is None:
+        _seq[0] += 1
+        key = "seq/%d" % _seq[0]
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, "piper-watch/" + key))
+
+
+# footprints for the parts ON the perfboard; every other symbol is marked on_board no (harness parts)
+FOOTPRINTS = {
+    "J1": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",
+    "J6": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal",
+    "J3": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-4-5.08_1x04_P5.08mm_Horizontal",
+    "J4": "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical",
+    "J5": "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
+    "U1": "Module:Pololu_Breakout-16_15.2x20.3mm",
+    "C1": "Capacitor_THT:CP_Radial_D8.0mm_P5.00mm",
+    "C2": "Capacitor_THT:CP_Radial_D8.0mm_P5.00mm",
+    "R1": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+    "R2": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+}
 
 
 def q(s):
@@ -210,8 +232,9 @@ def place(part, defs, path):
     out = []
     r = prop_at(text_, "Reference")
     v = prop_at(text_, "Value")
+    on_board = "yes" if part["ref"] in FOOTPRINTS else "no"
     out.append(f"(symbol (lib_id {q(part['lib_id'])}) (at {fmt(sx)} {fmt(sy)} 0) (unit 1) (exclude_from_sim no) (in_bom yes) "
-               f"(on_board yes) (dnp no) (uuid {q(uid())})")
+               f"(on_board {on_board}) (dnp no) (uuid {q(uid('sym/' + part['ref']))})")
     if part["lib_id"] in TWO_PIN:          # vertical 2-pin parts: both texts horizontal, to the right
         left = "(effects (font (size 1.27 1.27)) (justify left))"
         out.append(f"(property \"Reference\" {q(part['ref'])} (at {fmt(sx + 3.81)} {fmt(sy - 1.27)} 0) {left})")
@@ -221,7 +244,8 @@ def place(part, defs, path):
             v = (0.0, -12.7, 0)
         out.append(f"(property \"Reference\" {q(part['ref'])} (at {fmt(sx + r[0])} {fmt(sy - r[1])} {r[2]}) {FONT})")
         out.append(f"(property \"Value\" {q(part['value'])} (at {fmt(sx + v[0])} {fmt(sy - v[1])} {v[2]}) {FONT})")
-    for p in ("Footprint", "Datasheet", "Description"):
+    out.append(f"(property \"Footprint\" {q(FOOTPRINTS.get(part['ref'], ''))} (at {fmt(sx)} {fmt(sy)} 0) {FONT_HIDE})")
+    for p in ("Datasheet", "Description"):
         out.append(f"(property \"{p}\" \"\" (at {fmt(sx)} {fmt(sy)} 0) {FONT_HIDE})")
     for num in pins:
         out.append(f"(pin {q(num)} (uuid {q(uid())}))")
@@ -251,10 +275,10 @@ def schematic(sheet_uuid, paper, title, lib_ids, body):
 
 
 def main():
-    root_uuid = uid()
+    root_uuid = uid("root")
     sheet_blocks = []
     for i, sh in enumerate(SHEETS):
-        sh["uuid"] = uid()
+        sh["uuid"] = uid("sheet/" + sh["file"])
         lib_ids = {p["lib_id"] for p in sh["parts"]}
         defs = {i_: symbol_def(i_) for i_ in lib_ids}
         path = f"/{root_uuid}/{sh['uuid']}"
@@ -265,7 +289,7 @@ def main():
         for k, n in enumerate(sh["notes"]):
             body.append(text(n, (20.32, y + k * 3.81)))
         open(os.path.join(OUT, sh["file"]), "w", encoding="utf-8", newline="\n").write(
-            schematic(uid(), sh["paper"], sh["title"], lib_ids, body))
+            schematic(uid("file/" + sh["file"]), sh["paper"], sh["title"], lib_ids, body))
         x = 30.48 + i * 76.2
         sheet_blocks.append(
             f"(sheet (at {fmt(x)} 60.96) (size 60.96 30.48) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) "

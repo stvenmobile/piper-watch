@@ -20,3 +20,18 @@ there's no PCB. `piper-watch.pdf` is a plot of all the sheets.
 
 Checks: `kicad-cli sch erc piper-watch.kicad_sch` (0 violations on the draft), and
 `kicad-cli sch export pdf piper-watch.kicad_sch` to refresh the PDF.
+
+## Perfboard (Level 2)
+
+`perfboard_wiring.png` is the 70 x 50 perfboard as built: top view, back of the case at the top,
+parts on the 2.54 mm hole grid, every pad labelled. Wires are soldered on the underside but drawn
+as seen from the top: copper = bare solid wire (thick = 19 V, GND, motor), red = insulated wire
+where a run has to cross another.
+
+It's drawn from `piper-watch.kicad_pcb`, which KiCad checks against the schematic (DRC: no
+unconnected items, no schematic mismatches). Rebuild:
+
+    "C:\Program Files\KiCad\10.0\bin\python.exe" tools/gen_perfboard.py   # placement + wire routing
+    py -3 tools/plot_perfboard.py                                         # the picture (needs matplotlib)
+
+Placement is the `PLACE` table in `gen_perfboard.py`; the wires are laid by a small grid router.
