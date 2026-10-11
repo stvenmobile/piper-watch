@@ -17,11 +17,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 NET_COLOURS = {"+19V_SW": "#d62828", "+5V": "#ffffff", "GND": "#1a1a1a", "+3V3": "#f28c28",
                "STEP": "#1f6fd1", "DIR": "#2a9d3a", "EN": "#8e44ad", "HALL": "#8b5a2b",
                "MOT_A1": "#22b8c8", "MOT_A2": "#0e7c86", "MOT_B1": "#ff6fae", "MOT_B2": "#b8336a"}
-NET_NAMES = [("+19V_SW", "19 V (switched, fused)"), ("GND", "GND"), ("+5V", "5 V (Hall)"), ("+3V3", "3V3 (from the ESP32)"),
+NET_NAMES = [("+19V_SW", "19 V (switched)"), ("GND", "GND"), ("+5V", "5 V (Hall)"), ("+3V3", "3V3 (from the ESP32)"),
              ("STEP", "STEP"), ("DIR", "DIR"), ("EN", "EN"), ("HALL", "HALL"),
              ("MOT_A2", "coil A2"), ("MOT_A1", "coil A1"), ("MOT_B1", "coil B1"), ("MOT_B2", "coil B2")]
 PCB = os.path.join(HERE, "..", "piper-watch.kicad_pcb")
 PNG = os.path.join(HERE, "..", "perfboard_wiring.png")
+PDF = os.path.join(HERE, "..", "perfboard_wiring.pdf")     # vector: prints sharp at any size
+NOTES = [                                                    # short lines: no wider than the board
+    "TOP VIEW - back of the case at the top.",
+    "Wires are soldered on the UNDERSIDE, but drawn as seen from the top.",
+    "Thick = heavy wire (19 V, GND, motor).",
+    "Dotted stripe = INSULATED wire (it crosses another run); the rest can be bare.",
+    "Grey pads are not connected.  TMC2209 square pad = pin 1 (GND).",
+    "J6 / J1 / J3: the screw openings face the back edge.",
+]
 KICAD_PY = r"C:\Program Files\KiCad\10.0\bin\python.exe"
 
 DUMP = r'''
@@ -74,7 +83,10 @@ def main():
     x0, y0, x1, y1 = d["edge"]
     fig, ax = plt.subplots(figsize=(15, 11.5), dpi=130)
     ax.set_xlim(x0 - 6, x1 + 6)
-    ax.set_ylim(y1 + 9.5 + 2.2 * 6 + 1 + 3 * 2.4 + 2, y0 - 9)
+    y_notes = y1 + 3                                         # notes, then the parts, then the wire colours
+    y_parts = y_notes + 2.4 * len(NOTES) + 1.5
+    y_nets = y_parts + 2.2 * 5 + 1.5
+    ax.set_ylim(y_nets + 2.4 * 3 + 1, y0 - 9)
     ax.set_aspect("equal")
     ax.axis("off")
     ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, fc="#f3e9c6", ec="#8a7a4a", lw=1.5, zorder=0))
@@ -147,21 +159,19 @@ def main():
             ax.text(p["x"] + 1.2, p["y"], "+" if p["num"] == "1" else "-", fontsize=9, ha="left", va="center", zorder=6, fontweight="bold")
         elif p["ref"] == "GP1":
             ax.text(p["x"], p["y"] + 1.3, label, fontsize=6.5, ha="center", va="top", zorder=6)
-    ax.text(x0, y1 + 3, "TOP VIEW - back of the case at the top.  Wires are soldered on the UNDERSIDE, drawn as seen from the top.  "
-            "Thick = heavy wire (19 V, GND, motor).  Dotted stripe = INSULATED wire (it crosses another run); the rest can be bare.",
-            fontsize=8.5, va="top")
+    for k, line in enumerate(NOTES):
+        ax.text(x0, y_notes + 2.4 * k, line, fontsize=8.5, va="top")
     for k, (net, name) in enumerate(NET_NAMES):
-        lx, ly = x0 + (k % 4) * 18, y1 + 9.5 + 2.2 * 6 + 1 + (k // 4) * 2.4
+        lx, ly = x0 + (k % 4) * 17.5, y_nets + (k // 4) * 2.4
         ax.plot([lx, lx + 3], [ly, ly], color="#333333", lw=5.2, solid_capstyle="round")
         ax.plot([lx, lx + 3], [ly, ly], color=NET_COLOURS[net], lw=3.8, solid_capstyle="round")
         ax.text(lx + 4.2, ly, name, fontsize=8, va="center")
-    ax.text(x0, y1 + 6, "Grey pads are not connected.  TMC2209 square pad = pin 1 (GND).  J6/J1/J3 screw openings face the back edge.",
-            fontsize=8.5, va="top")
     for k, line in enumerate(legend):
-        ax.text(x0 + (k % 2) * 36, y1 + 9.5 + (k // 2) * 2.2, line, fontsize=8, va="top", color="#1f4e79")
+        ax.text(x0 + (k % 2) * 36, y_parts + (k // 2) * 2.2, line, fontsize=8, va="top", color="#1f4e79")
     ax.text(x0, y0 - 6.5, "Piper-Watch Level 2 perfboard (70 x 50)", fontsize=12, fontweight="bold", va="top")
     fig.savefig(PNG, bbox_inches="tight", facecolor="white")
-    print("written", os.path.normpath(PNG))
+    fig.savefig(PDF, bbox_inches="tight", facecolor="white")
+    print("written", os.path.normpath(PNG), "and", os.path.normpath(PDF))
 
 
 if __name__ == "__main__":
