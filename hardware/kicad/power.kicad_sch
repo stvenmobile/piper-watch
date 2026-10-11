@@ -1,0 +1,781 @@
+(kicad_sch (version 20250114) (generator "piper-watch-gen") (generator_version "9.0") (uuid "6f2a6cf2-a870-4af1-9012-8ed3a0a83c2b") (paper "A4") (title_block (title "Power: 19 V in, split block, panel fuse, switch, 5 V buck") (company "Piper-Watch") (comment 1 "Wiring draft generated from hardware/wiring.md"))
+(lib_symbols
+(symbol "Connector:Barrel_Jack"
+		(pin_names
+			(offset 1.016)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "J"
+			(at 0 5.334 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Barrel_Jack"
+			(at 0 -5.08 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 1.27 -1.016 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 1.27 -1.016 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "DC Barrel Jack"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "DC power barrel jack connector"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "BarrelJack*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "Barrel_Jack_0_1"
+			(rectangle
+				(start -5.08 3.81)
+				(end 5.08 -3.81)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy -3.81 -2.54) (xy -2.54 -2.54) (xy -1.27 -1.27) (xy 0 -2.54) (xy 2.54 -2.54) (xy 5.08 -2.54)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start -3.302 1.905)
+				(mid -3.9343 2.54)
+				(end -3.302 3.175)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start -3.302 1.905)
+				(mid -3.9343 2.54)
+				(end -3.302 3.175)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start 3.683 3.175)
+				(end -3.302 1.905)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 5.08 2.54) (xy 3.81 2.54)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "Barrel_Jack_1_1"
+			(pin passive line
+				(at 7.62 2.54 180)
+				(length 2.54)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 7.62 -2.54 180)
+				(length 2.54)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Connector_Generic:Conn_01x02"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "J"
+			(at 0 2.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x02"
+			(at 0 -5.08 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "Conn_01x02_1_1"
+			(rectangle
+				(start -1.27 1.27)
+				(end 1.27 -3.81)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -2.413)
+				(end 0 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 3.81)
+				(name "Pin_2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Device:Fuse"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "F"
+			(at 2.032 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Fuse"
+			(at -1.905 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Fuse"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "fuse"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "*Fuse*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "Fuse_0_1"
+			(rectangle
+				(start -0.762 -2.54)
+				(end 0.762 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 2.54) (xy 0 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "Fuse_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Switch:SW_SPST"
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "SW"
+			(at 0 3.175 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SW_SPST"
+			(at 0 -2.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Single Pole Single Throw (SPST) switch"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "switch lever"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "SW_SPST_0_0"
+			(circle
+				(center -2.032 0)
+				(radius 0.508)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.524 0.254) (xy 1.524 1.778)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 2.032 0)
+				(radius 0.508)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "SW_SPST_1_1"
+			(pin passive line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "A"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 5.08 0 180)
+				(length 2.54)
+				(name "B"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "piper-watch:Barrier_Strip_2x2" (pin_names (offset 1.016)) (exclude_from_sim no) (in_bom yes) (on_board yes)
+(property "Reference" "TB" (at 0 6.35 0) (effects (font (size 1.27 1.27))))
+(property "Value" "Barrier_Strip_2x2" (at 0 -3.81 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "2-circuit barrier terminal strip (M3.5 screws, spade lugs): two screws per circuit" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(symbol "Barrier_Strip_2x2_0_1" (rectangle (start -5.08 5.08) (end 5.08 -2.54) (stroke (width 0.254) (type default)) (fill (type background))))
+(symbol "Barrier_Strip_2x2_1_1"
+(pin passive line (at -7.62 2.54 0) (length 2.54) (name "1A" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+(pin passive line (at -7.62 0 0) (length 2.54) (name "2A" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+(pin passive line (at 7.62 2.54 180) (length 2.54) (name "1B" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+(pin passive line (at 7.62 0 180) (length 2.54) (name "2B" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
+))
+(symbol "piper-watch:LM2596_Module" (pin_names (offset 1.016)) (exclude_from_sim no) (in_bom yes) (on_board yes)
+(property "Reference" "U" (at 0 6.35 0) (effects (font (size 1.27 1.27))))
+(property "Value" "LM2596_Module" (at 0 -3.81 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "LM2596S buck converter module (adjustable, set to 5.0 V)" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(symbol "LM2596_Module_0_1" (rectangle (start -7.62 5.08) (end 7.62 -2.54) (stroke (width 0.254) (type default)) (fill (type background))))
+(symbol "LM2596_Module_1_1"
+(pin passive line (at -10.16 2.54 0) (length 2.54) (name "IN+" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+(pin passive line (at -10.16 0 0) (length 2.54) (name "IN-" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+(pin passive line (at 10.16 2.54 180) (length 2.54) (name "OUT+" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+(pin passive line (at 10.16 0 180) (length 2.54) (name "OUT-" (effects (font (size 1.27 1.27)))) (number "4" (effects (font (size 1.27 1.27)))))
+))
+)
+(symbol (lib_id "Connector:Barrel_Jack") (at 40.64 63.5 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "693ee747-92a9-410b-b753-e0ec02de7bf0")
+(property "Reference" "J7" (at 40.64 58.166 0) (effects (font (size 1.27 1.27))))
+(property "Value" "19 V panel jack (5.5 x 2.1)" (at 40.64 68.58 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 40.64 63.5 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 40.64 63.5 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 40.64 63.5 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "42af6cc5-9497-487a-a63f-0ed450cca52d"))
+(pin "2" (uuid "3055b539-9f1c-4829-8316-6b9bca12a17b"))
+(instances (project "piper-watch" (path "/e56e7f82-f52b-4710-ac11-1dbcb1ff9984/b9a8e4de-4068-4057-a335-9d95b0c99ea9" (reference "J7") (unit 1)))))
+(wire (pts (xy 48.26 60.96) (xy 50.8 60.96)) (stroke (width 0) (type default)) (uuid "7ced9bc3-c241-4f7c-8730-61b6e87f211e"))
+(global_label "+19V" (shape passive) (at 50.8 60.96 0) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify left)) (uuid "12b9354e-ee54-4313-96a6-d1c84436c9fe") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 50.8 60.96 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes))))
+(wire (pts (xy 48.26 66.04) (xy 50.8 66.04)) (stroke (width 0) (type default)) (uuid "e5df321f-0671-4038-ae67-f58d57820295"))
+(global_label "GND" (shape passive) (at 50.8 66.04 0) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify left)) (uuid "d8431315-66bf-4673-842b-c9b6946905b5") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 50.8 66.04 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes))))
+(symbol (lib_id "piper-watch:Barrier_Strip_2x2") (at 93.98 63.5 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "0ba89fb3-9da0-4ece-80e4-bde23fa659ef")
+(property "Reference" "TB1" (at 93.98 57.15 0) (effects (font (size 1.27 1.27))))
+(property "Value" "19 V split block" (at 93.98 67.31 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 93.98 63.5 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 93.98 63.5 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 93.98 63.5 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "a944e8b9-f33b-48f1-9548-f3ad8de05aeb"))
+(pin "3" (uuid "985cb7d5-90b9-440b-8acd-1229756ac54d"))
+(pin "2" (uuid "eecb4bbe-d76c-486b-9021-35b8998e4514"))
+(pin "4" (uuid "83084c7a-b153-4f6a-8197-836e1fe2acee"))
+(instances (project "piper-watch" (path "/e56e7f82-f52b-4710-ac11-1dbcb1ff9984/b9a8e4de-4068-4057-a335-9d95b0c99ea9" (reference "TB1") (unit 1)))))
+(wire (pts (xy 86.36 60.96) (xy 83.82 60.96)) (stroke (width 0) (type default)) (uuid "e1b23ae4-2d2d-4091-b4f6-b4534c228728"))
+(global_label "+19V" (shape passive) (at 83.82 60.96 180) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify right)) (uuid "a8901add-daee-44b5-b009-f85458dc54bf") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 83.82 60.96 0) (effects (font (size 1.27 1.27)) (justify right) (hide yes))))
+(wire (pts (xy 86.36 63.5) (xy 83.82 63.5)) (stroke (width 0) (type default)) (uuid "46b4c17a-3e31-4200-856c-d8048e789fb5"))
+(global_label "GND" (shape passive) (at 83.82 63.5 180) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify right)) (uuid "43dfb626-e6cd-4011-b3e6-774e4356ee02") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 83.82 63.5 0) (effects (font (size 1.27 1.27)) (justify right) (hide yes))))
+(wire (pts (xy 101.6 60.96) (xy 104.14 60.96)) (stroke (width 0) (type default)) (uuid "733e24e0-0913-4a7e-9f23-10047d386910"))
+(global_label "+19V" (shape passive) (at 104.14 60.96 0) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify left)) (uuid "405bdbb9-88a5-4e01-ad13-3df7ea7ac4bb") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 104.14 60.96 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes))))
+(wire (pts (xy 101.6 63.5) (xy 104.14 63.5)) (stroke (width 0) (type default)) (uuid "fda7b46e-e0d0-4913-869b-66fc28cb5063"))
+(global_label "GND" (shape passive) (at 104.14 63.5 0) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify left)) (uuid "8916a3bf-51e2-4396-ba99-bf21a356eb42") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 104.14 63.5 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes))))
+(symbol (lib_id "Connector_Generic:Conn_01x02") (at 167.64 101.6 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "d383bf3c-30cc-409f-a66a-875ad364dd64")
+(property "Reference" "J8" (at 167.64 99.06 0) (effects (font (size 1.27 1.27))))
+(property "Value" "Jetson DC in (19 V)" (at 167.64 106.68 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 167.64 101.6 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 167.64 101.6 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 167.64 101.6 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "ab52d072-634c-4ade-a27e-305ccdd7d6ed"))
+(pin "2" (uuid "ccc86a69-7032-4f31-a940-7146889b0cd6"))
+(instances (project "piper-watch" (path "/e56e7f82-f52b-4710-ac11-1dbcb1ff9984/b9a8e4de-4068-4057-a335-9d95b0c99ea9" (reference "J8") (unit 1)))))
+(wire (pts (xy 162.56 101.6) (xy 160.02 101.6)) (stroke (width 0) (type default)) (uuid "d94aea97-f772-49d4-94da-22650a55b7eb"))
+(global_label "+19V" (shape passive) (at 160.02 101.6 180) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify right)) (uuid "1a5afed1-be8d-4b5f-9604-f3173aa4b908") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 160.02 101.6 0) (effects (font (size 1.27 1.27)) (justify right) (hide yes))))
+(wire (pts (xy 162.56 104.14) (xy 160.02 104.14)) (stroke (width 0) (type default)) (uuid "9156743c-0d6b-45c5-a1c1-b4f5f596e506"))
+(global_label "GND" (shape passive) (at 160.02 104.14 180) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify right)) (uuid "230bfceb-57b8-467b-8cc1-ce0e322995ba") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 160.02 104.14 0) (effects (font (size 1.27 1.27)) (justify right) (hide yes))))
+(symbol (lib_id "Device:Fuse") (at 147.32 55.88 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "2efcddb3-311b-4820-806b-d75a7a2b1a92")
+(property "Reference" "F1" (at 151.13 54.61 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "3 A slow-blow, 6 x 30 panel holder" (at 151.13 57.15 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "" (at 147.32 55.88 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 147.32 55.88 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 147.32 55.88 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "aeb8bfc3-1589-429e-8e36-ab0526e59b0f"))
+(pin "2" (uuid "b2a31e03-dd79-4d8f-b1ce-22a30ce74e15"))
+(instances (project "piper-watch" (path "/e56e7f82-f52b-4710-ac11-1dbcb1ff9984/b9a8e4de-4068-4057-a335-9d95b0c99ea9" (reference "F1") (unit 1)))))
+(wire (pts (xy 147.32 52.07) (xy 147.32 49.53)) (stroke (width 0) (type default)) (uuid "019136d9-ec45-4ead-915d-3654fefd2ca2"))
+(global_label "+19V" (shape passive) (at 147.32 49.53 90) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify left)) (uuid "a344de89-8cd9-450a-9221-892bf0c986ac") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 147.32 49.53 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes))))
+(wire (pts (xy 147.32 59.69) (xy 147.32 62.23)) (stroke (width 0) (type default)) (uuid "d50cd049-b3a9-494a-a1e2-dd7c20cda3d8"))
+(global_label "+19V_FUSED" (shape passive) (at 147.32 62.23 270) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify right)) (uuid "f54290ae-07e0-48dd-8697-a5abb375e03a") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 147.32 62.23 0) (effects (font (size 1.27 1.27)) (justify right) (hide yes))))
+(symbol (lib_id "Switch:SW_SPST") (at 190.5 50.8 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "510802bb-51bc-446a-b716-aaf6d5695b63")
+(property "Reference" "SW1" (at 190.5 47.625 0) (effects (font (size 1.27 1.27))))
+(property "Value" "rocker XW-604B (head power)" (at 190.5 53.34 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 190.5 50.8 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 190.5 50.8 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 190.5 50.8 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "f10dd029-e442-4f6a-9bd8-d05c60d46c43"))
+(pin "2" (uuid "a8011261-564a-4e54-bb01-29adba405982"))
+(instances (project "piper-watch" (path "/e56e7f82-f52b-4710-ac11-1dbcb1ff9984/b9a8e4de-4068-4057-a335-9d95b0c99ea9" (reference "SW1") (unit 1)))))
+(wire (pts (xy 185.42 50.8) (xy 182.88 50.8)) (stroke (width 0) (type default)) (uuid "cdbcbf17-b09c-4b4c-91f6-e52ca31548d2"))
+(global_label "+19V_FUSED" (shape passive) (at 182.88 50.8 180) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify right)) (uuid "9da2de83-d7f0-47e1-8144-24209aed46f9") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 182.88 50.8 0) (effects (font (size 1.27 1.27)) (justify right) (hide yes))))
+(wire (pts (xy 195.58 50.8) (xy 198.12 50.8)) (stroke (width 0) (type default)) (uuid "7621494c-8d39-4dfd-af75-1d60f76cb9a7"))
+(global_label "+19V_SW" (shape passive) (at 198.12 50.8 0) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify left)) (uuid "6c222ae2-655d-4dcb-aaf5-795c612d7ac1") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 198.12 50.8 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes))))
+(symbol (lib_id "piper-watch:LM2596_Module") (at 241.3 101.6 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "aedbfe8c-56ad-4b57-a2c3-7372a0cd4c2c")
+(property "Reference" "U2" (at 241.3 95.25 0) (effects (font (size 1.27 1.27))))
+(property "Value" "LM2596 buck -> 5.0 V" (at 241.3 105.41 0) (effects (font (size 1.27 1.27))))
+(property "Footprint" "" (at 241.3 101.6 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 241.3 101.6 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 241.3 101.6 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "cd056145-0625-4689-97cd-06d5ea52eb9c"))
+(pin "2" (uuid "c32ad2af-23bf-4180-9140-624723178d06"))
+(pin "3" (uuid "dce6d33a-5990-4688-baca-cc29265dd860"))
+(pin "4" (uuid "4e47a39f-1eb7-4319-85c0-da9216031426"))
+(instances (project "piper-watch" (path "/e56e7f82-f52b-4710-ac11-1dbcb1ff9984/b9a8e4de-4068-4057-a335-9d95b0c99ea9" (reference "U2") (unit 1)))))
+(wire (pts (xy 231.14 99.06) (xy 228.6 99.06)) (stroke (width 0) (type default)) (uuid "db1d2f80-7894-4600-ae8e-6bca9073c5e6"))
+(global_label "+19V_SW" (shape passive) (at 228.6 99.06 180) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify right)) (uuid "66afec1a-e9e7-4699-9b1e-33b18c69e9bc") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 228.6 99.06 0) (effects (font (size 1.27 1.27)) (justify right) (hide yes))))
+(wire (pts (xy 231.14 101.6) (xy 228.6 101.6)) (stroke (width 0) (type default)) (uuid "8c143dd7-56c4-4ef3-a97f-038ad653e329"))
+(global_label "GND" (shape passive) (at 228.6 101.6 180) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify right)) (uuid "0828eb9a-bf2b-4fa8-b8c1-87e2150c2f3a") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 228.6 101.6 0) (effects (font (size 1.27 1.27)) (justify right) (hide yes))))
+(wire (pts (xy 251.46 99.06) (xy 254 99.06)) (stroke (width 0) (type default)) (uuid "e5b49851-2ad7-409c-ba79-174741310d55"))
+(global_label "+5V" (shape passive) (at 254 99.06 0) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify left)) (uuid "a66ba366-acf7-469f-bf13-59066d8c6daa") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 254 99.06 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes))))
+(wire (pts (xy 251.46 101.6) (xy 254 101.6)) (stroke (width 0) (type default)) (uuid "116a8c26-52c0-4c59-bd9f-b398f9706e5e"))
+(global_label "GND" (shape passive) (at 254 101.6 0) (fields_autoplaced yes) (effects (font (size 1.27 1.27)) (justify left)) (uuid "1ac7ee0b-b4ff-4195-b1f8-08d515920487") (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 254 101.6 0) (effects (font (size 1.27 1.27)) (justify left) (hide yes))))
+(text "19 V supply -> panel jack -> split block TB1 (on Level 2's floor). TB1's - side is the COMMON GROUND." (exclude_from_sim no) (at 20.32 180 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "60c47cc1-e7a8-4a7f-be3b-f93f5867e997"))
+(text "The Jetson is fed straight from TB1: always on, never switched or fused here (the supply limits it)." (exclude_from_sim no) (at 20.32 183.81 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "f2f71d03-972f-4fd4-be0c-22ace629f7b6"))
+(text "Head side: TB1 + -> panel fuse F1 (6 x 30 mm, 3 A slow-blow) -> rocker switch SW1 -> perfboard J1 (+19V_SW)." (exclude_from_sim no) (at 20.32 187.62 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "d92b6d99-4c19-4f47-b591-28567a55119d"))
+(text "Fuse holder: TB1 to its END contact, its SIDE contact to the switch (an unscrewed cap's exposed end is dead)." (exclude_from_sim no) (at 20.32 191.43 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "b6e9b072-a29e-4d7c-a251-a64d9c1d81c9"))
+(text "U2 (LM2596 buck, on its own floor bosses) is fed from perfboard J6; set it to 5.0 V before connecting the Hall sensor." (exclude_from_sim no) (at 20.32 195.24 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "e4ae88b7-6ab2-4eb4-998a-554e260db586"))
+(embedded_fonts no))

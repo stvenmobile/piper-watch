@@ -60,3 +60,10 @@ hardware/cad/vitamins/models/
 
 # Vendor datasheet images / diagrams - kept locally, not redistributed
 docs/stepper_wiring.png
+
+# KiCad local state
+hardware/kicad/*-backups/
+hardware/kicad/*.kicad_prl
+hardware/kicad/*.lck
+hardware/kicad/_autosave-*
+hardware/kicad/fp-info-cache
