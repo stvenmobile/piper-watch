@@ -1,12 +1,17 @@
-"""Draw the perfboard wiring as a picture (top view): perfboard_wiring.png next to the board file.
+"""Draw the perfboard wiring, and list its wires - all from the board file:
 
     py -3 hardware/kicad/tools/plot_perfboard.py
 
-Reads piper-watch.kicad_pcb through KiCad's own Python (to get pads, tracks and parts exactly as
-saved, including hand edits), then draws it with matplotlib: the hole grid, part outlines, every
-pad labelled with its pin, bare wires in copper and insulated wires in red. The wires are on the
-underside but drawn as seen from the top, so the picture matches the board in front of you.
+    perfboard_wiring.png / .pdf          TOP view (parts side up), wires drawn as if seen through
+    perfboard_wiring_bottom.png / .pdf   BOTTOM view (turned over left-to-right, back of the case
+                                         still at the top): the side you solder the wires on
+    ../wiring.md                         the wire list between its <!-- wires:start/end --> markers
+
+Reads piper-watch.kicad_pcb through KiCad's own Python (pads, tracks and parts exactly as saved,
+including hand edits), then draws it with matplotlib: the hole grid, part outlines, every pad
+labelled with its pin, wires coloured by net (thick = heavy wire, dotted stripe = insulated).
 """
+import re
 import json
 import os
 import subprocess
@@ -21,16 +26,26 @@ NET_NAMES = [("+19V_SW", "19 V (switched)"), ("GND", "GND"), ("+5V", "5 V (Hall)
              ("STEP", "STEP"), ("DIR", "DIR"), ("EN", "EN"), ("HALL", "HALL"),
              ("MOT_A2", "coil A2"), ("MOT_A1", "coil A1"), ("MOT_B1", "coil B1"), ("MOT_B2", "coil B2")]
 PCB = os.path.join(HERE, "..", "piper-watch.kicad_pcb")
-PNG = os.path.join(HERE, "..", "perfboard_wiring.png")
-PDF = os.path.join(HERE, "..", "perfboard_wiring.pdf")     # vector: prints sharp at any size
-NOTES = [                                                    # short lines: no wider than the board
-    "TOP VIEW - back of the case at the top.",
-    "Wires are soldered on the UNDERSIDE, but drawn as seen from the top.",
-    "Thick = heavy wire (19 V, GND, motor).",
-    "Dotted stripe = INSULATED wire (it crosses another run); the rest can be bare.",
-    "Grey pads are not connected.  TMC2209 square pad = pin 1 (GND).",
-    "J6 / J1 / J3: the screw openings face the back edge.",
-]
+OUT = os.path.join(HERE, "..", "perfboard_wiring")          # + .png / .pdf (vector: prints sharp at any size)
+WIRING_MD = os.path.join(HERE, "..", "..", "wiring.md")
+VIEWS = {                                                     # notes: short lines, no wider than the board
+    "top": {"suffix": "", "title": "Piper-Watch Level 2 perfboard (70 x 50) - TOP VIEW", "notes": [
+        "TOP VIEW - parts side up, back of the case at the top.",
+        "Wires are soldered on the UNDERSIDE, but drawn as if seen through the board.",
+        "Thick = heavy wire (19 V, GND, motor).",
+        "Dotted stripe = INSULATED wire (it crosses another run); the rest can be bare.",
+        "Grey pads are not connected.  TMC2209 square pad = pin 1 (GND).",
+        "J6 / J1 / J3: the screw openings face the back edge.",
+        "The same board seen from the solder side: perfboard_wiring_bottom.pdf"]},
+    "bottom": {"suffix": "_bottom", "title": "Piper-Watch Level 2 perfboard (70 x 50) - BOTTOM VIEW (solder side)", "notes": [
+        "BOTTOM VIEW - the solder side: the board turned over left-to-right,",
+        "  so the back of the case is still at the top. Wire it as you see it here.",
+        "Parts are on the other side (dashed outlines); J4 / J5 are now on the RIGHT.",
+        "Thick = heavy wire (19 V, GND, motor).",
+        "Dotted stripe = INSULATED wire (it crosses another run); the rest can be bare.",
+        "Grey pads are not connected.  TMC2209 square pad = pin 1 (GND).",
+        "The same board from the parts side: perfboard_wiring.pdf"]},
+}
 KICAD_PY = r"C:\Program Files\KiCad\10.0\bin\python.exe"
 
 DUMP = r'''
@@ -68,13 +83,39 @@ json.dump(out, open(sys.argv[1], "w"))
 '''
 
 
-def main():
+def load() -> dict:
     tmp = tempfile.mkdtemp()
     script, data = os.path.join(tmp, "dump.py"), os.path.join(tmp, "board.json")
     open(script, "w").write(DUMP % (HERE, os.path.abspath(PCB)))
     subprocess.run([KICAD_PY, script, data], check=True)
-    d = json.load(open(data))
+    return json.load(open(data))
 
+
+def mirrored(d: dict) -> dict:
+    """The board turned over left-to-right (seen from the solder side)."""
+    x0, _, x1, _ = d["edge"]
+    fx = lambda x: x0 + x1 - x
+    m = json.loads(json.dumps(d))
+    for p in m["pads"]:
+        p["x"] = fx(p["x"])
+    for t in m["tracks"]:
+        t["a"][0], t["b"][0] = fx(t["a"][0]), fx(t["b"][0])
+    for p in m["parts"]:
+        l, t, r, b = p["box"]
+        p["box"] = [fx(r), t, fx(l), b]
+    return m
+
+
+def main():
+    d = load()
+    draw(d, "top")
+    draw(mirrored(d), "bottom")
+    update_wiring_md(wire_list(d))
+
+
+def draw(d: dict, view: str):
+    v = VIEWS[view]
+    NOTES = v["notes"]
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -142,8 +183,10 @@ def main():
             label = p["net"].split("/")[-1] if p["net"] and not p["net"].startswith("unconnected") else ""
         if p["ref"] in ("J1", "J3", "J6"):
             ax.text(p["x"], p["y"] - 1.6, label, fontsize=7, ha="center", va="bottom", zorder=6, color="#222")
-        elif p["ref"] in ("J4", "J5"):
-            ax.text(p["x"] - 1.4, p["y"], label, fontsize=7, ha="right", va="center", zorder=6, color="#222")
+        elif p["ref"] in ("J4", "J5"):                 # beside the header, on the board-edge side
+            left = p["x"] < (x0 + x1) / 2
+            ax.text(p["x"] + (-1.4 if left else 1.4), p["y"], label, fontsize=7, ha="right" if left else "left",
+                    va="center", zorder=6, color="#222")
         elif p["ref"] == "U1":                     # label each pin on the inside of its row/column
             u = [q for q in d["pads"] if q["ref"] == "U1"]
             cx, cy = sum(q["x"] for q in u) / 16, sum(q["y"] for q in u) / 16
@@ -166,12 +209,91 @@ def main():
         ax.plot([lx, lx + 3], [ly, ly], color="#333333", lw=5.2, solid_capstyle="round")
         ax.plot([lx, lx + 3], [ly, ly], color=NET_COLOURS[net], lw=3.8, solid_capstyle="round")
         ax.text(lx + 4.2, ly, name, fontsize=8, va="center")
+    if view == "bottom":                                     # the parts' "left to right" is seen from the parts side
+        legend = [l.replace("left to right on the board", "right to left from this side")
+                  .replace("left to right", "right to left from this side") for l in legend]
     for k, line in enumerate(legend):
         ax.text(x0 + (k % 2) * 36, y_parts + (k // 2) * 2.2, line, fontsize=8, va="top", color="#1f4e79")
-    ax.text(x0, y0 - 6.5, "Piper-Watch Level 2 perfboard (70 x 50)", fontsize=12, fontweight="bold", va="top")
-    fig.savefig(PNG, bbox_inches="tight", facecolor="white")
-    fig.savefig(PDF, bbox_inches="tight", facecolor="white")
-    print("written", os.path.normpath(PNG), "and", os.path.normpath(PDF))
+    ax.text(x0, y0 - 6.5, v["title"], fontsize=12, fontweight="bold", va="top")
+    for ext in ("png", "pdf"):
+        fig.savefig(f"{OUT}{v['suffix']}.{ext}", bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print("written", os.path.normpath(f"{OUT}{v['suffix']}") + ".png / .pdf")
+
+
+# ---- the wire list: each separate piece of wire, and the pads it joins ---------------------------------
+def pad_label(p: dict) -> str:
+    if p["ref"] == "GP1":
+        return "GND point"
+    name = p["name"] if p["name"] and not p["name"].startswith("Pin_") else ""
+    if p["ref"] in ("C1", "C2"):
+        return f"{p['ref']} {'+' if p['num'] == '1' else '-'}"
+    if p["ref"] in ("R1", "R2"):
+        return f"{p['ref']} (pin {p['num']})"
+    if not name:
+        name = p["net"].split("/")[-1].replace("MOT_", "")
+        name = {"+19V_SW": "19V", "+5V": "5V", "+3V3": "3V3", "GND": "GND"}.get(name, name)
+    return f"{p['ref']} {name}"
+
+
+def _on_segment(pt, a, b, tol=0.3) -> bool:     # tol: within the pad (C1 sits 0.08 off the grid)
+    (px, py), (ax_, ay), (bx, by) = pt, a, b
+    if abs((bx - ax_) * (py - ay) - (by - ay) * (px - ax_)) > tol * max(1.0, abs(bx - ax_) + abs(by - ay)):
+        return False
+    return min(ax_, bx) - tol <= px <= max(ax_, bx) + tol and min(ay, by) - tol <= py <= max(ay, by) + tol
+
+
+def wire_list(d: dict) -> list[dict]:
+    """One entry per separate piece of wire: its net, bare or insulated, heavy or light, and the
+    pads it touches (a piece may branch). Pieces on different layers are different wires."""
+    key = lambda pt: (round(pt[0], 2), round(pt[1], 2))
+    groups = {}
+    for t in d["tracks"]:
+        groups.setdefault((t["net"], t["layer"]), []).append(t)
+    out = []
+    for (net, layer), tracks in groups.items():
+        parent = list(range(len(tracks)))
+
+        def find(i):
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+        ends = {}
+        for i, t in enumerate(tracks):
+            for pt in (key(t["a"]), key(t["b"])):
+                ends.setdefault(pt, []).append(i)
+        for idx in ends.values():
+            for j in idx[1:]:
+                parent[find(j)] = find(idx[0])
+        pieces = {}
+        for i, t in enumerate(tracks):
+            pieces.setdefault(find(i), []).append(t)
+        for segs in pieces.values():
+            pads = [p for p in d["pads"] if p["net"] == net and any(_on_segment((p["x"], p["y"]), t["a"], t["b"]) for t in segs)]
+            length = sum(((t["a"][0] - t["b"][0]) ** 2 + (t["a"][1] - t["b"][1]) ** 2) ** 0.5 for t in segs)
+            out.append({"net": net.split("/")[-1], "insulated": layer != "B.Cu", "heavy": max(t["w"] for t in segs) >= 0.5,
+                        "pads": [pad_label(p) for p in sorted(pads, key=lambda p: (p["y"], p["x"]))],
+                        "length_mm": round(length)})
+    order = [n for n, _ in NET_NAMES]
+    out.sort(key=lambda w: (not w["heavy"], order.index(w["net"]) if w["net"] in order else 99, w["pads"]))
+    return out
+
+
+def update_wiring_md(wires: list[dict]):
+    names = dict(NET_NAMES)
+    rows = ["| # | Net (colour in the pictures) | Wire | Joins | Length |", "|---|---|---|---|---|"]
+    for i, w in enumerate(wires, 1):
+        kind = ("heavy" if w["heavy"] else "light") + (", **insulated**" if w["insulated"] else ", bare")
+        rows.append(f"| {i} | {names.get(w['net'], w['net'])} | {kind} | {' · '.join(w['pads'])} | ~{w['length_mm']} mm |")
+    block = "\n".join(["<!-- wires:start (generated by hardware/kicad/tools/plot_perfboard.py - don't edit by hand) -->",
+                       *rows, "<!-- wires:end -->"])
+    md = open(WIRING_MD, encoding="utf-8").read()
+    new = re.sub(r"<!-- wires:start.*?<!-- wires:end -->", lambda _: block, md, flags=re.S)
+    if new == md and "<!-- wires:start" not in md:
+        raise SystemExit("wiring.md has no <!-- wires:start --> ... <!-- wires:end --> markers")
+    open(WIRING_MD, "w", encoding="utf-8", newline="").write(new)
+    print(f"wiring.md: {len(wires)} wires listed")
 
 
 if __name__ == "__main__":
