@@ -45,7 +45,7 @@ disp_win_dz = 2.8;               // the active area sits this far ABOVE the boar
                                  //   top margin ~3.9, bottom ~9.6 - the wide margin is at the bottom)
 
 // ---- back panel ------------------------------------------------------------------------------
-switch_cut  = [28, 10];          // XW-604B snap-in cut-out
+switch_cut  = [28, 10.5 + 0.5];   // MEASURED body 25.7 long (+ end clips) x 10.5 thick; +0.5 so it passes (XW-604B)
 switch_xz   = [-50, -26];        // centre (x, z) on the back wall
 switch_patch = 1.5;              // wall thickness for its clips
 jack_d      = 11.2 + 0.3 + cal_hole;  // MEASURED thread 11.2 OD (sold as M12) + 0.3: no wobble before the nut is on
