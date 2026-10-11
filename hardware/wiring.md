@@ -43,7 +43,7 @@ The perfboard carries the TMC2209 and the terminals; one switched, fused 19 V fe
 | Switch                 | J1 + → perfboard **VM rail**                                     | 20 AWG                                                                                                                               |
 | Split block −          | J1 − → the board's ground point (★)                              | 20 AWG; the split block's − is the **common ground**                                                                                 |
 | VM rail                | TMC2209 **VM**                                                   | short, 20–22 AWG                                                                                                                     |
-| VM rail ↔ board ground | **100 µF / 50 V** electrolytic (35 V is the minimum)             | right at the driver's VM/GND pins, polarity!                                                                                         |
+| VM rail ↔ board ground | **100 µF / 35 V** electrolytic (35 V minimum; 50 V gives more margin)             | right at the driver's VM/GND pins, polarity!                                                                                         |
 | VM rail / board ground | J6 **19V / GND** → LM2596 **IN+ / IN−**                          |                                                                                                                                      |
 | LM2596 **OUT+**        | J6 **5V** → perfboard **5 V rail** (Hall only)                   | **set to 5.0 V with a meter before connecting anything**; OUT− is the same as IN−                                                    |
 
@@ -125,7 +125,7 @@ J6 5V reads 5.0 V (buck set first), and no 19 V appears on any J4/J5 pin.
 | J6  | 3-way 5.08 mm screw terminal        | to the buck: 19V (switched, fused), GND out; 5V back              |
 | U1  | BTT TMC2209 on 2 × 8 female headers | so it can be swapped; check the pin labels against its silkscreen |
 | F1  | 6 × 30 mm (3AG) **3 A slow-blow**   | in the **panel** holder on the back wall, not on the board        |
-| C1  | 100 µF / 50 V electrolytic          | at U1's VS/GND                                                    |
+| C1  | 100 µF / 35 V electrolytic          | at U1's VS/GND                                                    |
 | R1  | 10 kΩ                               | Hall OUT pull-up to 3V3                                           |
 
 Use 20 AWG wire or solder-filled tracks for the 19 V and ground runs (J1, VM, J6 19V/GND); thin

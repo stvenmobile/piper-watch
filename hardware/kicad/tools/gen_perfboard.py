@@ -26,12 +26,12 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "piper-watc
 FPLIB = r"C:\Program Files\KiCad\10.0\share\kicad\footprints"
 
 BX, BY, BW, BH = 100.0, 100.0, 70.0, 50.0           # board outline (mm)
-NI, NJ = 24, 18                                     # 24 x 18 holes on a 70 x 50 board
-GX0 = BX + (BW - (NI - 1) * 2.54) / 2               # hole (0, 0)
+NI, NJ = 25, 18                                     # holes across x down (the outer ring near the corner
+GX0 = BX + (BW - 23 * 2.54) / 2 - 2.54              #   mounting holes is kept clear); hole (0, 0)
 GY0 = BY + (BH - (NJ - 1) * 2.54) / 2
 MOUNT = [(BX + 2, BY + 2), (BX + 68, BY + 2), (BX + 2, BY + 48), (BX + 68, BY + 48)]   # 66 x 46
 HEAVY, LIGHT = 0.6, 0.3
-STAR = (11, 5)                                     # the board ground point (a solder joint, drawn as a via)
+STAR = (12, 5)                                     # the board ground point (a solder joint, drawn as a via)
 
 
 def G(i, j):
@@ -45,13 +45,15 @@ def V(p):
 # ref: (grid hole of pad 1, rotation in degrees) - matches the board as built: J6, J1, J3 along the
 # back edge (screw openings facing it), J4 and J5 down the left edge, the driver in the middle
 PLACE = {
-    "J6": ((5, 2), 180), "J1": ((11, 2), 180), "J3": ((21, 2), 180),   # left to right: J6 5V GND 19V, J1 + -, J3 A2 A1 B1 B2
-    "J5": ((0, 5), 0), "J4": ((0, 9), 0),    # J5 (Hall) right under J6's 5V, then J4
+    # back edge (top row of holes but one), left to right: J6 (5V GND 19V), J1 (+ -), J3 (A2 A1 B1 B2)
+    "J6": ((6, 1), 180), "J1": ((12, 1), 180), "J3": ((22, 1), 180),
+    # left edge (outer column): J5 (Hall) right under J6's 5V, then J4
+    "J5": ((0, 5), 0), "J4": ((0, 9), 0),
     # driver right under J3 and C1, power row on top: VS GND A2 A1 B1 B2 VIO GND (left to right),
     # so the four coil wires go straight up to J3 in order; logic row (EN .. DIR) underneath
-    "U1": ((21, 9), 270),
-    "C1": ((14, 7), 90),                         # C1: + right above VS, - above it
-    "R1": ((2, 16), 0), "R2": ((9, 16), 0),
+    "U1": ((22, 9), 270),
+    "C1": ((15, 7), 90),                         # C1: + right above VS, - above it
+    "R1": ((3, 16), 0), "R2": ((10, 16), 0),
 }
 
 # connections in routing order: (net, heavy?, pad, pad) - pads as "REF.PIN" or "STAR"; a new
@@ -186,6 +188,9 @@ def main():
 
     def free(layer, a, b, net):
         if not (0 <= b[0] < NI and 0 <= b[1] < NJ):
+            return False
+        gx, gy = G(*b)
+        if any((gx - mx) ** 2 + (gy - my) ** 2 < 4.0 ** 2 for mx, my in MOUNT):
             return False
         if pad_at.get(b, net) != net:               # another net's pad (or an unused pad)
             return False

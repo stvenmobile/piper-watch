@@ -174,7 +174,7 @@ SHEETS = [
                 P("U1", f"{LIB}:TMC2209_Module", "BTT TMC2209", (162.56, 106.68),
                   {"1": "GND", "2": "+3V3", "3": "MOT_B2", "4": "MOT_B1", "5": "MOT_A1", "6": "MOT_A2", "7": "GND", "8": "+19V_SW",
                    "16": "DIR", "15": "STEP", "14": None, "13": None, "12": None, "11": "+3V3", "10": "+3V3", "9": "EN"}),
-                P("C1", "Device:C_Polarized", "100uF 50V (at U1 VS)", (124.46, 165.1), {"1": "+19V_SW", "2": "GND"}),
+                P("C1", "Device:C_Polarized", "100uF 35V (at U1 VS)", (124.46, 165.1), {"1": "+19V_SW", "2": "GND"}),
                 P("R1", "Device:R", "10k (Hall pull-up)", (185.42, 165.1), {"1": "+3V3", "2": "HALL"}),
                 P("R2", "Device:R", "10k (opt., EN pull-up)", (215.9, 165.1), {"1": "+3V3", "2": "EN"}),
                 P("U3", f"{LIB}:ESP32-S3-DevKitC-1", "ESP32-S3-DevKitC-1 N16R8", (299.72, 127.0), ESP_NETS),
