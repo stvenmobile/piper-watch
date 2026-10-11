@@ -46,12 +46,12 @@ def V(p):
 # back edge (screw openings facing it), J4 and J5 down the left edge, the driver in the middle
 PLACE = {
     "J6": ((5, 2), 180), "J1": ((11, 2), 180), "J3": ((21, 2), 180),   # left to right: J6 5V GND 19V, J1 + -, J3 A2 A1 B1 B2
-    "J4": ((0, 7), 0), "J5": ((0, 14), 0),
+    "J5": ((0, 5), 0), "J4": ((0, 9), 0),    # J5 (Hall) right under J6's 5V, then J4
     # driver right under J3 and C1, power row on top: VS GND A2 A1 B1 B2 VIO GND (left to right),
     # so the four coil wires go straight up to J3 in order; logic row (EN .. DIR) underneath
     "U1": ((21, 9), 270),
     "C1": ((14, 7), 90),                         # C1: + right above VS, - above it
-    "R1": ((2, 15), 0), "R2": ((9, 16), 0),
+    "R1": ((2, 16), 0), "R2": ((9, 16), 0),
 }
 
 # connections in routing order: (net, heavy?, pad, pad) - pads as "REF.PIN" or "STAR"; a new
@@ -62,15 +62,15 @@ ROUTES = [
     ("+19V_SW", True, "J1.2", "U1.8"), ("+19V_SW", True, "C1.1", "U1.8"), ("+19V_SW", True, "J6.1", "J1.2"),
     ("GND", True, "J1.1", "STAR"), ("GND", True, "STAR", "U1.7"), ("GND", True, "C1.2", "STAR"),
     ("GND", True, "J6.2", "STAR"),
-    ("/Level 2 drive/HALL", False, "J5.3", "J4.4"), ("/Level 2 drive/HALL", False, "R1.2", "J4.4"),
-    ("GND", False, "J4.6", "STAR"), ("GND", False, "J5.2", "STAR"),
     ("/Level 2 drive/STEP", False, "J4.1", "U1.15"), ("/Level 2 drive/DIR", False, "J4.2", "U1.16"),
     ("/Level 2 drive/EN", False, "J4.3", "U1.9"), ("/Level 2 drive/EN", False, "R2.2", "U1.9"),
+    ("/Level 2 drive/HALL", False, "J5.3", "J4.4"), ("/Level 2 drive/HALL", False, "R1.2", "J4.4"),
     ("/Level 2 drive/+3V3", False, "J4.5", "U1.2"), ("/Level 2 drive/+3V3", False, "U1.10", "U1.2"),
     ("/Level 2 drive/+3V3", False, "U1.11", "U1.10"), ("/Level 2 drive/+3V3", False, "R1.1", "J4.5"),
     ("/Level 2 drive/+3V3", False, "R2.1", "J4.5"),
     ("GND", False, "U1.1", "STAR"),
     ("+5V", False, "J6.3", "J5.1"),
+    ("GND", False, "J5.2", "STAR"), ("GND", False, "J4.6", "STAR"),
 ]
 
 
@@ -175,8 +175,13 @@ def main():
 
     # ---- grid router ----------------------------------------------------------------------------
     pad_at = {(gi, gj): n for gi, gj, n in pads.values()}
-    used = {pcbnew.B_Cu: {}, pcbnew.F_Cu: {}}      # layer -> {(i, j): net}
-    seg = {pcbnew.B_Cu: {}, pcbnew.F_Cu: {}}       # layer -> {frozenset(a, b): net}
+    # B.Cu = bare wire; F.Cu, In1.Cu, In2.Cu = insulated wire. Insulated wires can cross each other
+    # on a real board, so they get three layers to keep KiCad's checks happy
+    board.SetCopperLayerCount(4)
+    LAYERS = [pcbnew.B_Cu, pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu]
+    used = {L: {} for L in LAYERS}                  # layer -> {(i, j): net}
+    edges = {}                                      # frozenset({cell, cell}) -> net, on ANY layer: two
+                                                    #   wires may cross, never run along the same holes
     tree = {}                                       # net -> set of (i, j) on its wires/pads
 
     def free(layer, a, b, net):
@@ -185,6 +190,8 @@ def main():
         if pad_at.get(b, net) != net:               # another net's pad (or an unused pad)
             return False
         if used[layer].get(b, net) != net:
+            return False
+        if edges.get(frozenset((a, b)), net) != net:
             return False
         return True
 
@@ -211,7 +218,8 @@ def main():
 
     def lay(order):
         """Route the connections in this order; returns (score, [(path, layer, net, heavy)]) or None."""
-        used.update({pcbnew.B_Cu: {}, pcbnew.F_Cu: {}})
+        used.update({L: {} for L in LAYERS})
+        edges.clear()
         islands = {}                                # net -> [{"pads", B_Cu, F_Cu}] connected groups
         laid, score = [], 0
 
@@ -219,7 +227,8 @@ def main():
             for isl in islands.setdefault(net, []):
                 if cell in isl["pads"]:
                     return isl
-            isl = {"pads": {cell}, pcbnew.B_Cu: set(), pcbnew.F_Cu: set()}
+            isl = {"pads": {cell}}
+            isl.update({L: set() for L in LAYERS})
             islands[net].append(isl)
             return isl
         for net, heavy, a, b in order:
@@ -231,7 +240,8 @@ def main():
             if ia is ib:
                 continue
             best = None
-            for layer, penalty in ((pcbnew.B_Cu, 0), (pcbnew.F_Cu, 6 if heavy else 1)):
+            ins = 6 if heavy else 1
+            for layer, penalty in ((pcbnew.B_Cu, 0), (pcbnew.F_Cu, ins), (pcbnew.In1_Cu, ins + 0.5), (pcbnew.In2_Cu, ins + 1)):
                 # land on the far end's group: one of its pads, or its wire on the SAME layer
                 # (bare and insulated wires only join at pads)
                 targets = ib["pads"] | ib[layer]
@@ -244,15 +254,17 @@ def main():
             score += cost
             for c in path:
                 used[layer][c] = net
+            for c0, c1 in zip(path, path[1:]):
+                edges[frozenset((c0, c1))] = net
             ia["pads"] |= ib["pads"] | (set(path) & padcells)
-            for L in (pcbnew.B_Cu, pcbnew.F_Cu):
+            for L in LAYERS:
                 ia[L] |= ib[L]
             ia[layer] |= set(path)
             islands[net].remove(ib)
             for other in list(islands[net]):            # the path may have touched a third group's pad
                 if other is not ia and other["pads"] & set(path):
                     ia["pads"] |= other["pads"]
-                    for L in (pcbnew.B_Cu, pcbnew.F_Cu):
+                    for L in LAYERS:
                         ia[L] |= other[L]
                     islands[net].remove(other)
             laid.append((path, layer, net, heavy))
@@ -262,7 +274,7 @@ def main():
     light_routes = [r for r in ROUTES if not r[1]]
     rng = random.Random(1)
     best, best_order = None, None
-    for attempt in range(300):
+    for attempt in range(400):
         order = light_routes if attempt == 0 else rng.sample(light_routes, len(light_routes))
         r = lay(heavy_routes + order)
         if r and (best is None or r[0] < best[0]):

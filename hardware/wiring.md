@@ -54,23 +54,18 @@ the low-current logic (J4 to the ESP32, J5 to the Hall sensor) plugs onto 2.54 m
 multi-pin Dupont housings. Everything is along the back and left edges only (the front faces the
 display; the right edge is 2.5 mm from the wall).
 
-```text
- back of the case
-     J6 buck            J1 19V in (switched, fused)        J3 motor
- ┌○──[19V GND 5V]──────[ +   − ]──────────────────[A1 A2 B1 B2]──○┐
- │                                                                 │
- │ J4 ▶● STEP          C1      ┌ GND VIO B2 B1 A1 A2 GND VS ┐  pot │
- │     ● DIR                   │          TMC2209           │      │
- │     ● EN                    └ DIR STEP CLK TX RX MS2 MS1 EN ┘     │
- │     ● HALL                                                      │
- │     ● 3V3                                                       │
- │     ● GND                                                       │
- │ J5 ▶● 5V      R1 10k       ★ board ground point                 │
- │     ● GND                                                       │
- │     ● OUT                                                       │
- └○───────────────────────────────────────────────────────────────○┘
-     front (display)          ▶ = pin 1 (mark it on the board and on the housing)
-```
+![Perfboard wiring, top view](kicad/perfboard_wiring.png)
+
+Drawn to scale from `kicad/piper-watch.kicad_pcb` (KiCad checks it against the schematic). Top view,
+back of the case at the top; wires are soldered underneath but drawn as seen from the top.
+
+- **Back edge**, left to right: J6 (5V, GND, 19V), J1 (+, −) - the two 19 V screws side by side -
+  and J3 (A2, A1, B1, B2). The screw openings face the back edge.
+- **Left edge**, top to bottom: J5 (Hall: 5V, GND, OUT) right under J6's 5V, then J4 (STEP, DIR, EN,
+  HALL, 3V3, GND). Pin 1 (square pad) is at the top of each.
+- **TMC2209** under J3 with its power row on top (VS, GND, A2, A1, B1, B2, VIO, GND left to right):
+  the coil wires go straight up to J3. C1 sits right above VS; the board's ground point is just
+  under J1's −.
 
 ### Point-to-point wiring list
 

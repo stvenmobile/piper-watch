@@ -14,6 +14,12 @@ import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+NET_COLOURS = {"+19V_SW": "#d62828", "+5V": "#ffffff", "GND": "#1a1a1a", "+3V3": "#f28c28",
+               "STEP": "#1f6fd1", "DIR": "#2a9d3a", "EN": "#8e44ad", "HALL": "#8b5a2b",
+               "MOT_A1": "#22b8c8", "MOT_A2": "#0e7c86", "MOT_B1": "#ff6fae", "MOT_B2": "#b8336a"}
+NET_NAMES = [("+19V_SW", "19 V (switched, fused)"), ("GND", "GND"), ("+5V", "5 V (Hall)"), ("+3V3", "3V3 (from the ESP32)"),
+             ("STEP", "STEP"), ("DIR", "DIR"), ("EN", "EN"), ("HALL", "HALL"),
+             ("MOT_A2", "coil A2"), ("MOT_A1", "coil A1"), ("MOT_B1", "coil B1"), ("MOT_B2", "coil B2")]
 PCB = os.path.join(HERE, "..", "piper-watch.kicad_pcb")
 PNG = os.path.join(HERE, "..", "perfboard_wiring.png")
 KICAD_PY = r"C:\Program Files\KiCad\10.0\bin\python.exe"
@@ -68,7 +74,7 @@ def main():
     x0, y0, x1, y1 = d["edge"]
     fig, ax = plt.subplots(figsize=(15, 11.5), dpi=130)
     ax.set_xlim(x0 - 6, x1 + 6)
-    ax.set_ylim(y1 + 9.5 + 2.2 * 6 + 2, y0 - 9)
+    ax.set_ylim(y1 + 9.5 + 2.2 * 6 + 1 + 3 * 2.4 + 2, y0 - 9)
     ax.set_aspect("equal")
     ax.axis("off")
     ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, fc="#f3e9c6", ec="#8a7a4a", lw=1.5, zorder=0))
@@ -95,14 +101,19 @@ def main():
                                     fc="#ffffff55", ec="#3b6ea5", lw=1.2, ls="--", zorder=2))
         ax.text(l + 0.3, t + 0.3, p["ref"], fontsize=8, color="#1f4e79", zorder=6, va="top", ha="left", fontweight="bold")
         legend.append("%s  %s" % (p["ref"], p["value"]))
-    # wires: insulated (F.Cu) drawn over bare (B.Cu)
-    for layer, colour, edge in (("B.Cu", "#c87533", "#7a3f12"), ("F.Cu", "#d62828", "#7d0f0f")):
+    # wires, coloured by net; insulated ones (F.Cu) get a dotted stripe and are drawn on top
+    for insulated in (False, True):
         for t in d["tracks"]:
-            if t["layer"] != layer:
+            if (t["layer"] != "B.Cu") != insulated:
                 continue
-            lw = 5.0 if t["w"] >= 0.5 else 2.6
-            ax.plot([t["a"][0], t["b"][0]], [t["a"][1], t["b"][1]], color=edge, lw=lw + 1.2, solid_capstyle="round", zorder=3)
-            ax.plot([t["a"][0], t["b"][0]], [t["a"][1], t["b"][1]], color=colour, lw=lw, solid_capstyle="round", zorder=4)
+            net = t["net"].split("/")[-1]
+            colour = NET_COLOURS.get(net, "#999999")
+            lw = 5.0 if t["w"] >= 0.5 else 3.0
+            xs, ys = [t["a"][0], t["b"][0]], [t["a"][1], t["b"][1]]
+            ax.plot(xs, ys, color="#333333", lw=lw + 1.4, solid_capstyle="round", zorder=3)
+            ax.plot(xs, ys, color=colour, lw=lw, solid_capstyle="round", zorder=4)
+            if insulated:
+                ax.plot(xs, ys, color="#555555" if net in ("+5V",) else "#ffffff", lw=0.9, ls=(0, (1.5, 2.5)), zorder=4.5)
     # pads + pin labels
     for p in d["pads"]:
         if p["ref"].startswith("H"):
@@ -136,9 +147,14 @@ def main():
             ax.text(p["x"] + 1.2, p["y"], "+" if p["num"] == "1" else "-", fontsize=9, ha="left", va="center", zorder=6, fontweight="bold")
         elif p["ref"] == "GP1":
             ax.text(p["x"], p["y"] + 1.3, label, fontsize=6.5, ha="center", va="top", zorder=6)
-    ax.text(x0, y1 + 3, "TOP VIEW - back of the case at the top.  Wires are soldered on the UNDERSIDE: bare solid wire "
-            "(copper; thick = 19 V, GND, motor) and insulated wire (red) where a run crosses another.",
+    ax.text(x0, y1 + 3, "TOP VIEW - back of the case at the top.  Wires are soldered on the UNDERSIDE, drawn as seen from the top.  "
+            "Thick = heavy wire (19 V, GND, motor).  Dotted stripe = INSULATED wire (it crosses another run); the rest can be bare.",
             fontsize=8.5, va="top")
+    for k, (net, name) in enumerate(NET_NAMES):
+        lx, ly = x0 + (k % 4) * 18, y1 + 9.5 + 2.2 * 6 + 1 + (k // 4) * 2.4
+        ax.plot([lx, lx + 3], [ly, ly], color="#333333", lw=5.2, solid_capstyle="round")
+        ax.plot([lx, lx + 3], [ly, ly], color=NET_COLOURS[net], lw=3.8, solid_capstyle="round")
+        ax.text(lx + 4.2, ly, name, fontsize=8, va="center")
     ax.text(x0, y1 + 6, "Grey pads are not connected.  TMC2209 square pad = pin 1 (GND).  J6/J1/J3 screw openings face the back edge.",
             fontsize=8.5, va="top")
     for k, line in enumerate(legend):
