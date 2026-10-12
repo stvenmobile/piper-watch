@@ -27,6 +27,8 @@ clr_fit     = 0.35;              // gap for parts that slide/rotate against each
 m3          = 3.0;
 m4          = 4.0;
 insert_m3   = [4.1, 5.0];        // heat-set insert bore [diameter, depth] - coupon "M3a" confirmed
+tap_m3      = [2.5 + cal_hole, 6.0];   // an M3 screw cuts its own thread: hole prints ~2.5 (tap_coupon.scad
+                                       //   to pick the size), depth
 insert_m25  = [3.1 + cal_hole, 4.5];   // M2.5 x 4 inserts: hole prints ~3.1 (user's fit), 4.5 deep
 insert_m4   = [5.6, 6.0];        // coupon "M4a" confirmed
 m5          = 5.0;

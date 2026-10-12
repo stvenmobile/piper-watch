@@ -1,21 +1,25 @@
 // Level 2 body: floor + four walls, open at the top (the drive deck screws on as the lid).
 //
 //   FRONT  the JC4827W543 4.3" display: window over its active area; the board's four corner
-//          ears screw (M3) to posts behind the wall, holding the glass against it.
-//   BACK   (left)  XW-604B snap-in rocker switch on a 1.5 mm patch (its clips need a thin panel),
-//                  5.5 x 2.1 IP68 panel jack (11.2 mm thread, flange 14.1, nut 13.6 AF, 21 mm behind the flange): flange + gasket outside, nut inside,
-//                  6 x 30 mm panel FUSE holder (double-D hole: 15 dia, flats 12.2 apart): split block
-//                  -> fuse -> switch -> perfboard J1 (the head side only; the Jetson is unswitched)
+//          ears screw (M3, straight into tapped posts - no inserts) to posts behind the wall,
+//          holding the glass against it.
+//   BACK   (left)  a column: 6 x 30 mm panel FUSE holder (double-D hole: 15 dia, flats 12.2 apart)
+//                  above the 5.5 x 2.1 IP68 panel jack (11.2 mm thread, flange 14.1, nut 13.6 AF,
+//                  21 mm behind the flange: flange + gasket outside, nut inside); right of them the
+//                  snap-in ROCKER switch, upright (ON at the top) in a plain cut-out.
+//                  Split block -> fuse -> switch -> perfboard J1 (the head side only; the Jetson is unswitched)
 //          (right) cable exit, low under the motor: Jetson 19 V, ESP32 USB, camera USB
 //          (big enough for a USB-A plug and the barrel plug to pass), two zip-tie anchors
-//   LEFT   ESP32-S3 breakout (70 x 80, holes 32 x 72.5) standing 5 mm off the wall, USB to the back
+//   LEFT   ESP32-S3 breakout (70 x 80, holes 32 x 72.5) standing 5 mm off the wall on tapped M3
+//          bosses (no inserts), USB to the back
 //   FLOOR  19 V split block (2-way barrier strip, 36 x 21.5, M3.5 spade screws) back-left near the
 //          jack and switch: a low pad at each end with two M3 inserts; its − side is the common ground.
 //          Bosses (M2.5 inserts) for a 50 x 70 perfboard (stepper driver + 100 uF,
 //          terminal blocks) in the
 //          front-right; bosses for the 19 -> 5 V buck (Seloky LM2596S, 66 x 36, holes 54 x 31) in
 //          the front-left, input end to the back; four screws down into the skirt
-//   CORNERS posts with M3 inserts for the drive deck's screws
+//   CORNERS solid rounded-square columns, floor to deck, filleted into both walls, each with an M3
+//          insert at the top for the drive deck's screws
 //   VENTS  tall narrow slots high on both sides (no bridging)
 //
 // Frame: the deck frame (level2.scad) - deck top z = 0, so the body runs z = -l2_h .. -deck_t.
@@ -30,7 +34,8 @@ half    = l2_size[0] / 2;        // 80
 inner   = half - l2_wall;        // 77.5: inside faces of the walls
 
 m3_clear  = 3.4 + cal_hole;      // prints ~3.35 (PETG)
-post_d    = 8;
+corner_col = 14;                 // the corner columns: this square (rounded), filleted into the walls
+corner_fillet = 3;
 corner_xy = half - 9;            // deck screws (match drive_deck.scad)
 
 // ---- display (JC4827W543, measured from its STEP model + spec) ---------------------------------
@@ -45,14 +50,13 @@ disp_win_dz = 2.8;               // the active area sits this far ABOVE the boar
                                  //   top margin ~3.9, bottom ~9.6 - the wide margin is at the bottom)
 
 // ---- back panel ------------------------------------------------------------------------------
-switch_cut  = [28, 10.5 + 0.5];   // MEASURED body 25.7 long (+ end clips) x 10.5 thick; +0.5 so it passes (XW-604B)
-switch_xz   = [-50, -26];        // centre (x, z) on the back wall
-switch_patch = 1.5;              // wall thickness for its clips
+switch_cut  = [12.3 + 0.3, 17.1 + 0.3];   // MEASURED body 12.3 wide x 17.1 tall (upright; flange 14.8 x 21.7)
+switch_xz   = [-10, -42];        // centre (x, z) on the back wall - where the fuse was, 10 mm further in
 jack_d      = 11.2 + 0.3 + cal_hole;  // MEASURED thread 11.2 OD (sold as M12) + 0.3: no wobble before the nut is on
-jack_xz     = [-50, -58];
+jack_xz     = [-40, -58];        // 10 mm further in from the corner than before
 fuse_d      = 15.0 + cal_hole;   // panel fuse holder: round hole ...
 fuse_flats  = 12.2 + 0.3;        // ... with two flats this far apart (stops it turning)
-fuse_xz     = [-20, -42];        // its ring nut (~20 across) clears the switch's recess and the
+fuse_xz     = [-40, -36];        // above the jack: its ring nut (~20) clears the jack's nut (13.6 AF)        // its ring nut (~20 across) clears the switch's recess and the
                                  //   motor; the holder reaches ~34 mm inside, over the split block
 exit_slot   = [32, 16];          // cable exit (w x h), rounded
 exit_xz     = [22, z_floor + 3 + 8];
@@ -87,6 +91,18 @@ tb_boss_h   = 3;                 // floor 3 + boss 3 = room for a 5 mm M3 insert
 skirt_pts   = [[-71, -45], [-71, 45], [71, -45], [71, 5]];   // clear of the breakout (left, |y| < 40),
                                  //   the perfboard (right front) and the motor (right back)
 
+// the four corner columns (2D): a rounded square in each corner, joined to both walls by fillets
+module corner_columns_2d() {
+    intersection() {
+        rrect(l2_size - [2, 2] * l2_wall, l2_r - l2_wall);                        // inside the walls
+        offset(r = -corner_fillet) offset(delta = corner_fillet) union() {       // closing = the fillets
+            difference() { square(l2_size + [20, 20], center = true); rrect(l2_size - [2, 2] * l2_wall, l2_r - l2_wall); }
+            for (sx = [-1, 1], sy = [-1, 1]) translate([sx * (inner - corner_col / 2), sy * (inner - corner_col / 2)])
+                offset(r = 2) square(corner_col - 4, center = true);
+        }
+    }
+}
+
 module rrect(sz, r) { offset(r = r) square([sz[0] - 2 * r, sz[1] - 2 * r], center = true); }
 
 module shell() {
@@ -97,9 +113,8 @@ module shell() {
 }
 
 module adds() {
-    // corner posts for the deck screws (merge into the corner walls)
-    for (sx = [-1, 1], sy = [-1, 1]) translate([sx * corner_xy, sy * corner_xy, z_floor - 0.01])
-        cylinder(d = post_d, h = z_top - z_floor + 0.01, $fn = 32);
+    // corner columns for the deck screws: solid, floor to deck, filleted into both walls
+    translate([0, 0, z_floor - 0.01]) linear_extrude(z_top - z_floor + 0.01) corner_columns_2d();
     // display posts: wall's inside face -> the board's front (glass thickness)
     for (sx = [-1, 1], sz = [-1, 1]) translate([sx * disp_holes[0] / 2, inner + 0.01, disp_zc + sz * disp_holes[1] / 2])
         rotate([90, 0, 0]) cylinder(d = 7, h = disp_glass_t + 0.01, $fn = 32);
@@ -132,13 +147,12 @@ module cuts() {
         linear_extrude(0.01) square(disp_win + [2, 2] * (l2_wall + 0.02), center = true);
         translate([0, 0, l2_wall + 0.02]) linear_extrude(0.01) square(disp_win, center = true);
     }
-    // display post screws (M3 heat-set inserts from behind)
+    // display post screws (tapped M3 - an M3 screw cuts its own thread; screws <= 8 mm long)
     for (sx = [-1, 1], sz = [-1, 1]) translate([sx * disp_holes[0] / 2, inner - disp_glass_t - 0.01, disp_zc + sz * disp_holes[1] / 2])
-        rotate([-90, 0, 0]) cylinder(d = insert_m3[0], h = insert_m3[1], $fn = 24);
-    // switch: cut-out on a thinned patch
+        rotate([-90, 0, 0]) cylinder(d = tap_m3[0], h = min(tap_m3[1], disp_glass_t + 1), $fn = 24);   // 1.5 mm skin left in front
+    // switch: a plain cut-out, upright - it snaps in from outside
     translate([switch_xz[0], -half, switch_xz[1]]) {
         translate([-switch_cut[0] / 2, -1, -switch_cut[1] / 2]) cube([switch_cut[0], l2_wall + 2, switch_cut[1]]);
-        translate([-switch_cut[0] / 2 - 4, switch_patch, -switch_cut[1] / 2 - 4]) cube([switch_cut[0] + 8, l2_wall, switch_cut[1] + 8]);
     }
     // barrel jack: plain hole in the full wall - flange + gasket outside, nut inside
     translate([jack_xz[0], -half, jack_xz[1]]) rotate([-90, 0, 0])
@@ -149,9 +163,9 @@ module cuts() {
     // cable exit
     translate([exit_xz[0], -half - 1, exit_xz[1]]) rotate([-90, 0, 0]) linear_extrude(l2_wall + 2)
         offset(r = 6) square(exit_slot - [12, 12], center = true);
-    // breakout boss holes (M3 inserts)
-    for (sy = [-1, 1], sz = [-1, 1]) translate([-inner + brk_standoff - insert_m3[1] + 0.01, sy * brk_holes[0] / 2, brk_zc + sz * brk_holes[1] / 2])
-        rotate([0, 90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1], $fn = 24);
+    // breakout boss holes (tapped M3)
+    for (sy = [-1, 1], sz = [-1, 1]) translate([-inner + brk_standoff - tap_m3[1] + 0.01, sy * brk_holes[0] / 2, brk_zc + sz * brk_holes[1] / 2])
+        rotate([0, 90, 0]) cylinder(d = tap_m3[0], h = tap_m3[1], $fn = 24);
     // perfboard boss holes (M2.5 inserts)
     for (sx = [-1, 1], sy = [-1, 1]) translate([pb_c[0] + sx * pb_holes[0] / 2, pb_c[1] + sy * pb_holes[1] / 2, z_floor + pb_boss_h - insert_m25[1]])
         cylinder(d = insert_m25[0], h = insert_m25[1] + 1, $fn = 24);
