@@ -91,15 +91,19 @@ tb_boss_h   = 3;                 // floor 3 + boss 3 = room for a 5 mm M3 insert
 skirt_pts   = [[-71, -45], [-71, 45], [71, -45], [71, 5]];   // clear of the breakout (left, |y| < 40),
                                  //   the perfboard (right front) and the motor (right back)
 
-// the four corner columns (2D): a rounded square in each corner, joined to both walls by fillets
+// the four corner columns (2D): a square filling each corner of the inside, its exposed corner
+// rounded, joined to both walls by fillets. Built from plain shapes (not offset closing, which
+// $fn = 96 from params.scad breaks).
 module corner_columns_2d() {
-    intersection() {
-        rrect(l2_size - [2, 2] * l2_wall, l2_r - l2_wall);                        // inside the walls
-        offset(r = -corner_fillet) offset(delta = corner_fillet) union() {       // closing = the fillets
-            difference() { square(l2_size + [20, 20], center = true); rrect(l2_size - [2, 2] * l2_wall, l2_r - l2_wall); }
-            for (sx = [-1, 1], sy = [-1, 1]) translate([sx * (inner - corner_col / 2), sy * (inner - corner_col / 2)])
-                offset(r = 2) square(corner_col - 4, center = true);
+    a = inner - corner_col;                 // the column's inner faces (x and y)
+    f = corner_fillet;
+    for (sx = [-1, 1], sy = [-1, 1]) scale([sx, sy]) {
+        intersection() {
+            rrect(l2_size - [2, 2] * l2_wall, l2_r - l2_wall);                              // inside the walls
+            translate([a, a]) offset(r = 2) offset(delta = -2) square(corner_col + 5);     // exposed corner rounded
         }
+        for (m = [0, 1]) multmatrix(m ? [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0]] : [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]])   // both walls (swap x/y)
+            translate([a - f, inner - f]) difference() { square(f + 0.01); circle(r = f); }
     }
 }
 
