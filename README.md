@@ -136,7 +136,7 @@ GND: all grounds meet at one star point at the brick input.
 Normal tracking stays well inside 5 A, and even a full stall of the single servo (jammed, or
 pushing against a hard stop) stays under it. Protection:
 
-- Set each servo's **protection current and overload limits** in its EEPROM (see Servo setup),
+- Set each servo's **protection current and overload limits** in its EEPROM,
   so a stall is cut back long before it threatens the brick.
 - The **5 A fuse** protects the wiring if something does go wrong.
 
@@ -147,9 +147,7 @@ start moving, so the 12 V line doesn't dip.
 
 ## Wiring and pins (ESP32-S3 DevKitC-1 N16R8)
 
-> **Superseded:** the servo, LED ring and separate base ESP32 are gone. The pan motor is now a
-> NEMA17 on a TMC2209, run by the ESP32-S3 inside Level 2's JC4827W543R display. The current
-> wiring and pins are in [hardware/wiring.md](hardware/wiring.md).
+> **Superseded:** the servo, LED ring and separate base ESP32 are gone. The pan motor is now a NEMA17 on a TMC2209, run by the ESP32-S3 inside Level 2's JC4827W543R display. The current wiring and pins are in [hardware/wiring.md](hardware/wiring.md).
 
 Pins avoid the ones the N16R8 module and board use internally: GPIO 26-32 (flash),
 33-37 (octal PSRAM), 19/20 (native USB), 43/44 (UART0, the board's "UART" port) and the
@@ -179,26 +177,6 @@ The adapter handles the half-duplex direction switching, so the ESP32 just uses 
 
 ---
 
-## Servo setup (one-time)
-
-1. **ID:** the pan servo stays at the factory **ID 1** (the spare can be set to ID 2 if it is ever
-   added). Use Feetech's FD software, the Bus Servo Adapter's USB mode, or a small ESP32 sketch.
-2. **Zero before assembly, then centre.** Before fitting a horn or coupling, power each servo and
-   command it to **2048 (mid position)**. Only then attach the turntable coupling with the head
-   pointing **straight ahead**. That way the mechanism's centre is the servo's
-   centre and nothing is under strain at rest. Afterwards, fine-tune with the middle-position
-   calibration so that **2048 = straight ahead** exactly. The bench firmware has a
-   `center` command for this.
-3. **Angle limits in the servo's EEPROM**, so they hold even if the software misbehaves:
-   - **Pan:** about ±150° from centre (the camera cable sets the real limit; see Mechanics).
-4. **Protection:** set the protection current, overload torque and temperature limits, and enable
-   the overload behaviour that drops torque instead of fighting.
-5. **Speed and acceleration:** set sensible defaults. The ESP32 overrides them per move.
-
-Library: Feetech's **SCServo** (`SMS_STS` class) for Arduino-ESP32, at 1 Mbps.
-
----
-
 ## Motion control
 
 - The Jetson sends **targets** (pan angle plus a speed hint) at up to 30–50 Hz.
@@ -217,7 +195,7 @@ Library: Feetech's **SCServo** (`SMS_STS` class) for Arduino-ESP32, at 1 Mbps.
   starts from there.
 - **Don't force the head while it's powered.** The STS3215 has no slip clutch: twisting a head
   that is holding position by hand fights the motor and can strip its gears. Two defences:
-  - the servo-side **overload and current limits** (Servo setup, step 4) drop torque instead of
+  - the servo-side **overload and current limits** drop torque instead of
     fighting;
   - **torque is released when idle** (watchdog above). To move the head by hand on purpose, release
     torque first (a command from the Jetson or the dashboard), and turn it gently.
