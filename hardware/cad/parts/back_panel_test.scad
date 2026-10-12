@@ -1,7 +1,7 @@
 // Back-panel fit test: the Level 2 body's back wall round the switch, fuse holder and barrel jack,
 // cut straight from l2_body.scad (so it's identical to the real print) - to check before the long
 // body print:
-//   * rocker switch (body 12.3 x 17.1, upright): snaps into the plain 12.6 x 17.4 cut-out in the
+//   * rocker switch (body 12.3 x 17.1, upright): snaps into the plain 12.6 x 18.4 cut-out in the
 //     2.5 mm wall and stays put; ON at the top
 //   * fuse holder (6 x 30 mm): double-D hole - slides in, doesn't turn, ring nut tightens flat
 //   * barrel jack (5.5 x 2.1 IP68, 11.2 mm thread): 11.5 mm hole, flange + gasket outside, nut

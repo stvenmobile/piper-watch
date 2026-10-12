@@ -50,7 +50,7 @@ disp_win_dz = 2.8;               // the active area sits this far ABOVE the boar
                                  //   top margin ~3.9, bottom ~9.6 - the wide margin is at the bottom)
 
 // ---- back panel ------------------------------------------------------------------------------
-switch_cut  = [12.3 + 0.3, 17.1 + 0.3];   // MEASURED body 12.3 wide x 17.1 tall (upright; flange 14.8 x 21.7)
+switch_cut  = [12.3 + 0.3, 17.1 + 1.3];   // MEASURED body 12.3 wide x 17.1 tall (length +1.0 after the test print) (upright; flange 14.8 x 21.7)
 switch_xz   = [-10, -42];        // centre (x, z) on the back wall - where the fuse was, 10 mm further in
 jack_d      = 11.2 + 0.3 + cal_hole;  // MEASURED thread 11.2 OD (sold as M12) + 0.3: no wobble before the nut is on
 jack_xz     = [-40, -58];        // 10 mm further in from the corner than before
