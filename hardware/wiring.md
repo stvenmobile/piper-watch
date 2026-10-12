@@ -1,8 +1,9 @@
 # Wiring
 
 Two boards carry Piper-Watch's wiring: the **perfboard** on Level 2's floor (stepper driver and
-power) and the **XIAO ESP32-S3** in the head (the three displays). Everything talks to the Jetson
-over USB; no Wi-Fi or Bluetooth is used, so the XIAO's external antenna stays unplugged (the radio
+power) and the **XIAO ESP32-S3** in the head (the three displays). The stepper and the Hall sensor
+are run by the ESP32-S3 built into Level 2's front **display** (Guition JC4827W543R) - there's no
+separate base ESP32. Everything talks to the Jetson over USB; no Wi-Fi or Bluetooth is used, so the XIAO's external antenna stays unplugged (the radio
 is never turned on).
 
 > The top-level README's electrical section describes the earlier servo design (USB hub, LED
@@ -21,12 +22,12 @@ is never turned on).
  USB to the Jetson (data, and power for the boards' logic):
    • head XIAO ESP32-S3   - eyes + mouth          (through the turntable's hollow)
    • C920 camera board    - original cable        (through the turntable's hollow)
-   • base ESP32-S3        - stepper, Hall sensor  (stays in Level 2)
+   • JC4827 display       - front screen, stepper, Hall sensor  (Level 2's front wall)
 ```
 
 The 19 V is split by a screw terminal block screwed to Level 2's floor: one pair of spade leads goes to the Jetson; the other goes through the panel fuse and the switch (both on the back panel, right beside the block) to the perfboard's J1. The fuse and switch cover **only the head side**  (stepper and buck), and the fuse can be changed from outside. The Jetson's feed never passes through the perfboard or the switch, so switching the head off never pulls the Jetson's power; it's protected by the 19 V supply's own current limit.
 
-All grounds are common. The system's **common ground** is the split block's − terminal: the jack's −, the Jetson's − and the perfboard's J1 − all land there. On the perfboard, one ground point (★) gathers the board's grounds and returns to the split block through J1 −: the buck's input and output, the TMC2209's motor and logic grounds, and the base ESP32's GND. The ground is never switched or fused.
+All grounds are common. The system's **common ground** is the split block's − terminal: the jack's −, the Jetson's − and the perfboard's J1 − all land there. On the perfboard, one ground point (★) gathers the board's grounds and returns to the split block through J1 −: the buck's input and output, the TMC2209's motor and logic grounds, and the display's GND (through J4). The ground is never switched or fused.
 
 ---
 
@@ -50,7 +51,7 @@ The perfboard carries the TMC2209 and the terminals; one switched, fused 19 V fe
 ### Layout (70 × 50 perfboard) and parts
 
 Top view, back of the case at the top. Power and motor leads land on screw terminals (J1, J3, J6);
-the low-current logic (J4 to the ESP32, J5 to the Hall sensor) plugs onto 2.54 mm pin headers with
+the low-current logic (J4 to the display's ESP32, J5 to the Hall sensor) plugs onto 2.54 mm pin headers with
 multi-pin Dupont housings. Everything is along the back and left edges only (the front faces the
 display; the right edge is 2.5 mm from the wall).
 
@@ -98,9 +99,9 @@ logic supply, A1/A2 = one coil, B1/B2 = the other.
 | 16 | HALL | light, bare | J5 HALL · J4 HALL | ~18 mm |
 <!-- wires:end -->
 
-Leave U1's CLK, TX, RX and the DIAG pins unconnected. R2 (10 kΩ, EN to 3V3) is optional: it keeps
-the motor disabled while the ESP32 boots (its pins float until the firmware sets them) - leave it
-and its two wires out if you like.
+Leave U1's CLK, TX, RX and the DIAG pins unconnected. **Fit R2** (10 kΩ, EN to 3V3): it keeps the
+motor disabled while the display's ESP32 boots - its pins float until the firmware sets them, and
+that board resets whenever its USB is plugged in or the firmware is flashed.
 
 Before plugging in U1: power J1 alone and check with a meter that U1's VS socket pin reads 19 V,
 J6 5V reads 5.0 V (buck set first), and no 19 V appears on any J4/J5 pin.
@@ -119,27 +120,27 @@ J6 5V reads 5.0 V (buck set first), and no 19 V appears on any J4/J5 pin.
 | --- | ----------------------------------- | ----------------------------------------------------------------- |
 | J1  | 2-way 5.08 mm screw terminal        | + from the switch (switched, fused 19 V); − from the split block  |
 | J3  | 4-way 5.08 mm screw terminal        | motor coils                                                       |
-| J4  | 1 × 6 2.54 mm pin header            | to the base ESP32: STEP, DIR, EN, HALL, 3V3, GND (6-pin Dupont)   |
+| J4  | 1 × 6 2.54 mm pin header            | to the display's P3 + P4: STEP, DIR, EN, HALL, 3V3, GND (6-pin Dupont) |
 | J5  | 1 × 3 2.54 mm pin header            | Hall sensor: 5V, GND, OUT (3-pin Dupont)                          |
 | J6  | 3-way 5.08 mm screw terminal        | to the buck: 19V (switched, fused), GND out; 5V back              |
 | U1  | BTT TMC2209 on 2 × 8 female headers | so it can be swapped; check the pin labels against its silkscreen |
 | F1  | 6 × 30 mm (3AG) **3 A slow-blow**   | in the **panel** holder on the back wall, not on the board        |
 | C1  | 100 µF / 35 V electrolytic          | at U1's VS/GND                                                    |
 | R1  | 10 kΩ                               | Hall OUT pull-up to 3V3                                           |
-| R2  | 10 kΩ (optional)                    | U1 EN pull-up to 3V3: motor off while the ESP32 boots             |
+| R2  | 10 kΩ                               | U1 EN pull-up to 3V3: motor off while the ESP32 boots             |
 
 Use 20 AWG wire or solder-filled tracks for the 19 V and ground runs (J1, VM, J6 19V/GND); thin
 wire is fine for the logic and the 5 V Hall feed.
 
-### TMC2209 (BTT, STEP/DIR mode) ↔ base ESP32-S3
+### TMC2209 (BTT, STEP/DIR mode) ↔ the display's ESP32-S3
 
 | TMC2209 pin                  | Goes to                   | Notes                                                  |
 | ---------------------------- | ------------------------- | ------------------------------------------------------ |
 | VS (VM) / GND (motor side)   | VM rail / board ground    |                                                        |
-| VIO / GND (logic side)       | ESP32 **3V3** / ESP32 GND | logic at 3.3 V: no level shifting needed               |
-| STEP                         | ESP32 **GPIO 4**          |                                                        |
-| DIR                          | ESP32 **GPIO 5**          |                                                        |
-| EN                           | ESP32 **GPIO 6**          | LOW = motor enabled                                    |
+| VIO / GND (logic side)       | display **3.3V** / GND (P4) | logic at 3.3 V: no level shifting needed             |
+| STEP                         | display **IO 15** (P3)    | pulses from the RMT/MCPWM hardware, not the CPU        |
+| DIR                          | display **IO 16** (P3)    |                                                        |
+| EN                           | display **IO 6** (P3)     | LOW = motor enabled; R2 holds it HIGH during boot      |
 | MS1, MS2                     | VIO (both HIGH)           | **1/16 microstepping** (the firmware will assume this) |
 | TX, RX, CLK, DIAG           | unconnected               | UART tuning can come later                             |
 | A1, A2 / B1, B2              | NEMA17 coil A / coil B    | see **The motor's 6-pin connector** below |
@@ -181,15 +182,46 @@ Never plug or unplug the motor while VS (19 V) is live.
 | ---------------------------------------------- | ------------------------------------------------- |
 | 1 VCC                                          | 5 V rail (the A3144 needs 4.5 V or more)          |
 | 2 GND                                          | board ground                                      |
-| 3 OUT                                          | ESP32 **GPIO 7**, with a **10 kΩ pull-up to 3V3** |
+| 3 OUT                                          | display **IO 7** (P3), with a **10 kΩ pull-up to 3V3** |
 
 The output is open-collector, so the pull-up sets its high level. Pull it up to **3V3, never to
 5 V**, which would push 5 V into the ESP32's pin.
 
-### The base ESP32-S3
+### The display's ESP32-S3 (Guition JC4827W543R, N4R8)
 
-- It's powered by its USB cable from the Jetson. **Don't** also connect the buck's 5 V to its 5V
-  pin: two 5 V sources would fight, and the buck could back-feed the Jetson's USB port.
+The 4.3" display on Level 2's front wall has its own ESP32-S3, and it runs the motor too: the
+display (a 1 frame/s camera view, a status page on a tap) and the stepper share the chip easily,
+because the step pulses come from the S3's pulse hardware (RMT/MCPWM), not from the CPU.
+
+Its free pins come out on four small 4-pin **1.25 mm** connectors along the board's bottom edge
+(labels as printed on the board):
+
+| Connector | Pins                       | Used for                                                     |
+| --------- | -------------------------- | ------------------------------------------------------------ |
+| P2        | IO46, IO9, IO14, IO5       | spare (IO46 is a boot-strapping pin - avoid it)              |
+| **P3**    | IO6, IO7, IO15, IO16       | **EN, HALL, STEP, DIR**                                      |
+| **P4**    | GND, 3.3V, IO17, IO18      | **GND and 3.3V** to the perfboard; IO17/18 (UART1) unused    |
+| P5        | GND, 3.3V, IO17, IO18      | the same as P4 - spare                                       |
+
+**The lead:** a 4-wire 1.25 mm pigtail from P3 and a 2-wire one from P4 (GND and 3.3V only; cut
+or tape off the IO17/IO18 wires), crimped together into the 6-pin Dupont housing that plugs onto
+J4:
+
+| J4 pin | Signal | Display pin  |
+| ------ | ------ | ------------ |
+| 1      | STEP   | IO 15 (P3)   |
+| 2      | DIR    | IO 16 (P3)   |
+| 3      | EN     | IO 6 (P3)    |
+| 4      | HALL   | IO 7 (P3)    |
+| 5      | 3V3    | 3.3V (P4)    |
+| 6      | GND    | GND (P4)     |
+
+- Pigtail colours vary from batch to batch: check each wire against the board's labels with a
+  meter (continuity to the connector pin) before crimping.
+- It's powered by its USB cable from the Jetson (about 260 mA) - that's also its data link. **Don't**
+  also feed it from the buck through its 4-pin power connector: two 5 V sources would fight, and
+  the buck could back-feed the Jetson's USB port.
+- The buck stays: it feeds the Hall sensor's 5 V (the display's connectors only give 3.3 V).
 - The **level shifter** planned for the LED ring isn't needed any more (the ring is retired).
 
 ---
@@ -233,12 +265,3 @@ deliberately left unused. "Left" and "right" are as seen from the front.
 - **Check the labels:** confirm each module's pin labels on arrival. Some GC9A01 modules have a
   BL/BLK backlight pin; others tie the backlight on. **These modules (measured): 7 pins, VCC GND SCL SDA DC CS RST - no BL, so D6 is free.**
 - **Image orientation:** the eyes are mounted upside down, so the firmware rotates their image 180°.
-
----
-
-## Open questions
-
-- **The 4.3" JC4827 display in Level 2's front** (it has its own ESP32-S3): either its own USB to
-  the Jetson (data and power, a third cable, but it doesn't move), or Wi-Fi with power from the
-  buck. If it goes on USB, the buck only feeds the Hall sensor, and that can come from the base
-  ESP32's 5V pin instead, so the buck could be dropped.

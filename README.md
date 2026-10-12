@@ -1,17 +1,10 @@
 # Piper-Watch
 
 **Piper-Watch** is the eyes of [piper-assistant](https://github.com/stvenmobile/piper_assistant):
-a desktop robot head that turns to look around, finds and follows
-faces, and recognises the people it knows. The face is deliberately not a cartoon: a round
-face with the camera lens in the middle, framed by a **glowing LED ring** that shows what Piper
+a desktop robot head that turns to look around, finds and follows faces, and recognises the people it knows. The face is deliberately not a cartoon: a round face with the camera lens in the middle, framed by a **glowing LED ring** that shows what Piper
 is doing (listening, thinking, speaking) and who it is paying attention to.
 
-All the thinking happens on an **NVIDIA Jetson Orin NX** in a separate enclosure. Piper-Watch
-itself is a compact two-part unit: a **shallow cylindrical base** (power, an ESP32-S3 controller,
-the pan servo) carrying a lazy Susan, and a **head** on a short neck that turns left and right.
-There is deliberately **no tilt motor**: the head is fixed at a 15° upward angle by a swappable
-wedge, which suits seated conversation. Anything richer than the ring - text, status, the
-camera view - goes on the Jetson's dashboard web page.
+All the thinking happens on an **NVIDIA Jetson Orin NX** in a separate enclosure. Piper-Watch itself is a compact two-part unit: a **shallow cylindrical base** (power, an ESP32-S3 controller, the pan servo) carrying a lazy Susan, and a **head** on a short neck that turns left and right. There is deliberately **no tilt motor**: the head is fixed at a 15° upward angle by a swappable wedge, which suits seated conversation. Anything richer than the ring - text, status, the camera view - goes on the Jetson's dashboard web page.
 
 > **Status:** design phase. The servos are on order; nothing is built yet.
 
@@ -20,18 +13,17 @@ camera view - goes on the Jetson's dashboard web page.
 ## Goals and non-goals
 
 **Goals**
+
 - Smooth, quiet tracking of a person's face (pan), without stepping or buzzing while holding still.
 - Simple and stable: one servo, no tilt joint, everything wired inside.
 - Face detection and recognition running entirely locally on the Jetson.
-- A calm, clearly-a-device presence: the light ring shows Piper's state and points toward the
-  person it is attending to, so it reads as an assistant, not a camera that silently watches.
-  No eyes or mouth to anthropomorphise (and Piper's voice comes from the speakerphone anyway).
+- A calm, clearly-a-device presence: the light ring shows Piper's state and points toward the person it is attending to, so it reads as an assistant, not a camera that silently watches. No eyes or mouth to anthropomorphise (and Piper's voice comes from the speakerphone anyway).
 - Compact: a footprint barely larger than the 140 mm lazy Susan, about 20-23 cm tall.
 - One data cable and one power brick between the head and the rest of the system.
 
 **Non-goals (for now)**
-- A display on the unit. Text, status and the camera view with detection overlays live on
-  the Jetson's **dashboard web page** instead.
+
+- A display on the unit. Text, status and the camera view with detection overlays live on the Jetson's **dashboard web page** instead.
 - Running any AI on the ESP32.
 - Battery operation.
 
@@ -64,6 +56,7 @@ camera view - goes on the Jetson's dashboard web page.
 ```
 
 The roles are:
+
 - **Jetson:** perception and decisions. It decides *where to look*.
 - **ESP32-S3:** real-time body. It decides *how to move there* smoothly and safely,
   reports where the head actually is, and animates the face.
@@ -74,23 +67,23 @@ The roles are:
 
 ## Components
 
-| Part | Role | Status |
-|---|---|---|
-| NVIDIA Jetson Orin NX (JetPack) | vision, recognition, assistant, dashboard | have |
-| **ESP32-S3 DevKitC-1 N16R8** (16 MB flash, 8 MB octal PSRAM, native USB) | controller: pan motor, LED ring, link to the Jetson | have |
-| **24-LED WS2812-type ring**: OD 65.6, ID 52.3, 3.2 mm with LEDs; through-hole pads 2× 5 V, 2× GND, DIN, DOUT | the face's light ring | have |
-| **74AHCT125** (or a single-gate 74AHCT1G125) level shifter | ESP32 3.3 V data → 5 V ring | needed (~$1) |
-| Translucent ring, printed (`ring_diffuser.scad`) in white or natural PLA/PETG | diffuser in front of the LEDs | print |
-| **Feetech STS3215, 12 V / 30 kg·cm** serial bus servo: 360° magnetic encoder (4096 steps, 0.088°), position/load/voltage/temperature feedback, 1 Mbps half-duplex TTL bus (2 ordered; the second is a spare) | pan | **ordered** |
-| Waveshare **Bus Servo Adapter (A)**: 9–12.6 V input, powers the servo bus and converts it to plain TX/RX for the ESP32 | servo bus interface | needed |
-| Logitech **C920X**, housing partly stripped (94 × 24.1 × 29 mm) | camera - the head's "nose" | have |
-| **SP-200** USB speakerphone (5 V): 4-mic array, hardware echo cancellation, USB Audio Class | microphone/speaker, connected to the Jetson | have |
-| 5.5" (140 mm) aluminium lazy Susan bearing | pan base, carries all vertical load | have / needed |
-| 3D-printed base, turntable plate, hollow neck, 15° wedge, and a two-part head (face front + screw-on back) | enclosure | camera pod fit-tested |
-| Silicone hook-up wire, ~2 mm, very flexible (6 colours) | display wiring through the neck | have |
-| **12 V / 5 A** power brick, inline 5 A fuse, 1000 µF / 25 V capacitor | head power | needed |
-| **5 V / 3 A** buck converter | USB hub power | needed |
-| **FE1.1s 4-port USB 2.0 hub board** (~$5–7) with external 5V/GND pads and a cuttable "Disable USB Power" jumper (e.g. [Circuitneato](https://circuitneato.com/how-to-use-the-fe1-1s-usb-hub/), or generic "FE1.1s hub module" listings) | one cable to the Jetson | needed |
+| Part                                                                                                                                                                                                                                    | Role                                                                            | Status                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------- |
+| NVIDIA Jetson Orin NX (JetPack)                                                                                                                                                                                                         | vision, recognition, assistant, dashboard                                       | have                  |
+| **Guition JC4827W543R** 4.3" 480 × 272 display with its own **ESP32-S3** (N4R8, native USB)                                                                                                                                             | Level 2's front screen, and the pan motor's controller (no separate base ESP32) | have                  |
+| **24-LED WS2812-type ring**: OD 65.6, ID 52.3, 3.2 mm with LEDs; through-hole pads 2× 5 V, 2× GND, DIN, DOUT                                                                                                                            | the face's light ring                                                           | have                  |
+| **74AHCT125** (or a single-gate 74AHCT1G125) level shifter                                                                                                                                                                              | ESP32 3.3 V data → 5 V ring                                                     | needed (~$1)          |
+| Translucent ring, printed (in white or natural PLA/PETG                                                                                                                                                                                 | diffuser in front of the LEDs                                                   | print                 |
+| **Feetech STS3215, 12 V / 30 kg·cm** serial bus servo: 360° magnetic encoder (4096 steps, 0.088°), position/load/voltage/temperature feedback, 1 Mbps half-duplex TTL bus (2 ordered; the second is a spare)                            | pan                                                                             | **ordered**           |
+| Waveshare **Bus Servo Adapter (A)**: 9–12.6 V input, powers the servo bus and converts it to plain TX/RX for the ESP32                                                                                                                  | servo bus interface                                                             | needed                |
+| Logitech **C920X**, housing partly stripped (94 × 24.1 × 29 mm)                                                                                                                                                                         | camera - the head's "nose"                                                      | have                  |
+| **SP-200** USB speakerphone (5 V): 4-mic array, hardware echo cancellation, USB Audio Class                                                                                                                                             | microphone/speaker, connected to the Jetson                                     | have                  |
+| 5.5" (140 mm) aluminium lazy Susan bearing                                                                                                                                                                                              | pan base, carries all vertical load                                             | have / needed         |
+| 3D-printed base, turntable plate, hollow neck, 15° wedge, and a two-part head (face front + screw-on back)                                                                                                                              | enclosure                                                                       | camera pod fit-tested |
+| Silicone hook-up wire, ~2 mm, very flexible (6 colours)                                                                                                                                                                                 | display wiring through the neck                                                 | have                  |
+| **12 V / 5 A** power brick, inline 5 A fuse, 1000 µF / 25 V capacitor                                                                                                                                                                   | head power                                                                      | needed                |
+| **5 V / 3 A** buck converter                                                                                                                                                                                                            | USB hub power                                                                   | needed                |
+| **FE1.1s 4-port USB 2.0 hub board** (~$5–7) with external 5V/GND pads and a cuttable "Disable USB Power" jumper (e.g. [Circuitneato](https://circuitneato.com/how-to-use-the-fe1-1s-usb-hub/), or generic "FE1.1s hub module" listings) | one cable to the Jetson                                                         | needed                |
 
 ---
 
@@ -109,6 +102,7 @@ GND: all grounds meet at one star point at the brick input.
 ```
 
 **Why this layout**
+
 - **Isolation:** the ESP32-S3, LED ring and camera get their 5 V from their own regulator, never
   from the servo rail, so servo current spikes can't reset the ESP32 or glitch the camera. They
   also don't depend on the Jetson's USB ports for power.
@@ -117,6 +111,7 @@ GND: all grounds meet at one star point at the brick input.
 - **One cable:** the hub merges the camera and the ESP32-S3 onto a single USB cable to the Jetson.
 
 **USB hub: FE1.1s board**
+
 - **Power:** wire the 5 V buck to the board's **5V/GND pads**. It runs self-powered, at
   500 mA per port (2 A total), which covers the ESP32-S3 (~0.1 A) and the camera (~0.5 A).
   The LED ring is wired to the buck directly, not through the hub.
@@ -129,17 +124,18 @@ GND: all grounds meet at one star point at the brick input.
 
 **Power budget (estimates)**
 
-| Load | Typical | Peak |
-|---|---|---|
-| STS3215 at 12 V, holding | ~0.1 A | |
-| STS3215 at 12 V, moving | ~0.3–0.8 A | ~3 A if it stalls |
-| ESP32-S3 (5 V) | ~0.1 A | |
-| LED ring (5 V), brightness capped at ~25% | ~0.05–0.25 A | ~1.4 A if driven full white (the firmware never does) |
-| C920X camera (5 V) | ~0.4 A | ~0.5 A |
-| **12 V input total** | **~0.4–1.2 A** | **~3.5 A** |
+| Load                                      | Typical        | Peak                                                  |
+| ----------------------------------------- | -------------- | ----------------------------------------------------- |
+| STS3215 at 12 V, holding                  | ~0.1 A         |                                                       |
+| STS3215 at 12 V, moving                   | ~0.3–0.8 A     | ~3 A if it stalls                                     |
+| ESP32-S3 (5 V)                            | ~0.1 A         |                                                       |
+| LED ring (5 V), brightness capped at ~25% | ~0.05–0.25 A   | ~1.4 A if driven full white (the firmware never does) |
+| C920X camera (5 V)                        | ~0.4 A         | ~0.5 A                                                |
+| **12 V input total**                      | **~0.4–1.2 A** | **~3.5 A**                                            |
 
 Normal tracking stays well inside 5 A, and even a full stall of the single servo (jammed, or
 pushing against a hard stop) stays under it. Protection:
+
 - Set each servo's **protection current and overload limits** in its EEPROM (see Servo setup),
   so a stall is cut back long before it threatens the brick.
 - The **5 A fuse** protects the wiring if something does go wrong.
@@ -151,22 +147,27 @@ start moving, so the 12 V line doesn't dip.
 
 ## Wiring and pins (ESP32-S3 DevKitC-1 N16R8)
 
+> **Superseded:** the servo, LED ring and separate base ESP32 are gone. The pan motor is now a
+> NEMA17 on a TMC2209, run by the ESP32-S3 inside Level 2's JC4827W543R display. The current
+> wiring and pins are in [hardware/wiring.md](hardware/wiring.md).
+
 Pins avoid the ones the N16R8 module and board use internally: GPIO 26-32 (flash),
 33-37 (octal PSRAM), 19/20 (native USB), 43/44 (UART0, the board's "UART" port) and the
 strapping pins 0, 3, 45, 46.
 
-| Signal | ESP32-S3 pin | Goes to |
-|---|---|---|
-| Servo bus TX | **GPIO 17** (UART1 TX) | Bus Servo Adapter **RX** |
-| Servo bus RX | **GPIO 18** (UART1 RX) | Bus Servo Adapter **TX** |
-| Ground | GND | Bus Servo Adapter GND (do not connect its supply to the S3) |
-| LED ring data | **GPIO 8** → 74AHCT125 (powered from 5 V) → ring **DIN** | 24-LED ring; DOUT unused |
-| LED ring power | 5 V buck / GND | ring 5 V and GND pads (use both pairs) |
-| Jetson link + flashing | native USB (the board's **"USB"** port, GPIO 19/20) | USB hub → Jetson, appears as `/dev/ttyACM0` |
-| Status LED | on-board RGB (GPIO 48 on v1.0 boards, GPIO 38 on v1.1) | link / fault indication |
+| Signal                 | ESP32-S3 pin                                             | Goes to                                                     |
+| ---------------------- | -------------------------------------------------------- | ----------------------------------------------------------- |
+| Servo bus TX           | **GPIO 17** (UART1 TX)                                   | Bus Servo Adapter **RX**                                    |
+| Servo bus RX           | **GPIO 18** (UART1 RX)                                   | Bus Servo Adapter **TX**                                    |
+| Ground                 | GND                                                      | Bus Servo Adapter GND (do not connect its supply to the S3) |
+| LED ring data          | **GPIO 8** → 74AHCT125 (powered from 5 V) → ring **DIN** | 24-LED ring; DOUT unused                                    |
+| LED ring power         | 5 V buck / GND                                           | ring 5 V and GND pads (use both pairs)                      |
+| Jetson link + flashing | native USB (the board's **"USB"** port, GPIO 19/20)      | USB hub → Jetson, appears as `/dev/ttyACM0`                 |
+| Status LED             | on-board RGB (GPIO 48 on v1.0 boards, GPIO 38 on v1.1)   | link / fault indication                                     |
 
 **Three wires to the head.** The ring needs only 5 V, GND and one data wire, running about
 40-50 cm from the base up through the lazy Susan and the neck (plus the camera cable), so:
+
 - **level-shift the data** to 5 V at the ESP32 end (74AHCT125): WS2812-type LEDs want a 5 V
   logic high, and 3.3 V straight down a long wire is unreliable;
 - add a **330 Ω resistor** in series with the data line at the shifter output, and a
@@ -230,14 +231,14 @@ Library: Feetech's **SCServo** (`SMS_STS` class) for Arduino-ESP32, at 1 Mbps.
 - **Framing:** binary messages, **COBS**-framed with a **CRC-16**, each with a type byte and a
   sequence number. Unknown types are ignored, so either side can be updated first.
 
-| Direction | Message | Contents |
-|---|---|---|
-| Jetson → ESP32 | `HEARTBEAT` | sequence, Jetson time |
-| Jetson → ESP32 | `LOOK` | pan°, max speed, mode (track / glance / rest) |
-| Jetson → ESP32 | `FACE` | state (idle, listening, thinking, speaking, sleeping, error, …), attention direction, colour/brightness |
-| Jetson → ESP32 | `CONFIG` | soft limits, smoothing, ring brightness limit, etc. |
-| ESP32 → Jetson | `STATUS` | actual pan, load, voltage, temperature, ESP32 time, flags |
-| ESP32 → Jetson | `EVENT` | watchdog/fault, boot |
+| Direction      | Message     | Contents                                                                                                |
+| -------------- | ----------- | ------------------------------------------------------------------------------------------------------- |
+| Jetson → ESP32 | `HEARTBEAT` | sequence, Jetson time                                                                                   |
+| Jetson → ESP32 | `LOOK`      | pan°, max speed, mode (track / glance / rest)                                                           |
+| Jetson → ESP32 | `FACE`      | state (idle, listening, thinking, speaking, sleeping, error, …), attention direction, colour/brightness |
+| Jetson → ESP32 | `CONFIG`    | soft limits, smoothing, ring brightness limit, etc.                                                     |
+| ESP32 → Jetson | `STATUS`    | actual pan, load, voltage, temperature, ESP32 time, flags                                               |
+| ESP32 → Jetson | `EVENT`     | watchdog/fault, boot                                                                                    |
 
 The message set stays small: no video or vector data crosses this link.
 
@@ -249,15 +250,15 @@ A round face (about 105 mm across - the smallest circle around the camera) with 
 in the middle, framed by a glowing ring. The ring is a 24-LED WS2812-type ring behind a
 translucent diffuser, and the ESP32-S3 animates it from a single state (`FACE` message):
 
-| State | Ring |
-|---|---|
-| **Idle** | a steady, soft warm glow |
-| **Listening** | slow "breathing" |
-| **Thinking** | a short comet running around the ring |
-| **Speaking** | a quick, slightly irregular pulse while Piper's TTS plays |
-| **Attention** | a brighter arc pointing toward the person being tracked |
-| **Sleeping** | a dim ember |
-| **Error** | amber flashes |
+| State         | Ring                                                      |
+| ------------- | --------------------------------------------------------- |
+| **Idle**      | a steady, soft warm glow                                  |
+| **Listening** | slow "breathing"                                          |
+| **Thinking**  | a short comet running around the ring                     |
+| **Speaking**  | a quick, slightly irregular pulse while Piper's TTS plays |
+| **Attention** | a brighter arc pointing toward the person being tracked   |
+| **Sleeping**  | a dim ember                                               |
+| **Error**     | amber flashes                                             |
 
 Brightness is capped at about 25%: plenty behind the diffuser, easy on the 5 V supply, and a
 soft warm-white ring also lights the person's face a little, which helps detection in a dim

@@ -73,15 +73,9 @@ CUSTOM = {
                           [("1", "1A"), ("3", "2A")], [("2", "1B"), ("4", "2B")]),
     "A3144": ("U", "A3144 Hall switch, TO-92 (open collector, needs a pull-up)",
               [("1", "VCC"), ("2", "GND")], [("3", "OUT")]),
-    "ESP32-S3-DevKitC-1": ("U", "ESP32-S3-DevKitC-1 (ESP32-S3-N16R8): 2 x 22 headers. GPIO35-37 are used by the octal PSRAM",
-                           [("1", "3V3"), ("2", "3V3"), ("3", "RST"), ("4", "GPIO4"), ("5", "GPIO5"), ("6", "GPIO6"), ("7", "GPIO7"),
-                            ("8", "GPIO15"), ("9", "GPIO16"), ("10", "GPIO17"), ("11", "GPIO18"), ("12", "GPIO8"), ("13", "GPIO3"),
-                            ("14", "GPIO46"), ("15", "GPIO9"), ("16", "GPIO10"), ("17", "GPIO11"), ("18", "GPIO12"), ("19", "GPIO13"),
-                            ("20", "GPIO14"), ("21", "5V"), ("22", "GND")],
-                           [("23", "GND"), ("24", "TX/GPIO43"), ("25", "RX/GPIO44"), ("26", "GPIO1"), ("27", "GPIO2"), ("28", "GPIO42"),
-                            ("29", "GPIO41"), ("30", "GPIO40"), ("31", "GPIO39"), ("32", "GPIO38"), ("33", "GPIO37"), ("34", "GPIO36"),
-                            ("35", "GPIO35"), ("36", "GPIO0"), ("37", "GPIO45"), ("38", "GPIO48"), ("39", "GPIO47"), ("40", "GPIO21"),
-                            ("41", "GPIO20"), ("42", "GPIO19"), ("43", "GND"), ("44", "GND")]),
+    "JC4827W543_IO": ("U", "Guition JC4827W543R 4.3 in display (ESP32-S3 N4R8): its extended-IO connectors P3 and P4 (1.25 mm, 4-pin)",
+                      [("1", "P3:IO6"), ("2", "P3:IO7"), ("3", "P3:IO15"), ("4", "P3:IO16")],
+                      [("5", "P4:GND"), ("6", "P4:3.3V"), ("7", "P4:IO17"), ("8", "P4:IO18")]),
     "XIAO_ESP32S3": ("U", "Seeed Studio XIAO ESP32-S3",
                      [("1", "D0/GPIO1"), ("2", "D1/GPIO2"), ("3", "D2/GPIO3"), ("4", "D3/GPIO4"), ("5", "D4/GPIO5"), ("6", "D5/GPIO6"),
                       ("7", "D6/GPIO43")],
@@ -139,9 +133,7 @@ def P(ref, lib_id, value, at, nets):
     return dict(ref=ref, lib_id=lib_id, value=value, at=at, nets=nets)
 
 
-ESP_NC = {str(i): None for i in range(1, 45)}
-ESP_NETS = dict(ESP_NC)
-ESP_NETS.update({"1": "+3V3", "2": None, "4": "STEP", "5": "DIR", "6": "EN", "7": "HALL", "22": "GND", "23": "GND"})
+ESP_NETS = {"1": "EN", "2": "HALL", "3": "STEP", "4": "DIR", "5": "GND", "6": "+3V3", "7": None, "8": None}
 
 SHEETS = [
     dict(file="power.kicad_sch", name="Power", paper="A4", title="Power: 19 V in, split block, panel fuse, switch, 5 V buck",
@@ -156,19 +148,19 @@ SHEETS = [
                 P("F1", "Device:Fuse", "3 A slow-blow, 6 x 30 panel holder", (147.32, 55.88), {"1": "+19V", "2": "+19V_FUSED"}),
                 P("SW1", "Switch:SW_SPST", "rocker XW-604B (head power)", (190.5, 50.8), {"1": "+19V_FUSED", "2": "+19V_SW"}),
                 P("U2", f"{LIB}:LM2596_Module", "LM2596 buck -> 5.0 V", (241.3, 101.6), {"1": "+19V_SW", "2": "GND", "3": "+5V", "4": "GND"})]),
-    dict(file="level2.kicad_sch", name="Level 2 drive", paper="A3", title="Level 2: perfboard (TMC2209), base ESP32-S3, Hall sensor, motor",
-         notes=["PERFBOARD (70 x 50): screw terminals J1 (19 V in), J3 (motor), J6 (buck); pin headers J4 (ESP32), J5 (Hall) with Dupont housings.",
+    dict(file="level2.kicad_sch", name="Level 2 drive", paper="A3", title="Level 2: perfboard (TMC2209), the display's ESP32-S3, Hall sensor, motor",
+         notes=["PERFBOARD (70 x 50): screw terminals J1 (19 V in), J3 (motor), J6 (buck); pin headers J4 (display P3/P4), J5 (Hall) with Dupont housings.",
                 "Heavy wire (20-22 AWG): 19 V, GND, motor. C1 sits right at U1's VS and the GND next to it.",
                 "U1 MS1 = MS2 = 3V3: 1/16 microstepping. CLK, TX, RX and DIAG unconnected. Set Vref ~0.7 V before connecting the motor.",
-                "R2 (optional) holds EN high (motor off) while the ESP32 boots.",
+                "R2 holds EN high (motor off) while the display's ESP32 boots - fit it.",
                 "Motor M1: 6-pin socket, pins 1+3 = coil A (red A1, blue A2); pins 4+6 = coil B (green B1, black B2); pins 2, 5 (centre taps) unused. J3 left to right: A2 A1 B1 B2.",
-                "U3 (base ESP32-S3) is powered by its USB cable from the Jetson - never also from the buck's 5 V.",
+                "U3 (the JC4827W543R display's ESP32-S3) runs the motor: P3 + P4 pigtails -> J4. Powered by its USB from the Jetson - never also from the buck.",
                 "Hall U4 (A3144) on the motor bracket's pad: VCC from the 5 V buck, OUT pulled up to 3V3 by R1 (never to 5 V)."],
          parts=[P("J1", "Connector:Screw_Terminal_01x02", "19V in: + - left to right", (63.5, 50.8), {"2": "+19V_SW", "1": "GND"}),
                 P("J6", "Connector:Screw_Terminal_01x03", "to buck: 19V, GND, 5V", (63.5, 81.28), {"1": "+19V_SW", "2": "GND", "3": "+5V"}),
                 P("J3", "Connector:Screw_Terminal_01x04", "motor: A2 A1 B1 B2 (left to right on the board)", (63.5, 116.84),
                   {"4": "MOT_A2", "3": "MOT_A1", "2": "MOT_B1", "1": "MOT_B2"}),
-                P("J4", "Connector_Generic:Conn_01x06", "to ESP32: STEP DIR EN HALL 3V3 GND", (63.5, 160.02),
+                P("J4", "Connector_Generic:Conn_01x06", "to display P3/P4: STEP DIR EN HALL 3V3 GND", (63.5, 160.02),
                   {"1": "STEP", "2": "DIR", "3": "EN", "4": "HALL", "5": "+3V3", "6": "GND"}),
                 P("J5", "Connector_Generic:Conn_01x03", "to Hall: 5V GND OUT", (63.5, 203.2), {"1": "+5V", "2": "GND", "3": "HALL"}),
                 P("U1", f"{LIB}:TMC2209_Module", "BTT TMC2209", (162.56, 106.68),
@@ -176,8 +168,8 @@ SHEETS = [
                    "16": "DIR", "15": "STEP", "14": None, "13": None, "12": None, "11": "+3V3", "10": "+3V3", "9": "EN"}),
                 P("C1", "Device:C_Polarized", "100uF 35V (at U1 VS)", (124.46, 165.1), {"1": "+19V_SW", "2": "GND"}),
                 P("R1", "Device:R", "10k (Hall pull-up)", (185.42, 165.1), {"1": "+3V3", "2": "HALL"}),
-                P("R2", "Device:R", "10k (opt., EN pull-up)", (215.9, 165.1), {"1": "+3V3", "2": "EN"}),
-                P("U3", f"{LIB}:ESP32-S3-DevKitC-1", "ESP32-S3-DevKitC-1 N16R8", (299.72, 127.0), ESP_NETS),
+                P("R2", "Device:R", "10k (EN pull-up)", (215.9, 165.1), {"1": "+3V3", "2": "EN"}),
+                P("U3", f"{LIB}:JC4827W543_IO", "JC4827W543R display (ESP32-S3)", (299.72, 127.0), ESP_NETS),
                 P("U4", f"{LIB}:A3144", "A3144 (homing)", (299.72, 210.82), {"1": "+5V", "2": "GND", "3": "HALL"}),
                 P("M1", "Motor:Stepper_Motor_bipolar", "NEMA17 (42 x 33.4)", (378.46, 76.2),
                   {"1": "MOT_A1", "2": "MOT_A2", "3": "MOT_B1", "4": "MOT_B2"})]),
@@ -297,9 +289,9 @@ def main():
             f"(property \"Sheetfile\" {q(sh['file'])} (at {fmt(x)} 92.0 0) (effects (font (size 1.27 1.27)) (justify left top))) "
             f"(instances (project {q(PROJECT)} (path {q('/' + root_uuid)} (page {q(str(i + 2))})))))")
     notes = ["Piper-Watch wiring. Power: the 19 V feed, split block, panel fuse, switch and buck.",
-             "Level 2 drive: the perfboard (TMC2209), base ESP32-S3, Hall sensor and motor. Head: the XIAO and the three displays.",
+             "Level 2 drive: the perfboard (TMC2209), the display's ESP32-S3, Hall sensor and motor. Head: the XIAO and the three displays.",
              "Nets that cross sheets use global labels: +19V, +19V_FUSED, +19V_SW, +5V, GND. Everything else is local to its sheet.",
-             "USB (data + logic power) runs to the Jetson from: base ESP32-S3, head XIAO ESP32-S3, C920 camera board."]
+             "USB (data + logic power) runs to the Jetson from: the JC4827 display, head XIAO ESP32-S3, C920 camera board."]
     root = (f"(kicad_sch (version 20250114) (generator \"piper-watch-gen\") (generator_version \"9.0\") (uuid {q(root_uuid)}) "
             f"(paper \"A4\") (title_block (title \"Piper-Watch wiring\") (company \"Piper-Watch\") "
             f"(comment 1 \"Wiring draft generated from hardware/wiring.md\"))\n(lib_symbols)\n"

@@ -1,5 +1,10 @@
 # Firmware
 
+> **Design change:** the separate base ESP32 is gone. Level 2's JC4827W543R display (ESP32-S3
+> N4R8, 4 MB flash, 8 MB PSRAM) will run one firmware for its screen and the pan motor (STEP
+> IO 15, DIR IO 16, EN IO 6, HALL IO 7 - see `hardware/wiring.md`); that project isn't written yet.
+> The head's XIAO ESP32-S3 drives the eyes and mouth. `head/` below is the earlier DevKitC bring-up.
+
 `head/` is the PlatformIO project for the controller, an **ESP32-S3 DevKitC-1 N16R8**
 (16 MB flash, 8 MB octal PSRAM). It drives the STS3215 servo bus, animates the two OLED eyes
 and talks to the Jetson over native USB serial.
