@@ -1,5 +1,5 @@
 // Tap coupon: which hole size lets an M3 screw cut a good thread straight into PETG (the Level 2
-// body's display posts and breakout bosses use tap_m3 from params.scad). Three bosses, the same
+// body's display posts use tap_m3 from params.scad). Three bosses, the same
 // height as the body's (6 mm deep holes), drawn at 2.8 / 2.9 / 3.0 - they print ~0.4 smaller.
 // Screw an M3 x 8 into each: pick the one that goes in firmly by hand with a screwdriver and holds
 // without the boss splitting, and set tap_m3 to it.

@@ -8,10 +8,10 @@
 //                  21 mm behind the flange: flange + gasket outside, nut inside); right of them the
 //                  snap-in ROCKER switch, upright (ON at the top) in a plain cut-out.
 //                  Split block -> fuse -> switch -> perfboard J1 (the head side only; the Jetson is unswitched)
-//          (right) cable exit, low under the motor: Jetson 19 V, ESP32 USB, camera USB
+//          (right) cable exit, low under the motor: Jetson 19 V, display USB, camera USB
 //          (big enough for a USB-A plug and the barrel plug to pass), two zip-tie anchors
-//   LEFT   ESP32-S3 breakout (70 x 80, holes 32 x 72.5) standing 5 mm off the wall on tapped M3
-//          bosses (no inserts), USB to the back
+//   LEFT   plain: no separate ESP32 - the display's own ESP32-S3 runs the motor too (pigtails
+//          from its P3 / P4 connectors to the perfboard's J4)
 //   FLOOR  19 V split block (2-way barrier strip, 36 x 21.5, M3.5 spade screws) back-left near the
 //          jack and switch: a low pad at each end with two M3 inserts; its − side is the common ground.
 //          Bosses (M2.5 inserts) for a 50 x 70 perfboard (stepper driver + 100 uF,
@@ -61,11 +61,6 @@ fuse_xz     = [-40, -36];        // above the jack: its ring nut (~20) clears th
 exit_slot   = [32, 16];          // cable exit (w x h), rounded
 exit_xz     = [22, z_floor + 3 + 8];
 
-// ---- left wall: ESP32-S3 breakout (ESP32-S3-TA-44P: 70 x 80, holes 32 x 72.5) --------------------
-brk_holes   = [72.5, 32];        // along y, along z
-brk_zc      = z_floor + 3 + 35;  // board 70 tall, 3 above the floor
-brk_standoff = 5;
-
 // ---- floor: 50 x 70 perfboard, front-right ----------------------------------------------------
 pb_holes    = [66, 46];          // x, y hole spacing MEASURED (M2.5 holes): the 70 side runs left-right
 pb_c        = [40, 36];          // centre (x, y): clear of the display's back (y < 66) and the motor (y > -2)
@@ -74,7 +69,7 @@ pb_boss_h   = 6;
 // ---- floor: 19 -> 5 V buck (Seloky LM2596S with voltmeter: 66 x 36 x 14, holes 54 x 31 MEASURED) ----
 buck_board  = [36, 66];          // x, y: long side runs front-back
 buck_holes  = [31, 54];          // x, y hole spacing
-buck_c      = [-35, 28];         // centre: clear of the breakout (x > -60), the perfboard (x < 5) and
+buck_c      = [-35, 28];         // centre: clear of the left wall, the perfboard (x < 5) and
                                  //   the display's back (y < 66); input terminals face the back
 buck_boss_h = 6;                 // its underside has pin stubs (~3 mm)
 
@@ -84,11 +79,11 @@ tb_holes    = [28.7, 8.8];       // MEASURED: four 4 mm holes, two at each end -
 tb_c        = [-38, -46];        // centre: ~21 mm to the back wall for the spades + wire bends (jack and
                                  //   switch leads on its back side); the Jetson
                                  //   and perfboard leads leave from its front side; clear of the corner
-                                 //   post, the skirt screw at (-71, -45), the buck (y > -5) and the breakout (x < -60)
+                                 //   post, the skirt screw at (-71, -45), and the buck (y > -5)
 tb_boss_h   = 3;                 // floor 3 + boss 3 = room for a 5 mm M3 insert
 
 // ---- body <-> skirt screws: along the sides, outside the reComputer (x +/-65) -------------------
-skirt_pts   = [[-71, -45], [-71, 45], [71, -45], [71, 5]];   // clear of the breakout (left, |y| < 40),
+skirt_pts   = [[-71, -45], [-71, 45], [71, -45], [71, 5]];   // clear of the buck (left),
                                  //   the perfboard (right front) and the motor (right back)
 
 // the four corner columns (2D): a square filling each corner of the inside, its exposed corner
@@ -122,9 +117,6 @@ module adds() {
     // display posts: wall's inside face -> the board's front (glass thickness)
     for (sx = [-1, 1], sz = [-1, 1]) translate([sx * disp_holes[0] / 2, inner + 0.01, disp_zc + sz * disp_holes[1] / 2])
         rotate([90, 0, 0]) cylinder(d = 7, h = disp_glass_t + 0.01, $fn = 32);
-    // breakout bosses on the left wall
-    for (sy = [-1, 1], sz = [-1, 1]) translate([-inner - 0.01, sy * brk_holes[0] / 2, brk_zc + sz * brk_holes[1] / 2])
-        rotate([0, 90, 0]) cylinder(d = 7, h = brk_standoff + 0.01, $fn = 32);
     // perfboard bosses
     for (sx = [-1, 1], sy = [-1, 1]) translate([pb_c[0] + sx * pb_holes[0] / 2, pb_c[1] + sy * pb_holes[1] / 2, z_floor - 0.01])
         cylinder(d = 7, h = pb_boss_h + 0.01, $fn = 32);
@@ -167,9 +159,6 @@ module cuts() {
     // cable exit
     translate([exit_xz[0], -half - 1, exit_xz[1]]) rotate([-90, 0, 0]) linear_extrude(l2_wall + 2)
         offset(r = 6) square(exit_slot - [12, 12], center = true);
-    // breakout boss holes (tapped M3)
-    for (sy = [-1, 1], sz = [-1, 1]) translate([-inner + brk_standoff - tap_m3[1] + 0.01, sy * brk_holes[0] / 2, brk_zc + sz * brk_holes[1] / 2])
-        rotate([0, 90, 0]) cylinder(d = tap_m3[0], h = tap_m3[1], $fn = 24);
     // perfboard boss holes (M2.5 inserts)
     for (sx = [-1, 1], sy = [-1, 1]) translate([pb_c[0] + sx * pb_holes[0] / 2, pb_c[1] + sy * pb_holes[1] / 2, z_floor + pb_boss_h - insert_m25[1]])
         cylinder(d = insert_m25[0], h = insert_m25[1] + 1, $fn = 24);
@@ -196,10 +185,9 @@ module l2_body() { difference() { union() { shell(); adds(); } cuts(); } }
 
 l2_body();
 
-// ghosts (not printed): display, breakout, perfboard, motor
+// ghosts (not printed): display, perfboard, buck
 %translate([0, inner - disp_glass_t - 1.6 / 2, disp_zc]) cube([disp_board[0], 1.6, disp_board[1]], center = true);
 %translate([0, inner - disp_glass_t / 2, disp_zc]) cube([105.5, disp_glass_t, 67.3], center = true);
-%translate([-inner + brk_standoff + 6, 0, brk_zc]) cube([12, 80, 70], center = true);
 %translate([pb_c[0], pb_c[1], z_floor + pb_boss_h + 0.8]) cube([70, 50, 1.6], center = true);
 %translate([buck_c[0], buck_c[1], z_floor + buck_boss_h + 7]) cube([buck_board[0], buck_board[1], 14], center = true);
 %translate([tb_c[0], tb_c[1], z_floor + tb_boss_h + tb_size[2] / 2]) cube(tb_size, center = true);
