@@ -9,6 +9,15 @@ l2_r      = 14;             // corner radius
 l2_h      = 90;             // body height (floor to the deck's underside... see body)
 l2_wall   = 2.5;            // body walls
 
+// ---- the reComputer under Level 2, and the skirt round it (skirt.scad) -------------------------
+jetson    = [130.1, 121.1, 58.1];   // reComputer J4012, MEASURED (x, y, height); ports at the back
+air_gap   = 13;                     // over the Jetson's lid (its fan draws from there)
+skirt_h   = jetson[2] + air_gap;    // 71.1: desk -> Level 2's floor
+// body <-> skirt screws (M3 down through the body floor into inserts in the skirt): along the
+// sides, outside the reComputer (x +/-65)
+skirt_pts = [[-71, -45], [-71, 45], [71, -45], [71, 5]];   // clear of the buck (left),
+                                    //   the perfboard (right front) and the motor (right back)
+
 // ---- deck ----------------------------------------------------------------------------------
 deck_t    = 4;              // deck plate: z = -deck_t .. 0
 deck_hole = 112;            // reach the inner ring's bolts from below during assembly

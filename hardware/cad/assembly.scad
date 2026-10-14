@@ -1,11 +1,12 @@
-// Piper-Watch assembly - the real printed parts placed together, plus see-through placeholders
-// for what isn't designed yet (the skirt) and the bought parts. The head is concept v2.
+// Piper-Watch assembly - the real printed parts placed together, plus the bought parts.
+// The head is concept v2.
 //
 // Frame: the desk under the centre of the reComputer J4012; +Y = front (display and face),
 // +Z = up. Level 2's own frame (level2.scad: origin = top of the drive deck) sits at z_l2.
 // F5 previews in colour.
 include <level2.scad>
 use <parts/l2_body.scad>
+use <parts/skirt.scad>
 use <parts/drive_deck.scad>
 use <parts/motor_bracket.scad>
 use <parts/turntable_pulley.scad>
@@ -17,9 +18,7 @@ pan       = 0;        // head pan angle (deg) - try +/-100
 cutaway   = false;    // true: cut the front-right quarter away to see inside
 
 // ---- the stack (heights from the desk) ---------------------------------------------------------
-jetson    = [130.1, 121.1, 58.1];   // reComputer J4012, measured
-air_gap   = 13;                     // over the Jetson's lid (its fan draws from there)
-z_skirt_top = jetson[2] + air_gap;  // 71.1: Level 2's floor sits here
+z_skirt_top = skirt_h;              // 71.1: Level 2's floor sits here (level2.scad)
 z_l2      = z_skirt_top + l2_h;     // 161.1: top of the drive deck
 plate_t   = 8;                      // turntable plate (turntable_pulley.scad)
 z_plate_top = z_l2 + z_plate + plate_t;
@@ -35,12 +34,8 @@ module cut() {
 color("#2a2a2a") linear_extrude(jetson[2]) rrect([jetson[0], jetson[1]], 8);
 color("#3d3d3d") for (x = [-56 : 4 : 56]) translate([x, 0, jetson[2]]) cube([2, jetson[1] - 12, 1], center = true);
 
-// ---- skirt (PLACEHOLDER: not designed yet) -------------------------------------------------------
-color("#cfd3d8", 0.35) cut() linear_extrude(z_skirt_top) difference() {
-    rrect(l2_size, l2_r);
-    rrect(l2_size - [2, 2] * l2_wall, l2_r - l2_wall);
-    translate([0, -l2_size[1] / 2]) square([100, 10], center = true);    // open at the back for the Jetson's ports
-}
+// ---- skirt ----------------------------------------------------------------------------------------
+color("#d9dcdf") cut() skirt();
 
 // ---- Level 2 (real parts) -----------------------------------------------------------------------
 translate([0, 0, z_l2]) {

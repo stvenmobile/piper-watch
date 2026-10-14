@@ -82,9 +82,7 @@ tb_c        = [-38, -46];        // centre: ~21 mm to the back wall for the spad
                                  //   post, the skirt screw at (-71, -45), and the buck (y > -5)
 tb_boss_h   = 3;                 // floor 3 + boss 3 = room for a 5 mm M3 insert
 
-// ---- body <-> skirt screws: along the sides, outside the reComputer (x +/-65) -------------------
-skirt_pts   = [[-71, -45], [-71, 45], [71, -45], [71, 5]];   // clear of the buck (left),
-                                 //   the perfboard (right front) and the motor (right back)
+// body <-> skirt screws: skirt_pts in level2.scad
 
 // the four corner columns (2D): a square filling each corner of the inside, its exposed corner
 // rounded, joined to both walls by fillets. Built from plain shapes (not offset closing, which
