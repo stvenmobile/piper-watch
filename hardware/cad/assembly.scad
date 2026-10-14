@@ -18,7 +18,7 @@ pan       = 0;        // head pan angle (deg) - try +/-100
 cutaway   = false;    // true: cut the front-right quarter away to see inside
 
 // ---- the stack (heights from the desk) ---------------------------------------------------------
-z_skirt_top = skirt_h;              // 64: Level 2's floor sits here (level2.scad)
+z_skirt_top = skirt_h;              // 68.1: Level 2's floor sits here (level2.scad)
 z_l2      = z_skirt_top + l2_h;     // 161.1: top of the drive deck
 plate_t   = 8;                      // turntable plate (turntable_pulley.scad)
 z_plate_top = z_l2 + z_plate + plate_t;

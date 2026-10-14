@@ -1,8 +1,9 @@
 // Skirt - the bottom of Piper-Watch: a sleeve that stands on the desk round the reComputer J4012
 // and carries Level 2 on top. The Jetson sits loose inside it on the desk; the skirt takes the weight.
 //
-//   SIZE    the body's 160 x 160 rounded square and 2.5 mm walls, skirt_h (64) tall: the
-//           Jetson's 51 (case top left off, for airflow) plus a 13 mm air gap, where its fan draws in
+//   SIZE    the body's 160 x 160 rounded square and 2.5 mm walls, skirt_h (68.1) tall: the
+//           Jetson's 51 with its case top off, room for the 7.1 mm top if you fit it, and a 10 mm
+//           air gap over that (17 mm with the top off), where its fan draws in
 //   TOP     four pads with M3 heat-set inserts: the body's floor screws (skirt_pts) come down
 //           into them from inside Level 2
 //   BACK    open from the desk up to just over the Jetson's height: its ports, and the 19 V and
@@ -22,7 +23,7 @@ half      = l2_size[0] / 2;     // 80
 inner     = half - l2_wall;     // 77.5
 stop_gap  = 0.75;               // Jetson <-> stops, each side
 stop_h    = 10;                 // stops: full depth up to here, then a 45-degree taper
-back_open = [124, jetson[2] + 4];   // back opening: width, height (from the desk)
+back_open = [124, jetson[2] + jetson_top + 3];   // back opening: width, height (from the desk)
 back_r    = 8;                  // its top corners
 pad_d     = 10;                 // the screw pads
 pad_h     = 12;                 // below the top face
