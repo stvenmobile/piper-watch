@@ -67,3 +67,6 @@ hardware/kicad/*.kicad_prl
 hardware/kicad/*.lck
 hardware/kicad/_autosave-*
 hardware/kicad/fp-info-cache
+
+# Vendor servo drawings - kept locally, not redistributed
+hardware/cad/vitamins/ST3215-2D/

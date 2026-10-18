@@ -58,10 +58,15 @@ plinth_id    = ls_outer_id + ls_clear;           // 116.2  box-top plinth touche
 plinth_h     = 2.0;              // raised plinth height = clear gap under the inner ring
 
 // --- Feetech STS3215 (12 V / 30 kg.cm) - EST from datasheet, verify on arrival --
-sts_body     = [45.2, 24.7, 35]; // length x width x height (without horn)
-sts_shaft_x  = 11.5;             // EST: output shaft centre from the near end
-sts_horn_d   = 20;               // EST: horn diameter
-sts_horn_h   = 3;
+sts_body     = [45.22, 24.72, 32];   // MEASURED (Feetech drawing, vitamins/ST3215-2D): length x width x case height
+sts_shaft_x  = 10.11;            // output shaft centre from the near end (drawing)
+sts_horn_d   = 19.2;             // horn disc (drawing); an identical idler disc on the opposite face
+sts_horn_h   = 2.6;              //   each (37.25 overall over both discs - 32 case) / 2
+sts_horn_pcd = 14;               // 4 x M3 tapped holes in each disc, on this circle (drawing + MEASURED)
+sts_case_screws = [[18.41, 10.25], [42.86, 10.25], [18.41, -10.25], [42.86, -10.25]];   // the screws that
+                                 //   HOLD THE CASE TOGETHER (horn face; x from the shaft end) - not mounting
+                                 //   holes. The only mounting threads are the 4 x M3 in each disc; the body is
+                                 //   held in a printed cradle (or these screws swapped for longer ones)
 
 // --- Pan-only head on a neck (no tilt motor) ----------------------------------------
 head_size    = [105, 45, 105];   // round face: diameter, depth (final ~45), diameter
