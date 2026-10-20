@@ -104,6 +104,7 @@ module hole3(h) cylinder(d = 3.4 + cal_hole, h = h, $fn = 24);
 
 // ==== BASE ===========================================================================================
 pan_ins_y = [-srv_sh - clr - sleeve_t / 2 + 6, srv[0] - srv_sh + clr - 6];   // pan strap inserts: Y (front, back)
+stop_y    = [9.5, srv[0] - srv_sh - 1];       // stop rails, Y: from just outside the hub's opening to near the end
 
 module base() {
     sx = [-srv[1] / 2 - clr, srv[1] / 2 + clr];            // sleeve inside, X
@@ -129,8 +130,16 @@ module base() {
             translate([x * pb_holes[0] / 2, y * pb_holes[1] / 2, -insert_m4[1]]) cylinder(d = insert_m4[0], h = insert_m4[1] + 1, $fn = 24);
         for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, z_case_bot - 0.01]) insert3();   // strap inserts
     }
-    // stop tabs: the servo's case top bears on these (far from the horn)
-    for (x = [-1, 1]) translate([x > 0 ? srv[1] / 2 + clr - 3 : -srv[1] / 2 - clr, sy[1] - 14, z_case_top]) cube([3, 12, 3]);
+    // stop rails: the servo's case top bears on these, along more than half its length so it can't rock
+    // before the strap goes on; they start just clear of the hub's opening. A 45 deg back (toward the plate)
+    // so they print without supports - the base prints upside down.
+    for (x = [-1, 1]) {
+        xw = x * (srv[1] / 2 + clr);                                  // the sleeve's inside face
+        hull() {
+            translate([xw - (x > 0 ? 3 : 0), stop_y[0], z_case_top]) cube([3, stop_y[1] - stop_y[0], 0.01]);
+            translate([xw - (x > 0 ? 0.01 : 0), stop_y[0], z_case_top + 3]) cube([0.01, stop_y[1] - stop_y[0], 0.01]);
+        }
+    }
 }
 
 module pan_strap() {          // under the pan servo: 2 x M3 into the sleeve's ends
