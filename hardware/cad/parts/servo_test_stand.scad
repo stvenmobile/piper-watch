@@ -121,7 +121,10 @@ module base() {
         }
         box(sx, [sy[0], sy[1] + 5], [z_case_bot - 1, -plate_t + 0.02]);                         // the servo's pocket (open at +Y)
         translate([0, 0, -plate_t - 1]) cylinder(d = hub_od + 2, h = plate_t + 2, $fn = 64);   // hub passes through
-        translate([0, 0, z_horn - 1]) cylinder(d = sts_horn_d + 2, h = -z_horn, $fn = 48);       // horn + hub end
+        translate([0, 0, z_horn - 1]) cylinder(d = hub_od + 1, h = -z_horn, $fn = 64);           // room for the hub down
+                                                                                                 //   to the horn (cuts the
+                                                                                                 //   sleeve's walls above
+                                                                                                 //   the servo's case only)
         for (x = [-1, 1], y = [-1, 1])                                                           // pillow block: M4 inserts
             translate([x * pb_holes[0] / 2, y * pb_holes[1] / 2, -insert_m4[1]]) cylinder(d = insert_m4[0], h = insert_m4[1] + 1, $fn = 24);
         for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, z_case_bot - 0.01]) insert3();   // strap inserts
@@ -275,7 +278,7 @@ module assembly() {
     color("#9aa3ad") base();
     color("#9aa3ad") translate([0, 0, z_case_bot - strap_t]) pan_strap();
     color("#b0b6bd") translate([-pb[0] / 2, -pb[1] / 2, 0]) cube(pb);                            // pillow block
-    translate([0, 0, z_horn]) rotate([0, 0, 90]) servo_model();                                   // pan servo
+    translate([0, 0, z_horn - disc_h]) rotate([0, 0, 90]) servo_model();                          // pan servo (horn top at z_horn)
     rotate([0, 0, pan]) {
         color("#e8a33d") hub();
         color("#2b2b2b") turret();
