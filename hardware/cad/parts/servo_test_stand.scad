@@ -139,6 +139,15 @@ module base() {
             translate([xw - (x > 0 ? 3 : 0), stop_y[0], z_case_top]) cube([3, stop_y[1] - stop_y[0], 0.01]);
             translate([xw - (x > 0 ? 0.01 : 0), stop_y[0], z_case_top + 3]) cube([0.01, stop_y[1] - stop_y[0], 0.01]);
         }
+        // ... and a pad in each corner at the shaft end, beyond the horn: what's left of a 3 x 4 mm corner
+        // block outside the hub's opening (13.6 mm from the shaft). Same 45 deg back.
+        difference() {
+            hull() {
+                translate([xw - (x > 0 ? 3 : 0), sy[0], z_case_top]) cube([3, 4, 0.01]);
+                translate([xw - (x > 0 ? 0.01 : 0), sy[0], z_case_top + 3]) cube([0.01, 4, 0.01]);
+            }
+            translate([0, 0, z_case_top - 1]) cylinder(r = 13.6, h = 6, $fn = 96);
+        }
     }
 }
 
