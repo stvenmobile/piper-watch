@@ -8,7 +8,8 @@
 //           servo's horn (4 x M3 on the 14 mm circle, driven down the open tube before the turret goes
 //           on); a window lets the tilt servo's cable out below the plate; a flange on top carries
 //   TURRET  floor (4 x M3 into the hub flange), the TILT servo lying on its side in a cradle (shaft
-//           along +X; idler disc located in the end wall; strap on top), two cheeks for the head's axle
+//           along +X; idler disc located in the end wall; strap on top), two cheeks for the head's axle;
+//           a tunnel under the servo takes its cable from its connector end down into the hub
 //   DISC    32 mm, on the tilt servo's horn (4 x M3); its boss carries the link's rod end 12 mm out
 //   HEAD    a stand-in: two ears on the axle (M4 screws through the cheeks into inserts in the ears),
 //           a bridge plate for a camera later, and the 15 mm CRANK (an M3 insert) on the right ear
@@ -158,6 +159,9 @@ module hub() {
 }
 
 // ==== TURRET =========================================================================================
+tun_x    = [-11, -3.5];          // cable tunnel, X (clear of the floor screw at X = 0) ...
+tun_y1   = 31.5;                 // ... runs from the hub's hole back to here
+
 // tilt strap inserts: one in the idler end wall (moved outward, into a boss), one in the post by the horn
 post_x   = [x_horn + clr, x_horn + clr + 6];                 // the post starts clear of the servo's case
 idl_ins  = [x_idler - clr - ins_wall - insert_m3[0] / 2, 8];
@@ -186,6 +190,11 @@ module turret() {
             }
         }
         translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);              // cables down the hub
+        // cable tunnel: from behind the tilt servo (its connector end, +Y), under it through the floor and the
+        // pedestal, to the hole down the hub - big enough for the servo's 3-pin plug; offset in X to miss the
+        // turret screw at (0, flange_r); 1 mm of pedestal left over it, under the servo
+        box(tun_x, [0, tun_y1], [z_floor - 1, zb[0] - 1]);
+        box(tun_x, [yb[1] + 3 + 0.5, tun_y1], [z_floor - 1, zb[1] + 10]);                         // ... and open upward there
         for (a = [0 : 90 : 270]) rotate(a) translate([flange_r, 0, z_floor - 1]) {               // 4 x M3 into the hub flange
             hole3(floor_t + 2);
         }
