@@ -31,7 +31,8 @@ tilt = 20;
 
 // ---- bought parts ---------------------------------------------------------------------------------
 pb       = [43, 40, 7];         // ServoCity 1" bore 2-post pillow block (drawing): X, Y, thickness
-pb_holes = [32, 24];            //   its 4 x 4 mm through-holes (M4)
+pb_holes = [32, 32];            //   its 4 x 4 mm through-holes (M4): a 32 mm square, MEASURED (the drawing
+                                //   showed 32 x 24) - 22.6 mm from the centre
 brg_bore = 25.4;                //   the bearing's bore
 brg_flange = 1.52;              //   the bearing's flange stands this far above the block (8.52 - 7) - CHECK
 srv      = sts_body;            // STS3215 [45.22, 24.72, 32]
@@ -51,6 +52,9 @@ z_horn   = -24;                 // pan servo's horn top (leaves room for the hub
 z_case_top = z_horn - disc_h;   // -26.6
 z_case_bot = z_case_top - srv[2];   // -58.6
 strap_t  = 3;
+ins_wall = 0.8;                 // plastic left between an insert's hole and the servo it sits beside
+ins_boss = insert_m3[0] + 4;    // round bosses round the strap inserts (2 mm of wall all round)
+pan_ins_x = srv[1] / 2 + clr + ins_wall + insert_m3[0] / 2;   // pan strap inserts: X (the sleeve's sides)
 z_desk   = z_case_bot - disc_h - strap_t - 2;   // legs' feet
 leg      = 9;
 
@@ -98,6 +102,8 @@ module insert3(h = insert_m3[1] + 1) cylinder(d = insert_m3[0], h = h, $fn = 24)
 module hole3(h) cylinder(d = 3.4 + cal_hole, h = h, $fn = 24);
 
 // ==== BASE ===========================================================================================
+pan_ins_y = [-srv_sh - clr - sleeve_t / 2 + 6, srv[0] - srv_sh + clr - 6];   // pan strap inserts: Y (front, back)
+
 module base() {
     sx = [-srv[1] / 2 - clr, srv[1] / 2 + clr];            // sleeve inside, X
     sy = [-srv_sh - clr, srv[0] - srv_sh + clr];            // sleeve inside, Y (shaft at Y = 0)
@@ -109,15 +115,15 @@ module base() {
             for (x = plate[0], y = plate[1])                                                     // legs
                 translate([x - (x > 0 ? leg : 0), y - (y > 0 ? leg : 0), z_desk]) cube([leg, leg, -z_desk - 0.01]);
             box([sx[0] - sleeve_t, sx[1] + sleeve_t], [sy[0] - sleeve_t, sy[1]], [z_case_bot, -plate_t + 0.01]);  // sleeve
+            for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, z_case_bot])         // bosses for the strap inserts
+                cylinder(d = ins_boss, h = insert_m3[1] + 3, $fn = 32);
         }
         box(sx, [sy[0], sy[1] + 5], [z_case_bot - 1, -plate_t + 0.02]);                         // the servo's pocket (open at +Y)
         translate([0, 0, -plate_t - 1]) cylinder(d = hub_od + 2, h = plate_t + 2, $fn = 64);   // hub passes through
         translate([0, 0, z_horn - 1]) cylinder(d = sts_horn_d + 2, h = -z_horn, $fn = 48);       // horn + hub end
         for (x = [-1, 1], y = [-1, 1])                                                           // pillow block: M4 inserts
             translate([x * pb_holes[0] / 2, y * pb_holes[1] / 2, -insert_m4[1]]) cylinder(d = insert_m4[0], h = insert_m4[1] + 1, $fn = 24);
-        for (x = [-1, 1]) translate([x * (srv[1] / 2 + clr + sleeve_t / 2), sy[0] - sleeve_t / 2 + 6, z_case_bot - 0.01])   // strap inserts
-            insert3();
-        for (x = [-1, 1]) translate([x * (srv[1] / 2 + clr + sleeve_t / 2), sy[1] - 6, z_case_bot - 0.01]) insert3();
+        for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, z_case_bot - 0.01]) insert3();   // strap inserts
     }
     // stop tabs: the servo's case top bears on these (far from the horn)
     for (x = [-1, 1]) translate([x > 0 ? srv[1] / 2 + clr - 3 : -srv[1] / 2 - clr, sy[1] - 14, z_case_top]) cube([3, 12, 3]);
@@ -126,9 +132,9 @@ module base() {
 module pan_strap() {          // under the pan servo: 2 x M3 into the sleeve's ends
     sy = [-srv_sh - clr, srv[0] - srv_sh + clr];
     difference() {
-        box([-srv[1] / 2 - clr - sleeve_t, srv[1] / 2 + clr + sleeve_t], [sy[0] - sleeve_t, sy[1]], [0, strap_t]);
+        hull() for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, 0]) cylinder(d = ins_boss, h = strap_t, $fn = 32);
         translate([0, 0, -1]) cylinder(d = sts_horn_d + 1.5, h = strap_t + 2, $fn = 48);       // idler disc
-        for (x = [-1, 1], y = [sy[0] - sleeve_t / 2 + 6, sy[1] - 6]) translate([x * (srv[1] / 2 + clr + sleeve_t / 2), y, -1]) hole3(strap_t + 2);
+        for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, -1]) hole3(strap_t + 2);
     }
 }
 
@@ -152,6 +158,11 @@ module hub() {
 }
 
 // ==== TURRET =========================================================================================
+// tilt strap inserts: one in the idler end wall (moved outward, into a boss), one in the post by the horn
+post_x   = [x_horn + clr, x_horn + clr + 6];                 // the post starts clear of the servo's case
+idl_ins  = [x_idler - clr - ins_wall - insert_m3[0] / 2, 8];
+post_ins = [(post_x[0] + post_x[1]) / 2, (8 + (y_srv - srv_sh + srv[0] + clr) + 3) / 2];
+
 module turret() {
     yb = [y_srv - srv_sh - clr, y_srv - srv_sh + srv[0] + clr];     // tilt servo body, Y (-22.9 .. 22.9)
     zb = [z_srv - srv[1] / 2, z_srv + srv[1] / 2];                  // ... Z
@@ -163,7 +174,9 @@ module turret() {
             box([x_idler - clr - 3, x_idler - clr], [yb[0] - 3, yb[1] + 3], [z_ft - 0.01, zb[1]]);   // idler-end wall
             box([x_idler - clr, x_horn - 4], [yb[0] - 3, yb[0]], [z_ft - 0.01, zb[1]]);            // front end wall
             box([x_idler - clr, x_horn - 4], [yb[1], yb[1] + 3], [z_ft - 0.01, zb[0] + 6]);        // back end (low: the connectors)
-            box([x_horn - 1, x_horn + 3], [8, yb[1] + 3], [z_ft - 0.01, zb[1]]);                   // strap post, beside the horn
+            box([post_x[0], post_x[1]], [8, yb[1] + 3], [z_ft - 0.01, zb[1]]);                     // strap post, beside the horn
+            translate([idl_ins[0], idl_ins[1], zb[1] - insert_m3[1] - 3])                            // boss on the end wall
+                cylinder(d = ins_boss, h = insert_m3[1] + 3, $fn = 32);
             for (s = [-1, 1]) {                                                                  // cheeks
                 x0 = s > 0 ? x_cheek : -x_cheek - cheek_t;
                 hull() {
@@ -180,15 +193,15 @@ module turret() {
         for (s = [-1, 1]) translate([s > 0 ? x_cheek - 1 : -x_cheek - cheek_t - 1, y_axle, z_axle]) rotate([0, 90, 0])
             cylinder(d = 4.4 + cal_hole, h = cheek_t + 2, $fn = 32);                            // axle screws (M4)
         // strap inserts: on the idler wall's top and the post's top
-        translate([x_idler - clr - 1.5, (yb[0] + yb[1]) / 2 + 8, zb[1] - insert_m3[1]]) insert3();
-        translate([x_horn + 1, (8 + yb[1] + 3) / 2, zb[1] - insert_m3[1]]) insert3();
+        translate([idl_ins[0], idl_ins[1], zb[1] - insert_m3[1]]) insert3();
+        translate([post_ins[0], post_ins[1], zb[1] - insert_m3[1]]) insert3();
     }
 }
 
 module tilt_strap() {         // across the tilt servo's top: from the idler wall to the post
     yb = [y_srv - srv_sh - clr, y_srv - srv_sh + srv[0] + clr];
-    a = [x_idler - clr - 1.5, (yb[0] + yb[1]) / 2 + 8];
-    b = [x_horn + 1, (8 + yb[1] + 3) / 2];
+    a = idl_ins;
+    b = post_ins;
     difference() {
         hull() for (p = [a, b]) translate(p) cylinder(d = 8, h = 3, $fn = 32);
         for (p = [a, b]) translate([p[0], p[1], -1]) hole3(5);

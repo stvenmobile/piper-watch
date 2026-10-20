@@ -26,7 +26,8 @@ clr_fit     = 0.35;              // gap for parts that slide/rotate against each
 // --- Fasteners ------------------------------------------------------------------
 m3          = 3.0;
 m4          = 4.0;
-insert_m3   = [4.1, 5.0];        // heat-set insert bore [diameter, depth] - coupon "M3a" confirmed
+insert_m3   = [4.3, 5.0];        // heat-set insert bore [diameter, depth] - 4.1 ("M3a" coupon) was too tight on the
+                                 //   servo test stand prints (2026-10-20): +0.2
 tap_m3      = [2.8, 6.0];              // an M3 screw cuts its own thread: 2.8 drawn, chosen on tap_coupon.scad
                                        //   (prints ~2.4), depth
 insert_m25  = [3.1 + cal_hole, 4.5];   // M2.5 x 4 inserts: hole prints ~3.1 (user's fit), 4.5 deep
