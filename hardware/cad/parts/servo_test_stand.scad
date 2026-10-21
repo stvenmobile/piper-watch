@@ -9,7 +9,7 @@
 //           on); a window lets the tilt servo's cable out below the plate; a flange on top carries
 //   TURRET  floor (4 x M3 into the hub flange), the TILT servo lying on its side in a cradle (shaft
 //           along +X; idler disc located in the end wall; strap on top), two cheeks for the head's axle;
-//           a 4 mm hole in the left cheek reaches the idler disc's centre screw;
+//           4 mm holes in the cheeks reach the centre screws of the idler disc (left) and the horn (right);
 //           the servo's plugs come out of its bottom face through the end wall; a tunnel under the floor
 //           takes the cable from there into the hub
 //   DISC    32 mm, on the tilt servo's horn (4 x M3); its boss carries the link's rod end 12 mm out
@@ -227,9 +227,10 @@ module turret() {
             }
         }
         translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);              // cables down the hub
-        // screwdriver access through the left cheek to the idler disc's centre screw (the disc goes on after the
-        // servo is in the cradle), on the servo's axis
-        translate([-x_cheek - cheek_t - 1, y_srv, z_srv]) rotate([0, 90, 0]) cylinder(d = 4, h = cheek_t + 2, $fn = 24);
+        // screwdriver access through both cheeks, on the servo's axis: left to the idler disc's centre screw (the
+        // disc goes on after the servo is in the cradle), right to the horn's centre screw (through the disc's hole)
+        for (x0 = [-x_cheek - cheek_t - 1, x_cheek - 1])
+            translate([x0, y_srv, z_srv]) rotate([0, 90, 0]) cylinder(d = 4, h = cheek_t + 2, $fn = 24);
         // the servo's bottom face lies against the end wall: cut-outs for its raised block and its sockets
         // (the plugs come out through the wall)
         yf = y_srv - srv_sh + srv[0];                                                            // its far end
