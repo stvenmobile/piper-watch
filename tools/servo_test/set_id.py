@@ -6,9 +6,7 @@ usage: py set_id.py OLD NEW          e.g.  py set_id.py 1 2
 import sys
 import time
 
-from sts import ADDR_ID, Bus
-
-ADDR_LOCK = 55          # EEPROM write lock: 0 = unlocked, 1 = locked
+from sts import ADDR_ID, ADDR_LOCK, Bus
 
 old, new = int(sys.argv[1]), int(sys.argv[2])
 bus = Bus()

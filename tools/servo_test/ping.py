@@ -17,7 +17,7 @@ try:
             lo, hi = bus.r2(sid, ADDR_MIN_ANGLE), bus.r2(sid, ADDR_MAX_ANGLE)
             print(f"ID {bus.r1(sid, ADDR_ID)}: model {model}, mode {bus.r1(sid, ADDR_MODE)}, "
                   f"torque {'on' if bus.r1(sid, ADDR_TORQUE) else 'off'}")
-            print(f"  position {s['pos']} ({pos_to_deg(sid, s['pos']):+.1f} deg, + = left), "
+            print(f"  position {s['pos']} ({pos_to_deg(sid, s['pos']):+.1f} deg), "
                   f"{s['volts']:.1f} V, {s['temp']} C, load {s['load%']:.1f} %")
             print(f"  angle limits {lo}..{hi}")
     if not found:

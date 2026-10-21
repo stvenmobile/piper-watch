@@ -13,6 +13,7 @@ ADDR_ID = 5
 ADDR_MIN_ANGLE = 9      # 2 bytes
 ADDR_MAX_ANGLE = 11     # 2 bytes
 ADDR_MODE = 33          # 0 = position
+ADDR_LOCK = 55          # EEPROM write lock: 0 = unlocked, 1 = locked
 # RAM
 ADDR_TORQUE = 40
 ADDR_ACC = 41
@@ -30,10 +31,20 @@ CENTRE = 2048
 # seen from above), tilt + = the disc's pin UP from forward (head tilts up). Both servos' raw positive
 # directions are the opposite (checked 2026-10-21).
 DIRECTION = {1: -1, 2: -1}
+# allowed range per servo, in servo degrees (robot convention). Also written to the servo's own angle
+# limits by set_limits.py. Tilt (2026-10-21, by eye on the test stand, camera looking along the plate):
+#   -70 -> head about -24 (max down)    +6.3 -> head about +20..25 (max up)
+#   readings: servo -64.8 -> -21, -53.1 -> -12, 0 -> +20 (design: -27, -20, +20)
+LIMITS = {2: (-70.0, 6.3)}
+
+
+def clamp(sid, deg):
+    lo, hi = LIMITS.get(sid, (-180.0, 180.0))
+    return max(lo, min(hi, deg))
 
 
 def deg_to_pos(sid, deg):
-    return round(CENTRE + DIRECTION.get(sid, 1) * deg * STEPS_PER_DEG)
+    return round(CENTRE + DIRECTION.get(sid, 1) * clamp(sid, deg) * STEPS_PER_DEG)
 
 
 def pos_to_deg(sid, pos):
@@ -78,6 +89,10 @@ class Bus:
 
     def w1(self, sid, addr, v):
         res, err = self.pk.write1ByteTxRx(self.port, sid, addr, v)
+        self._check(res, err, f"write {addr}")
+
+    def w2(self, sid, addr, v):
+        res, err = self.pk.write2ByteTxRx(self.port, sid, addr, v)
         self._check(res, err, f"write {addr}")
 
     def status(self, sid):
