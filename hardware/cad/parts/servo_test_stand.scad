@@ -210,8 +210,8 @@ module turret() {
                 translate([0, (floor_xy[1][0] + floor_xy[1][1]) / 2]) rrect([floor_xy[0][1] - floor_xy[0][0], floor_xy[1][1] - floor_xy[1][0]], 6);
             box([x_idler - clr, x_horn], yb, [z_ft - 0.01, zb[0]]);                              // pedestal
             box([x_idler - clr - 3, x_idler - clr], [yb[0] - 3, yb[1] + 3], [z_ft - 0.01, zb[1]]);   // idler-end wall
-            box([x_idler - clr, x_horn - 4], [yb[0] - 3, yb[0]], [z_ft - 0.01, zb[1]]);            // front end wall
-            box([x_idler - clr, x_horn - 4], [yb[1], yb[1] + 3], [z_ft - 0.01, zb[0] + 6]);        // back end (low: the connectors)
+            box([x_idler - clr, x_horn - 4], [yb[0] - 3, yb[0]], [z_ft - 0.01, zb[1]]);            // back end wall (-Y)
+            box([x_idler - clr, x_horn - 4], [yb[1], yb[1] + 3], [z_ft - 0.01, zb[0] + 6]);        // front end wall (+Y, low)
             box([post_x[0], post_x[1]], [8, yb[1] + 3], [z_ft - 0.01, zb[1]]);                     // strap post, beside the horn
             intersection() {                                                                     // boss on the end wall ...
                 translate([idl_ins[0], idl_ins[1], zb[1] - insert_m3[1] - 3]) cylinder(d = ins_boss, h = insert_m3[1] + 3, $fn = 32);
