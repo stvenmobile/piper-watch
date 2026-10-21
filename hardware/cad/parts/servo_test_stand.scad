@@ -9,7 +9,8 @@
 //           on); a window lets the tilt servo's cable out below the plate; a flange on top carries
 //   TURRET  floor (4 x M3 into the hub flange), the TILT servo lying on its side in a cradle (shaft
 //           along +X; idler disc located in the end wall; strap on top), two cheeks for the head's axle;
-//           a tunnel under the servo takes its cable from its connector end down into the hub
+//           the servo's plugs come out of its bottom face through the end wall; a tunnel under the floor
+//           takes the cable from there into the hub
 //   DISC    32 mm, on the tilt servo's horn (4 x M3); its boss carries the link's rod end 12 mm out
 //   HEAD    a stand-in: two ears on the axle (M4 screws through the cheeks into inserts in the ears),
 //           a bridge plate for a camera later, and the 15 mm CRANK (an M3 insert) on the right ear
@@ -41,6 +42,10 @@ srv_sh   = sts_shaft_x;         // 10.11: shaft from the near end
 disc_h   = sts_horn_h;          // 2.6: each of the servo's two discs
 pcd      = sts_horn_pcd;        // 14
 rod_c    = 40;                  // link, centre to centre
+// the STS3215's BOTTOM face (MEASURED, 2026-10-21): distances from its FAR end (away from the shaft)
+bot_blk  = [4, 14.6, 2, 2];     //   a raised block: from, to, inset from each side, height
+bot_skt  = [17.7, 25, 1];       //   two 3-pin sockets (plugs go straight in): from, to, inset from each side
+bot_clr  = 0.75;                //   clearance round both
 rod_ball_w = 5;                 // rod end ball width (EST - check)
 rod_eye_d  = 10;                // rod end eye outside (EST)
 
@@ -56,14 +61,17 @@ strap_t  = 3;
 ins_wall = 0.8;                 // plastic left between an insert's hole and the servo it sits beside
 ins_boss = insert_m3[0] + 4;    // round bosses round the strap inserts (2 mm of wall all round)
 pan_ins_x = srv[1] / 2 + clr + ins_wall + insert_m3[0] / 2;   // pan strap inserts: X (the sleeve's sides)
-z_desk   = z_case_bot - disc_h - strap_t - 2;   // legs' feet
+z_desk   = z_case_bot - 25;     // legs' feet: room under the servo for its plugs (they come straight out of
+                                //   its bottom) and a gentle bend in their cables
 leg      = 9;
 
 // ---- hub ------------------------------------------------------------------------------------------
 hub_od   = brg_bore - 0.15;     // slip fit in the bearing (CHECK: print the hub first)
 hub_id   = 19;
 hub_end  = 3;                   // closed lower end (onto the horn)
-z_flange = pb[2] + brg_flange + 1.0;   // flange's underside: 1 mm over the bearing's flange
+hub_drop = 2;                   // MEASURED (2026-10-21): with the pan servo seated on its rails the flange stood 2 mm
+                                //   over the bearing's flange - the hub's tube is 2 mm shorter so it rests on it
+z_flange = pb[2] + brg_flange + 1.0 - hub_drop;   // flange's underside
 flange_t = 6;
 flange_d = 66;
 flange_r = 29;                  // turret screws (4 x M3, at 0/90/180/270 - clear of the tilt servo)
@@ -157,6 +165,11 @@ module pan_strap() {          // under the pan servo: 2 x M3 into the sleeve's e
         hull() for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, 0]) cylinder(d = ins_boss, h = strap_t, $fn = 32);
         translate([0, 0, -1]) cylinder(d = sts_horn_d + 1.5, h = strap_t + 2, $fn = 48);       // idler disc
         for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, -1]) hole3(strap_t + 2);
+        yf = srv[0] - srv_sh;                                                                    // the servo's far end
+        box([-(srv[1] / 2 - bot_blk[2] + bot_clr), srv[1] / 2 - bot_blk[2] + bot_clr],          // the raised block
+            [yf - bot_blk[1] - bot_clr, yf - bot_blk[0] + bot_clr], [-1, strap_t + 1]);
+        box([-(srv[1] / 2 - bot_skt[2] + bot_clr), srv[1] / 2 - bot_skt[2] + bot_clr],          // the sockets + plugs
+            [yf - bot_skt[1] - bot_clr, yf - bot_skt[0] + bot_clr], [-1, strap_t + 1]);
     }
 }
 
@@ -180,12 +193,12 @@ module hub() {
 }
 
 // ==== TURRET =========================================================================================
-tun_x    = [-11, -3.5];          // cable tunnel, X (clear of the floor screw at X = 0) ...
-tun_y1   = 31.5;                 // ... runs from the hub's hole back to here
+tun_y    = [-11, -4];            // cable tunnel: Y (beside the floor screw at (-flange_r, 0)) ...
+tun_x0   = -31;                  // ... from outside the end wall, where the tilt servo's plugs come out, to the hub
 
 // tilt strap inserts: one in the idler end wall (moved outward, into a boss), one in the post by the horn
 post_x   = [x_horn + clr, x_horn + clr + 6];                 // the post starts clear of the servo's case
-idl_ins  = [x_idler - clr - ins_wall - insert_m3[0] / 2, 8];
+idl_ins  = [x_idler - clr - ins_wall - insert_m3[0] / 2, 22.8];   // at the wall's far end, past the cut-outs
 post_ins = [(post_x[0] + post_x[1]) / 2, (8 + (y_srv - srv_sh + srv[0] + clr) + 3) / 2];
 
 module turret() {
@@ -200,8 +213,10 @@ module turret() {
             box([x_idler - clr, x_horn - 4], [yb[0] - 3, yb[0]], [z_ft - 0.01, zb[1]]);            // front end wall
             box([x_idler - clr, x_horn - 4], [yb[1], yb[1] + 3], [z_ft - 0.01, zb[0] + 6]);        // back end (low: the connectors)
             box([post_x[0], post_x[1]], [8, yb[1] + 3], [z_ft - 0.01, zb[1]]);                     // strap post, beside the horn
-            translate([idl_ins[0], idl_ins[1], zb[1] - insert_m3[1] - 3])                            // boss on the end wall
-                cylinder(d = ins_boss, h = insert_m3[1] + 3, $fn = 32);
+            intersection() {                                                                     // boss on the end wall ...
+                translate([idl_ins[0], idl_ins[1], zb[1] - insert_m3[1] - 3]) cylinder(d = ins_boss, h = insert_m3[1] + 3, $fn = 32);
+                box([x_idler - clr - 10, x_idler - clr], [-99, 99], [-99, 99]);                    // ... stopping at the servo
+            }
             for (s = [-1, 1]) {                                                                  // cheeks
                 x0 = s > 0 ? x_cheek : -x_cheek - cheek_t;
                 hull() {
@@ -211,11 +226,18 @@ module turret() {
             }
         }
         translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);              // cables down the hub
-        // cable tunnel: from behind the tilt servo (its connector end, +Y), under it through the floor and the
-        // pedestal, to the hole down the hub - big enough for the servo's 3-pin plug; offset in X to miss the
-        // turret screw at (0, flange_r); 1 mm of pedestal left over it, under the servo
-        box(tun_x, [0, tun_y1], [z_floor - 1, zb[0] - 1]);
-        box(tun_x, [yb[1] + 3 + 0.5, tun_y1], [z_floor - 1, zb[1] + 10]);                         // ... and open upward there
+        // the servo's bottom face lies against the end wall: cut-outs for its raised block and its sockets
+        // (the plugs come out through the wall)
+        yf = y_srv - srv_sh + srv[0];                                                            // its far end
+        box([x_idler - clr - 4, x_idler + 1], [yf - bot_blk[1] - bot_clr, yf - bot_blk[0] + bot_clr],
+            [z_srv - (srv[1] / 2 - bot_blk[2] + bot_clr), z_srv + srv[1] / 2 - bot_blk[2] + bot_clr]);
+        box([x_idler - clr - 4, x_idler + 1], [yf - bot_skt[1] - bot_clr, yf - bot_skt[0] + bot_clr],
+            [z_srv - (srv[1] / 2 - bot_skt[2] + bot_clr), z_srv + srv[1] / 2 - bot_skt[2] + bot_clr]);
+        // cable tunnel: from outside the end wall (where the plugs come out) under the wall and the pedestal to
+        // the hole down the hub - big enough for a 3-pin plug; beside the floor screw at (-flange_r, 0); open
+        // underneath (the hub's flange closes it) and open upward outside the wall
+        box([tun_x0, 0], tun_y, [z_floor - 1, zb[0] - 1]);
+        box([tun_x0, x_idler - clr - 3 - 1.5], tun_y, [z_floor - 1, zb[1] + 10]);
         for (a = [0 : 90 : 270]) rotate(a) translate([flange_r, 0, z_floor - 1]) {               // 4 x M3 into the hub flange
             hole3(floor_t + 2);
         }

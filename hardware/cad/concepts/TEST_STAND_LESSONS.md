@@ -14,6 +14,14 @@ base box, turret and head are designed from `concepts/servo_turret.scad`.
   - shaft 10.11 mm from one end;
   - **no mounting holes**: the only threads are 4 × M3 in each disc, on a 14 mm circle. Hold the
     body in a cradle.
+  - **the bottom face (the idler-disc face) is not flat**, measured from the far end (away from the
+    shaft): a raised block 2 mm high, inset 2 mm from each side, from 4 to about 14.6 mm; then the
+    **two 3-pin sockets**, from about 17.7 to 25 mm. The plugs go straight in, so **the cables leave
+    through the bottom face**: whatever that face sits on needs an opening there and room below for
+    the plugs and a cable bend (`bot_blk`, `bot_skt`).
+- **Pan stack height:** with the pan servo seated on its rails, the hub's flange stood 2 mm above
+  the bearing's flange (1 mm was designed). The hub tube is now 2 mm shorter (`hub_drop`), so the
+  turntable rests on the bearing.
 
 ## Design rules
 
