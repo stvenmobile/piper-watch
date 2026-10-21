@@ -44,10 +44,34 @@ base box, turret and head are designed from `concepts/servo_turret.scad`.
    project the previews have hidden real faults several times. Run a clash check (intersect each
    pair of parts) after every change.
 
+## Results on the stand (2026-10-21)
+
+- **Both servos run cleanly from the Waveshare bus adapter at 12 V** (`tools/servo_test`):
+  - every move lands within 0.3 degrees;
+  - load stays at 2-3 % in every combination of pan and tilt, so the bearing, hub and linkage
+    add almost no friction;
+  - 12.2-12.4 V with both moving.
+- **Pan** (ID 1): centred facing forward, + = left. Swept +/-170 degrees freely. Tested to
+  +/-90 degrees with the tilt cable attached.
+- **Tilt** (ID 2): centre = the disc's pin pointing forward; + = up. The servo's own angle limits
+  are set to **servo -70 to +6.3 degrees**, which is **head about -24 (max down) to +20..25 (max up)**,
+  chosen by eye for a camera on a desk. The head is level at about servo -33.
+  - **Measured head angles differ from the design** at the low end: servo -53 gives head -12
+    (design -20). Above servo 0 they match. Work from the measured values, not the design curve.
+  - **A plain flat link on two M3 bolts works as well as rose joints** here: both pins are
+    parallel, so nothing needs to swivel. Bolt each end as a pivot (snug, not clamped).
+- **The tilt cable goes OUTSIDE the neck.** Routing it down through the hub was awkward. On the
+  stand it leaves the turret and hangs in a loose loop behind the neck. **The real head should have:**
+  - a slot in the turret wall where the tilt servo's plugs come out;
+  - room for a slack loop outside, behind the neck (the pan's range sets how much);
+  - a slot or grommet in the base box lid to take the cable down inside;
+  - a cable-tie anchor at each end of the loop.
+
+  The hub can then be solid.
+
 ## Still to prove on the stand
 
 - Pan: does the pillow block's single bearing hold the turret without wobble? If not, use two
   stacked 6807ZZ bearings.
-- Tilt: linkage play with the rose joints; the servo angles for head −20° / +20° / +60°
-  (design: −53° / 0° / +54°).
+- Pan: how much of its range the outside tilt cable allows, which sets the real pan limit.
 - Noise: STS3215 hum while holding, near the microphone.
