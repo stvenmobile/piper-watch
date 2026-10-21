@@ -16,8 +16,15 @@ try:
         bus.w1(sid, ADDR_TORQUE, 128)      # STS: 128 -> current position becomes 2048 (offset saved in EEPROM)
     except IOError:
         pass                               # it sometimes doesn't answer while saving - the read below confirms
-    time.sleep(0.3)
-    bus.w1(sid, ADDR_TORQUE, 0)
-    print("after: ", bus.r2(sid, ADDR_POS))
+    for attempt in range(5):               # it can take a moment to answer again after saving
+        time.sleep(0.4)
+        try:
+            bus.w1(sid, ADDR_TORQUE, 0)
+            print("after: ", bus.r2(sid, ADDR_POS))
+            break
+        except (IOError, IndexError):
+            pass
+    else:
+        print("no answer after saving - check with: py ping.py", sid)
 finally:
     bus.close()

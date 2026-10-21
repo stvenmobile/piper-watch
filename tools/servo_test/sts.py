@@ -27,8 +27,9 @@ ADDR_MOVING = 66
 STEPS_PER_DEG = 4096 / 360
 CENTRE = 2048
 # +1 or -1 per servo ID so positive angles follow the robot convention: pan + = LEFT (counter-clockwise
-# seen from above). Pan's raw positive direction turns RIGHT (checked 2026-10-21).
-DIRECTION = {1: -1}
+# seen from above), tilt + = the disc's pin UP from forward (head tilts up). Both servos' raw positive
+# directions are the opposite (checked 2026-10-21).
+DIRECTION = {1: -1, 2: -1}
 
 
 def deg_to_pos(sid, deg):
