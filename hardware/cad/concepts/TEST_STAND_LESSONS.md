@@ -62,9 +62,13 @@ base box, turret and head are designed from `concepts/servo_turret.scad`.
     parallel, so nothing needs to swivel. Bolt each end as a pivot (snug, not clamped).
 - **The tilt cable goes OUTSIDE the neck.** Routing it down through the hub was awkward. On the
   stand it leaves the turret and hangs in a loose loop behind the neck. **The real head should have:**
-  - a slot in the turret wall where the tilt servo's plugs come out;
+  - a channel inside the turret from the tilt servo's plug face (its left side, since the shaft
+    points right) round to an exit at the turret's **rear centre**. On the stand the cable leaves at
+    the left side, and at pan -90 that side faces forward: the loop would hang across the display.
+    Exiting at the back, +/-90 swings it to the sides but never to the front (about 40-50 mm of extra
+    loop each way);
   - room for a slack loop outside, behind the neck (the pan's range sets how much);
-  - a slot or grommet in the base box lid to take the cable down inside;
+  - a slot or grommet in the base box lid, directly behind the pan axis, to take the cable down inside;
   - a cable-tie anchor at each end of the loop.
 
   The hub can then be solid.
