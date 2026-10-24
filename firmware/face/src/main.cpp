@@ -58,7 +58,7 @@ LGFX_Sprite canvas(&lcd);
 Adafruit_NeoPixel mouth(ring::N, RING_DATA, NEO_GRB + NEO_KHZ800);
 
 ring::Face face;                                     // what the Pi asked for
-uint8_t maxBrightness = 40;                          // the mouth's cap (~15 %): plenty behind the diffuser
+uint8_t maxBrightness = 24;                          // the mouth's cap (~9 %): plenty behind the diffuser
 uint32_t lastHeartbeat = 0, heartbeatSeq = 0, badLines = 0, mouthAt = 0;
 bool linkUp = false, everLinked = false;
 

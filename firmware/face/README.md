@@ -31,7 +31,7 @@ The ring has four pads on the back: **5V DC Power**, **Power Signal Ground**, **
 | Ring pad | CYD | Notes |
 |---|---|---|
 | **Data Input** | **IO22**, on the **CN1** (or P3) connector | through a **330 Ω resistor**, close to the ring |
-| **5V DC Power** | **5V**, on the **P1** (serial) connector | USB power: about 0.1–0.2 A at the brightness used (capped at 40/255) |
+| **5V DC Power** | **5V**, on the **P1** (serial) connector | USB power: about 0.1–0.2 A at the brightness used (capped at 24/255) |
 | **Power Signal Ground** | **GND**, on CN1 or P1 | |
 
 - **Don't use IO27:** on the 2.4" CYD it drives the screen's backlight. IO21, also on P3, may be the
