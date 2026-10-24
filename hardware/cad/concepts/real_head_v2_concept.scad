@@ -1,7 +1,7 @@
 // Concept v2 (2026-10-24): the HEAD is an enclosed box that nods - its front wall carries the 2.4" CYD (the
 // "eyes", above) and the C920 camera (below), so both look where Piper looks. The turret (pans) keeps the
 // tilt servo low inside and grows a yoke: two cheeks outside the head's side walls with 608 bearings; the
-// head turns on M8 bolts through them. Same tilt linkage as the test stand (servo disc, 40 mm link, crank
+// head turns on printed "ear" pins through them (see EARS below). Same tilt linkage as the test stand (servo disc, 40 mm link, crank
 // on the axle), so the same angles. Draft blocks for proportions and clearances, not parts yet.
 // The MOUTH: an Adafruit NeoPixel Ring 12 round the camera lens, behind a white diffuser ring flush with the
 // face (animated while Piper speaks).
@@ -36,9 +36,20 @@ diff_t   = 2;                    // white diffuser ring, flush with the face
 air      = 3.5;                  // gap between the diffuser and the LEDs: blends 12 dots into a glow
 
 // ---- the yoke on the turret ----------------------------------------------------------------------------------
-yoke_gap = 1.5;                  // head side wall to cheek (a washer)
-cheek    = 5;
+yoke_gap = 1.5;                  // head side wall to cheek: filled by a boss on the head wall touching only the
+                                 //   bearing's inner race
+cheek    = 8;                    // the 608 (7 wide) sits in it from the inside, a 1 mm lip outside
 boss_d   = 27;                   // round each 608 (22 mm OD)
+brg      = [22, 8, 7];           // 608-2RS: OD, bore, width
+
+// EARS: one printed piece per side, fitted from outside - an octagonal cap (the "ear"), a shoulder pressing only
+// the bearing's inner race, and an 8 mm stub through the bearing into a keyed socket on the head wall. An M3
+// through its middle (head recessed in the cap) screws into an insert inside the head wall: it clamps the ear to
+// the head and spreads the stub (two slots, a bore narrowing to ~2.6 mm at its end) for a firm fit in the bearing.
+ear_d    = 32;                   // cap: across the flats (octagon) - about the size of the cheek's round top
+ear_t    = 4;
+ear_gap  = 1;                    // cap to the cheek's outer face
+key      = 5;                    // square key on the stub's inner end (into the head wall's socket)
 
 module octagon(inset = 0) {      // the head's front outline (x across, y = height), shrunk by `inset`
     offset(delta = -inset) polygon([
@@ -88,21 +99,61 @@ module head() {
         cylinder(d = ring[0], h = ring[2], $fn = 64);
         translate([0, 0, -1]) cylinder(d = ring[1], h = ring[2] + 2, $fn = 48);
     }
-    // the axle: an M8 through the side walls (out through the yoke's bearings), and the crank on it
-    color("#8a8f96") rotate([0, 90, 0]) cylinder(d = 8, h = hw + 2 * (yoke_gap + cheek) + 12, center = true, $fn = 24);
-    color("#6b8fb5") hull() {                                                       // crank: the link's pin 15 mm out
-        translate([x_link + rod_ball_w / 2 + 0.5, 0, 0]) rotate([0, 90, 0]) cylinder(d = 14, h = 4, $fn = 32);
-        translate([x_link + rod_ball_w / 2 + 0.5, arm_h * cos(crank_off), arm_h * sin(crank_off)]) rotate([0, 90, 0]) cylinder(d = 8, h = 4, $fn = 24);
+    // pivots: a boss on each side wall (outside: touches only the bearing's inner race; inside: the M3 insert),
+    // and the ears
+    for (sd = [-1, 1]) mirror([sd < 0 ? 1 : 0, 0, 0]) {
+        color("#eef0f3") translate([hw / 2, 0, 0]) rotate([0, 90, 0]) cylinder(d = 12, h = yoke_gap, $fn = 32);
+        color("#eef0f3") translate([hw / 2 - t - 6, 0, 0]) rotate([0, 90, 0]) cylinder(d = 11, h = 6.01, $fn = 32);
+        translate([hw / 2 + yoke_gap, 0, 0]) ear();
     }
+    // the crank: moulded onto the inside of the right side wall, the link's pin 15 mm from the pivot
+    color("#6b8fb5") hull() for (p = [[0, 0, 13], [arm_h * cos(crank_off), arm_h * sin(crank_off), 9]])
+        translate([x_link + rod_ball_w / 2 + 0.5, p[0], p[1]]) rotate([0, 90, 0])
+            cylinder(d = p[2], h = hw / 2 - t - (x_link + rod_ball_w / 2 + 0.5), $fn = 32);
+}
+
+module octagon2d(w) {            // a regular octagon, `w` across the flats
+    r = w / 2 / cos(22.5);
+    rotate([0, 0, 22.5]) circle(r = r, $fn = 8);
+}
+
+module ear(section = false) {   // in its own frame: x = 0 at the head boss's outer face, +x outward
+    stub_l = brg[2] + 1;                                            // through the bearing (and its 1 mm lip)
+    difference() {
+        union() {
+            color("#f2b84b") {
+                translate([-key - 1, -key / 2, -key / 2]) cube([key + 1.01, key, key]);           // key, into the socket
+                rotate([0, 90, 0]) cylinder(d = brg[1], h = stub_l, $fn = 32);                  // stub
+                translate([stub_l, 0, 0]) rotate([0, 90, 0]) cylinder(d = 11, h = ear_gap + 1, $fn = 32);   // shoulder
+                translate([cheek + ear_gap, 0, 0]) rotate([0, 90, 0]) linear_extrude(ear_t) octagon2d(ear_d);  // cap
+                translate([cheek + ear_gap + ear_t, 0, 0]) rotate([0, 90, 0]) difference() {    // raised ring
+                    cylinder(d = 14, h = 1.2, $fn = 48); translate([0, 0, -1]) cylinder(d = 10, h = 3, $fn = 48);
+                }
+            }
+        }
+        // M3: clearance through the cap, narrowing to ~2.6 at the stub's inner end (spreads it), head recessed
+        translate([-key - 2, 0, 0]) rotate([0, 90, 0]) cylinder(d1 = 2.6, d2 = 3.4, h = key + 2 + stub_l, $fn = 24);
+        translate([stub_l - 0.01, 0, 0]) rotate([0, 90, 0]) cylinder(d = 3.4, h = 20, $fn = 24);
+        translate([cheek + ear_gap + ear_t - 2.5, 0, 0]) rotate([0, 90, 0]) cylinder(d = 6.2, h = 5, $fn = 24);
+        for (a = [0, 90]) rotate([a, 0, 0]) translate([0.5, -0.4, -6]) cube([brg[2], 0.8, 12]);   // slots
+        if (section) translate([-20, -20, 0]) cube([40, 40, 20]);
+    }
+    color("#8a8f96") translate([cheek + ear_gap + ear_t - 2.5, 0, 0]) rotate([0, 90, 0]) cylinder(d = 5.5, h = 2.5, $fn = 24);  // M3 head
 }
 
 module yoke() {
     xo = hw / 2 + yoke_gap;
     for (s = [-1, 1]) {
         x0 = s > 0 ? xo : -xo - cheek;
-        color("#d9dde3") hull() {
-            translate([x0, y_axle, z_axle]) rotate([0, 90, 0]) cylinder(d = boss_d + 8, h = cheek, $fn = 48);
-            translate([x0, y_axle - 22, z_floor]) cube([cheek, 44, 6]);
+        color("#d9dde3") difference() {
+            hull() {
+                translate([x0, y_axle, z_axle]) rotate([0, 90, 0]) cylinder(d = boss_d + 8, h = cheek, $fn = 48);
+                translate([x0, y_axle - 22, z_floor]) cube([cheek, 44, 6]);
+            }
+            translate([x0 - 1, y_axle, z_axle]) rotate([0, 90, 0]) cylinder(d = 12, h = cheek + 2, $fn = 32);
+        }
+        color("#b8bec6") translate([s > 0 ? xo : -xo - brg[2], y_axle, z_axle]) rotate([0, 90, 0]) difference() {   // the 608
+            cylinder(d = brg[0], h = brg[2], $fn = 48); translate([0, 0, -1]) cylinder(d = brg[1], h = brg[2] + 2, $fn = 32);
         }
     }
     color("#d9dde3") translate([-xo - cheek, y_axle - 22, z_floor]) cube([2 * (xo + cheek), 44, floor_t]);  // floor out to the cheeks
@@ -143,4 +194,5 @@ module robot() {
     }
 }
 
-robot();
+if (part == "ear") { ear(); translate([0, 45, 0]) ear(section = true); }   // openscad -D 'part="ear"': whole + cut in half
+else robot();
