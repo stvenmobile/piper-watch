@@ -19,6 +19,9 @@ hw       = 106;                  // outside width
 hy       = [-28, 47];            // back face .. front face (from the axle)
 hz       = [-44, 48];            // bottom edge .. top (from the axle)
 t        = 2.5;                  // walls
+chamfer  = 15;                   // the front outline is an octagon: 45 deg corners this far in (corner faces
+                                 //   ~21 mm; long top, bottom and sides)
+bottom_open = 70;                // the underside is open this wide (for the link, the cables and nodding)
 cyd_b    = [74, 43, 1.8];        // Guition ESP32-2432S024 (2.4"), landscape
 cyd_lit  = [48.96, 36.72];
 cyd_z    = 22;                   // screen centre (from the axle)
@@ -36,10 +39,21 @@ yoke_gap = 1.5;                  // head side wall to cheek (a washer)
 cheek    = 5;
 boss_d   = 27;                   // round each 608 (22 mm OD)
 
+module octagon(inset = 0) {      // the head's front outline (x across, y = height), shrunk by `inset`
+    offset(delta = -inset) polygon([
+        [-hw / 2 + chamfer, hz[0]], [hw / 2 - chamfer, hz[0]], [hw / 2, hz[0] + chamfer], [hw / 2, hz[1] - chamfer],
+        [hw / 2 - chamfer, hz[1]], [-hw / 2 + chamfer, hz[1]], [-hw / 2, hz[1] - chamfer], [-hw / 2, hz[0] + chamfer]]);
+}
+
+module along_depth(y0, y1) {     // extrude a front outline from y0 back... to y1 (front)
+    translate([0, y1, 0]) rotate([90, 0, 0]) linear_extrude(y1 - y0) children();
+}
+
 module head_box() {
     difference() {
-        translate([-hw / 2, hy[0], hz[0]]) cube([hw, hy[1] - hy[0], hz[1] - hz[0]]);
-        translate([-hw / 2 + t, hy[0] + t, hz[0] - 1]) cube([hw - 2 * t, hy[1] - hy[0] - 2 * t, hz[1] - hz[0] - t + 1]);  // hollow, open below
+        along_depth(hy[0], hy[1]) octagon();
+        along_depth(hy[0] + t, hy[1] - t) octagon(t);                                                    // hollow
+        translate([-bottom_open / 2, hy[0] + t, hz[0] - 1]) cube([bottom_open, hy[1] - hy[0] - 2 * t, t + 2]);  // open below
         translate([2 - cyd_lit[0] / 2 - 1, hy[1] - t - 1, cyd_z - cyd_lit[1] / 2 - 1]) cube([cyd_lit[0] + 2, t + 2, cyd_lit[1] + 2]);  // screen
         translate([0, hy[1] - t - 1, cam_z]) rotate([-90, 0, 0]) cylinder(d = ring[0] + 1, h = t + 2, $fn = 64);  // mouth
         translate([-15, hy[0] - 1, hz[0] - 1]) cube([30, t + 2, 16]);                                           // cable exit, back
