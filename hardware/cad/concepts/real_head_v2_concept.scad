@@ -26,8 +26,8 @@ bottom_open = 70;                // the underside is open this wide (for the lin
 cyd_b    = [74, 43, 1.8];        // Guition ESP32-2432S024 (2.4"), landscape; seen from the front with the picture
                                  // right-side up, its USB jack is on the LEFT (Piper's right): the USB access goes there
 cyd_glass = [58.3, 43];         // the glass: centred on the board (7.85 in from each end, flush top and bottom)
-cyd_lit  = [48.96, 36.72];
-cyd_lit_dx = 0;                  // the picture's offset in the glass (+ = toward the USB end): MEASURE, assumed centred
+cyd_lit  = [48.8, 39];          // the viewable area: inside the black mask (2 top and bottom, 2.5 at the far end, 7 at the USB end)
+cyd_lit_dx = -2.25;              // its centre: 2.25 from the glass centre, AWAY from the USB end (+x = the USB end)
 cyd_z    = 22;                   // screen centre (from the axle)
 cam_z    = -21;                  // camera lens centre = the mouth's centre
 cam_b    = [80, 22, 1.2];
@@ -70,7 +70,7 @@ module head_box() {
         along_depth(hy[0] + t, hy[1] - t) octagon(t);                                                    // hollow
         translate([-bottom_open / 2, hy[0] + t, hz[0] - 1]) cube([bottom_open, hy[1] - hy[0] - 2 * t, t + 2]);  // open below
         translate([cyd_lit_dx, hy[1] + 1, cyd_z]) rotate([90, 0, 0]) linear_extrude(t + 2) {          // screen window
-            w = cyd_lit[0] + 2; h = cyd_lit[1] + 2; c = win_chamfer;
+            w = cyd_lit[0] + 1; h = cyd_lit[1] + 1; c = win_chamfer;
             polygon([[-w / 2 + c, -h / 2], [w / 2 - c, -h / 2], [w / 2, -h / 2 + c], [w / 2, h / 2 - c],
                      [w / 2 - c, h / 2], [-w / 2 + c, h / 2], [-w / 2, h / 2 - c], [-w / 2, -h / 2 + c]]);
         }
