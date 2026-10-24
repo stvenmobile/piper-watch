@@ -1,9 +1,9 @@
 // Head pivot coupon: one working pivot of the v2 head (concepts/real_head_v2_concept.scad), to tune the fits
 // before printing the head and the yoke.
 //
-//   BAR    a piece of yoke cheek (8 thick) with three 608 pockets, drawn 21.9 / 22.0 / 22.1 (+ the printer's
-//          hole shrink): the bearing should go in snug by hand - no wobble, no force. Round 1's 22.2 / 22.4 /
-//          22.6 were all loose.
+//   BAR    a piece of yoke cheek (8 thick) with three 608 pockets, drawn 21.6 / 21.7 / 21.8 (+ the printer's
+//          hole shrink): a light press, and the bearing stays in when the bar is turned over. Round 1 (22.2 /
+//          22.4 / 22.6) and round 2 (21.9 / 22.0 / 22.1) were all loose: the bearing fell out.
 //          The bearing goes in from the face marked with the groove; a 1 mm lip on the other face stops it.
 //   EARS   round 2: all with the 8.1 stub (round 1's winner in the bearing), and a SOLID square key drawn
 //          5.1 / 5.25 / 5.4 (numbered 1 2 3 on the back of the cap) for the wall's socket (drawn 5.5): keep the
@@ -25,7 +25,7 @@ part = "all";                    // "all" | "bar" | "ears" | "wall"   ("ears" al
 brg      = [22, 8, 7];           // 608-2RS: OD, bore, width
 cheek    = 8;
 lip      = cheek - brg[2];       // 1 mm lip on the outer face
-pockets  = [21.9, 22.0, 22.1];   // drawn (before the hole shrink); round 1: 22.2 / 22.4 / 22.6, all loose
+pockets  = [21.6, 21.7, 21.8];   // drawn (before the hole shrink); round 1 22.2-22.6 and round 2 21.9-22.1: all loose
 stubs    = [8.1, 8.1, 8.1];      // drawn (round 1 tried 7.9 / 8.0 / 8.1: 8.1 won)
 keys     = [5.1, 5.25, 5.4];     // drawn: the solid key, against the 5.5 socket
 ear_d    = 32;                   // octagonal cap, across the flats
