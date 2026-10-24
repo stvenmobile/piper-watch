@@ -118,13 +118,14 @@ module octagon2d(w) {            // a regular octagon, `w` across the flats
 }
 
 module ear(section = false) {   // in its own frame: x = 0 at the head boss's outer face, +x outward
-    stub_l = brg[2] + 1;                                            // through the bearing (and its 1 mm lip)
+    stub_l = brg[2] - 0.2;                                          // through the bearing (a hair shorter: the clamp
+                                                                    //   is on the inner race)
     difference() {
         union() {
             color("#f2b84b") {
                 translate([-key - 1, -key / 2, -key / 2]) cube([key + 1.01, key, key]);           // key, into the socket
                 rotate([0, 90, 0]) cylinder(d = brg[1], h = stub_l, $fn = 32);                  // stub
-                translate([stub_l, 0, 0]) rotate([0, 90, 0]) cylinder(d = 11, h = ear_gap + 1, $fn = 32);   // shoulder
+                translate([stub_l, 0, 0]) rotate([0, 90, 0]) cylinder(d = 11, h = cheek - stub_l + ear_gap + 0.01, $fn = 32);   // shoulder: through the lip, on the inner race
                 translate([cheek + ear_gap, 0, 0]) rotate([0, 90, 0]) linear_extrude(ear_t) octagon2d(ear_d);  // cap
                 translate([cheek + ear_gap + ear_t, 0, 0]) rotate([0, 90, 0]) difference() {    // raised ring
                     cylinder(d = 14, h = 1.2, $fn = 48); translate([0, 0, -1]) cylinder(d = 10, h = 3, $fn = 48);
