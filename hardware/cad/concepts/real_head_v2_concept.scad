@@ -25,7 +25,9 @@ win_chamfer = 7;                 // the screen's window: octagonal too, to echo 
 bottom_open = 70;                // the underside is open this wide (for the link, the cables and nodding)
 cyd_b    = [74, 43, 1.8];        // Guition ESP32-2432S024 (2.4"), landscape; seen from the front with the picture
                                  // right-side up, its USB jack is on the LEFT (Piper's right): the USB access goes there
+cyd_glass = [58.3, 43];         // the glass: centred on the board (7.85 in from each end, flush top and bottom)
 cyd_lit  = [48.96, 36.72];
+cyd_lit_dx = 0;                  // the picture's offset in the glass (+ = toward the USB end): MEASURE, assumed centred
 cyd_z    = 22;                   // screen centre (from the axle)
 cam_z    = -21;                  // camera lens centre = the mouth's centre
 cam_b    = [80, 22, 1.2];
@@ -67,7 +69,7 @@ module head_box() {
         along_depth(hy[0], hy[1]) octagon();
         along_depth(hy[0] + t, hy[1] - t) octagon(t);                                                    // hollow
         translate([-bottom_open / 2, hy[0] + t, hz[0] - 1]) cube([bottom_open, hy[1] - hy[0] - 2 * t, t + 2]);  // open below
-        translate([2, hy[1] + 1, cyd_z]) rotate([90, 0, 0]) linear_extrude(t + 2) {          // screen window
+        translate([cyd_lit_dx, hy[1] + 1, cyd_z]) rotate([90, 0, 0]) linear_extrude(t + 2) {          // screen window
             w = cyd_lit[0] + 2; h = cyd_lit[1] + 2; c = win_chamfer;
             polygon([[-w / 2 + c, -h / 2], [w / 2 - c, -h / 2], [w / 2, -h / 2 + c], [w / 2, h / 2 - c],
                      [w / 2 - c, h / 2], [-w / 2 + c, h / 2], [-w / 2, h / 2 - c], [-w / 2, -h / 2 + c]]);
@@ -81,8 +83,8 @@ module head_box() {
 module head() {
     color("#eef0f3") head_box();
     // inside the front wall: the CYD (glass to the wall) and the camera board (lens block to the wall)
-    color("#0b0d10") translate([2 - cyd_lit[0] / 2, hy[1] - t - 0.3, cyd_z - cyd_lit[1] / 2]) cube([cyd_lit[0], 0.6, cyd_lit[1]]);
-    color("#4cc2ff") for (s = [-1, 1]) translate([2 + s * 12, hy[1] - t + 0.4, cyd_z + 1]) rotate([90, 0, 0])
+    color("#0b0d10") translate([cyd_lit_dx - cyd_lit[0] / 2, hy[1] - t - 0.3, cyd_z - cyd_lit[1] / 2]) cube([cyd_lit[0], 0.6, cyd_lit[1]]);
+    color("#4cc2ff") for (s = [-1, 1]) translate([cyd_lit_dx + s * 12, hy[1] - t + 0.4, cyd_z + 1]) rotate([90, 0, 0])
         scale([1, 1.25, 1]) cylinder(d = 13, h = 0.3, $fn = 40);                                           // eyes
     color("#c98d1a") translate([-cyd_b[0] / 2, hy[1] - t - 4.3 - cyd_b[2], cyd_z - cyd_b[1] / 2]) cube([cyd_b[0], cyd_b[2], cyd_b[1]]);
     cam_y = hy[1] - 14 - cam_back;                                                // camera board's front face
