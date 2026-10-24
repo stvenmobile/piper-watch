@@ -23,7 +23,8 @@ chamfer  = 15;                   // the front outline is an octagon: 45 deg corn
                                  //   ~21 mm; long top, bottom and sides)
 win_chamfer = 7;                 // the screen's window: octagonal too, to echo the head (hides a little of the screen)
 bottom_open = 70;                // the underside is open this wide (for the link, the cables and nodding)
-cyd_b    = [74, 43, 1.8];        // Guition ESP32-2432S024 (2.4"), landscape
+cyd_b    = [74, 43, 1.8];        // Guition ESP32-2432S024 (2.4"), landscape; seen from the front with the picture
+                                 // right-side up, its USB jack is on the LEFT (Piper's right): the USB access goes there
 cyd_lit  = [48.96, 36.72];
 cyd_z    = 22;                   // screen centre (from the axle)
 cam_z    = -21;                  // camera lens centre = the mouth's centre
