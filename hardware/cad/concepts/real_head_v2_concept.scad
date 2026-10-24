@@ -21,6 +21,7 @@ hz       = [-44, 48];            // bottom edge .. top (from the axle)
 t        = 2.5;                  // walls
 chamfer  = 15;                   // the front outline is an octagon: 45 deg corners this far in (corner faces
                                  //   ~21 mm; long top, bottom and sides)
+win_chamfer = 7;                 // the screen's window: octagonal too, to echo the head (hides a little of the screen)
 bottom_open = 70;                // the underside is open this wide (for the link, the cables and nodding)
 cyd_b    = [74, 43, 1.8];        // Guition ESP32-2432S024 (2.4"), landscape
 cyd_lit  = [48.96, 36.72];
@@ -54,7 +55,11 @@ module head_box() {
         along_depth(hy[0], hy[1]) octagon();
         along_depth(hy[0] + t, hy[1] - t) octagon(t);                                                    // hollow
         translate([-bottom_open / 2, hy[0] + t, hz[0] - 1]) cube([bottom_open, hy[1] - hy[0] - 2 * t, t + 2]);  // open below
-        translate([2 - cyd_lit[0] / 2 - 1, hy[1] - t - 1, cyd_z - cyd_lit[1] / 2 - 1]) cube([cyd_lit[0] + 2, t + 2, cyd_lit[1] + 2]);  // screen
+        translate([2, hy[1] + 1, cyd_z]) rotate([90, 0, 0]) linear_extrude(t + 2) {          // screen window
+            w = cyd_lit[0] + 2; h = cyd_lit[1] + 2; c = win_chamfer;
+            polygon([[-w / 2 + c, -h / 2], [w / 2 - c, -h / 2], [w / 2, -h / 2 + c], [w / 2, h / 2 - c],
+                     [w / 2 - c, h / 2], [-w / 2 + c, h / 2], [-w / 2, h / 2 - c], [-w / 2, -h / 2 + c]]);
+        }
         translate([0, hy[1] - t - 1, cam_z]) rotate([-90, 0, 0]) cylinder(d = ring[0] + 1, h = t + 2, $fn = 64);  // mouth
         translate([-15, hy[0] - 1, hz[0] - 1]) cube([30, t + 2, 16]);                                           // cable exit, back
         if (show_cutaway) translate([hw / 2 - t - 1, hy[0] - 1, hz[0] - 1]) cube([t + 2, hy[1] - hy[0] + 2, hz[1] - hz[0] + 2]);
