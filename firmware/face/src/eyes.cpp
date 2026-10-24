@@ -116,12 +116,12 @@ void render(LGFX_Sprite &c, const Look &l, uint32_t t) {
     if (l.mood == ring::Mood::Curious && side > 0) hh = h * 1.08f;            // curious: one eye a touch bigger
     drawEye(c, cx, cy, w, hh, col, l, side);
   }
-  if (l.state == ring::State::Sleeping) {                                       // a small "z" drifting up
+  if (l.state == ring::State::Sleeping) {             // a small "zzz" drifting up
     int z = (t / 40) % 60;
     c.setTextColor(lgfx::color565(60, 130, 170));
     c.setTextSize(2);
     c.setCursor(W / 2 + 70 + z / 3, H / 2 - 20 - z);
-    c.print("z");
+    c.print("zzz");
   }
 }
 
