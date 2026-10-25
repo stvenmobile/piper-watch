@@ -90,7 +90,8 @@ barrel_h = 4.1;                  // the lens barrel above the cube (MEASURED; wi
 lens_h   = cube[1] + barrel_h;   //   to the lens front - another measurement said 14.2)
 barrel_d = 8.8;
 cube_fit = 0.2;                  // clearance each side in the pocket
-cube_lip = [0.8, 11.5];          // the lip the cube's top stops against: thickness, its hole (the barrel)
+cube_lip = [0.8, 12];            // the lip the cube's top stops against: thickness, its hole (the barrel: 8.8,
+                                 //   but 11 across four small flanges at its base)
 cube_top = ring_back;            // 7.4 behind the face
 lens_depth = cube_top - (lens_h - cube[1]);   // 3.5: the lens front behind the face
 pcb_depth  = cube_top + cube[1];              // 17.7: the board's front behind the face
@@ -292,8 +293,8 @@ module mouth_diffuser() {
         }
         // the view: a cone from 16 at the face to the barrel's bore at the lens front (clears the C920's
         // 78 deg diagonal), then the bore round the barrel
-        translate([0, 0, -0.01]) cylinder(d1 = lens_open, d2 = cube_lip[1], h = lens_depth + 0.02);
-        translate([0, 0, lens_depth]) cylinder(d = cube_lip[1], h = cube_top);
+        translate([0, 0, -0.01]) cylinder(d1 = lens_open, d2 = cube_lip[1] + cal_hole, h = lens_depth + 0.02);
+        translate([0, 0, lens_depth]) cylinder(d = cube_lip[1] + cal_hole, h = cube_top);
     }
 }
 
