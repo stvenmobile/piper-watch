@@ -162,11 +162,20 @@ module head_front_v2() {
     }
 }
 
-module corner_boss(p) {          // along y from the split, sloped into the corner walls (printable face-down)
-    dir = [sign(p[0]), sign(p[1])] / sqrt(2);
-    hull() {
-        y_cyl(cb_d, y_split, y_split + cb_len, p[0], p[1]);
-        y_cyl(1, y_split, y_split + cb_len + 11, p[0] + 6 * dir[0], p[1] + 6 * dir[1]);
+// along y from the split: the boss joined to its corner wall by straight sides at right angles to the wall,
+// tangent to the boss; its front end slopes into the wall at 45 deg (printable face-down)
+module corner_boss(p) {
+    dir = [sign(p[0]), sign(p[1])] / sqrt(2);              // the corner wall's normal
+    w = p + 9 * dir;                                        // the same circle, reaching into the wall
+    intersection() {
+        union() {
+            hull() { y_cyl(cb_d, y_split, y_split + cb_len, p[0], p[1]); y_cyl(cb_d, y_split, y_split + cb_len, w[0], w[1]); }
+            hull() {                                        // the slope under its front end
+                y_cyl(cb_d, y_split, y_split + cb_len, p[0], p[1]);
+                y_cyl(cb_d, y_split, y_split + cb_len + 2 * cb_d, w[0], w[1]);
+            }
+        }
+        along_y(y_split, hy[1]) octagon(0.01);              // trimmed to the shell
     }
 }
 
@@ -193,7 +202,10 @@ module head_cap_v2() {
             difference() {                                           // the lip, inside the front
                 along_y(y_split - 0.01, y_split + lip[0]) octagon(t + lip[2]);
                 along_y(y_split - 1, y_split + lip[0] + 1) octagon(t + lip[2] + lip[1]);
-                for (p = cb_pts) y_cyl(cb_d + 1, y_split - 1, y_split + lip[0] + 1, p[0], p[1]);
+                for (p = cb_pts) hull() {                     // notched round the corner bosses and their webs
+                    y_cyl(cb_d + 1, y_split - 1, y_split + lip[0] + 1, p[0], p[1]);
+                    y_cyl(cb_d + 1, y_split - 1, y_split + lip[0] + 1, p[0] + 9 * sign(p[0]) / sqrt(2), p[1] + 9 * sign(p[1]) / sqrt(2));
+                }
             }
             for (p = cb_pts) intersection() {                         // screw tubes
                 y_cyl(8, hy[0], y_split, p[0], p[1]);
