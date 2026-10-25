@@ -48,11 +48,12 @@ brg      = [22, 8, 7];           // 608-2RS: OD, bore, width
 // EARS: one printed piece per side, fitted from outside - an octagonal cap (the "ear"), a shoulder pressing only
 // the bearing's inner race, and an 8 mm stub through the bearing into a keyed socket on the head wall. An M3
 // through its middle (head recessed in the cap) screws into an insert inside the head wall: it clamps the ear to
-// the head and spreads the stub (two slots, a bore narrowing to ~2.6 mm at its end) for a firm fit in the bearing.
+// the head and spreads the stub (two slots, a bore narrowing to 3.0 within the stub; clearance through the key)
+// for a firm fit in the bearing. Fits from the coupon: params.scad pivot_* (pocket, stub, key, socket).
 ear_d    = 32;                   // cap: across the flats (octagon) - about the size of the cheek's round top
 ear_t    = 4;
 ear_gap  = 1;                    // cap to the cheek's outer face
-key      = 5;                    // square key on the stub's inner end (into the head wall's socket)
+key      = pivot_key;            // square key on the stub's inner end (into the head wall's socket)
 
 module octagon(inset = 0) {      // the head's front outline (x across, y = height), shrunk by `inset`
     offset(delta = -inset) polygon([
@@ -135,8 +136,9 @@ module ear(section = false) {   // in its own frame: x = 0 at the head boss's ou
                 }
             }
         }
-        // M3: clearance through the cap, narrowing to ~2.6 at the stub's inner end (spreads it), head recessed
-        translate([-key - 2, 0, 0]) rotate([0, 90, 0]) cylinder(d1 = 2.6, d2 = 3.4, h = key + 2 + stub_l, $fn = 24);
+        // M3: clearance through the key and the cap, narrowing to 3.0 within the stub (spreads it), head recessed
+        translate([-key - 2, 0, 0]) rotate([0, 90, 0]) cylinder(d = 3.4, h = key + 2.01, $fn = 24);
+        rotate([0, 90, 0]) cylinder(d1 = 3.0, d2 = 3.4, h = stub_l, $fn = 24);
         translate([stub_l - 0.01, 0, 0]) rotate([0, 90, 0]) cylinder(d = 3.4, h = 20, $fn = 24);
         translate([cheek + ear_gap + ear_t - 2.5, 0, 0]) rotate([0, 90, 0]) cylinder(d = 6.2, h = 5, $fn = 24);
         for (a = [0, 90]) rotate([a, 0, 0]) translate([0.5, -0.4, -6]) cube([brg[2], 0.8, 12]);   // slots

@@ -5,6 +5,10 @@
 //          hole shrink): a light press, and the bearing stays in when the bar is turned over. Round 1 (22.2 /
 //          22.4 / 22.6) and round 2 (21.9 / 22.0 / 22.1) were all loose: the bearing fell out.
 //          The bearing goes in from the face marked with the groove; a 1 mm lip on the other face stops it.
+//   RESULT (2026-10-24): bar round 3 pocket 3 (21.8) + round-2 ear 2 (stub 8.1, key 5.25, socket 5.5) make a
+//          smooth pivot with almost no play - now params.scad's pivot_*. Ear 1's key snapped when the M3 was
+//          driven through it: the bore narrowed to 2.6 INSIDE the key. Now the M3 has clearance through the
+//          key, and the narrowing (to 3.0) is in the slotted stub only, where spreading is wanted.
 //   EARS   round 2: all with the 8.1 stub (round 1's winner in the bearing), and a SOLID square key drawn
 //          5.1 / 5.25 / 5.4 (numbered 1 2 3 on the back of the cap) for the wall's socket (drawn 5.5): keep the
 //          one that pushes in with no wobble. Round 1 (stubs 7.9 / 8.0 / 8.1, 5 mm key slotted through) fitted
@@ -66,7 +70,8 @@ module ear(stub, n, k = key) {
         }
         translate([0, 0, -1]) cylinder(d = 6.2 + cal_hole, h = 2.5 + 1, $fn = 32);                  // bolt head recess
         translate([0, 0, 1.5]) cylinder(d = 3.4 + cal_hole, h = z_stub, $fn = 24);                   // M3 clearance
-        translate([0, 0, z_stub]) cylinder(d1 = 3.4 + cal_hole, d2 = 2.6, h = stub_l + key + 0.01, $fn = 24);   // narrowing: spreads the stub
+        translate([0, 0, z_stub]) cylinder(d1 = 3.4 + cal_hole, d2 = 3.0, h = stub_l + 0.01, $fn = 24);          // narrowing: spreads the stub
+        translate([0, 0, z_stub + stub_l]) cylinder(d = 3.4 + cal_hole, h = key + 1, $fn = 24);                  // clearance through the key
         for (a = [0, 90]) rotate([0, 0, a]) translate([-stub, -0.4, z_stub + 1]) cube([2 * stub, 0.8, stub_l - 1]);   // slots: the stub only
         translate([0, 0, ear_t - 0.6]) rotate([0, 0, 0]) for (k = [0 : n - 1])                        // number = dots on the cap's back
             translate([9 + 2.5 * k, 0, 0]) cylinder(d = 1.6, h = 1, $fn = 12);

@@ -35,6 +35,14 @@ insert_m4   = [5.6, 6.0];        // coupon "M4a" confirmed
 m5          = 5.0;
 insert_m5   = [6.4, 7.0];        // EST - confirm with parts/m5_coupon.scad
 
+// --- Head pivot: 608-2RS bearing + printed "ear" pin (parts/head_pivot_coupon.scad, PETG, 2026-10-24) ----
+// Chosen: a smooth pivot with almost no play. Big holes shrink less than cal_hole says: the pocket that
+// HOLDS a 22.0 bearing (stays in upside down, light press) is drawn 21.8 + cal_hole (22.2 to the slicer).
+pivot_pocket   = 21.8;           // + cal_hole: the 608's pocket (22.2-22.6 and 21.9-22.1 drawn: bearing fell out)
+pivot_stub     = 8.1;            // the ear's stub in the 8 mm bore (7.9 / 8.0 looser), slotted, spread by the M3
+pivot_key      = 5.25;           // the ear's solid square key ...
+pivot_key_sock = 5.5;            // ... in this square socket (no cal: 5.1 fitted too, 5.4 tight)
+
 // --- Lazy Susan: 140 mm round aluminium turntable bearing (Amazon B08CSMCRC6) ----
 // Two COPLANAR rings, both 10.5 mm thick and flush top and bottom, with a 0.8 mm gap.
 // The outer ring screws down into the box (countersinks on top); the inner ring
