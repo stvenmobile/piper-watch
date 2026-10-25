@@ -94,6 +94,7 @@ clip     = [8, 2.5, 3.0, 0.5];   // width, thickness, bridge rise above the bloc
 cb_d     = 10;
 cb_len   = 8;                    // front's bosses: from the split forward
 cb_fillet = 2;                   //   fillets where their sides meet the corner wall
+bed_chamfer = 0.6;               // the edges that print on the bed: the face (and its window) and the back
 cb_pts   = [for (sx = [-1, 1], p = [[40.2, 35.2], [40.2, -31.2]]) [sx * p[0], p[1]]];
 
 $fn = 48;
@@ -152,6 +153,11 @@ module head_front_v2() {
         x_cyl(insert_m3[0], crank_x0 - 0.01, crank_x0 + insert_m3[1] + 1, crank_pin[0], crank_pin[1]);   // crank pin insert
         // the face: screen window, mouth opening
         translate([cyd_lit_dx, hy[1] + 1, cyd_z]) rotate([90, 0, 0]) linear_extrude(t + 2) oct_poly(cyd_lit[0] + 1, cyd_lit[1] + 1, win_chamfer);
+        translate([cyd_lit_dx, 0, cyd_z]) hull() {                                   // ... its edge chamfered on the face
+            along_y(hy[1] - bed_chamfer, hy[1] - bed_chamfer + 0.01) oct_poly(cyd_lit[0] + 1, cyd_lit[1] + 1, win_chamfer);
+            along_y(hy[1], hy[1] + 0.01) offset(delta = bed_chamfer) oct_poly(cyd_lit[0] + 1, cyd_lit[1] + 1, win_chamfer);
+        }
+        bed_edge(hy[1], -1);                                                          // the face's outer edge
         y_cyl(mouth_d + 0.3 + cal_hole, hy[1] - t - 1, hy[1] + 1, 0, cam_z);
         // CYD inserts (M2.5) from the posts' ends
         for (sx = [-1, 1], sz = [-1, 1])
@@ -225,6 +231,17 @@ module head_cap_v2() {
         }
         translate([-bottom_open / 2, hy[0] + t, hz[0] - 1]) cube([bottom_open, y_split - hy[0], t + 2]);   // open below
         translate([-15, hy[0] - 1, hz[0] - 1]) cube([30, t + 2, 16]);                                     // cable exit
+        bed_edge(hy[0], 1);                                                                                // the back's outer edge
+    }
+}
+
+// a 45 deg chamfer round the outline's edge at the face y = yf (the side on the bed); s = the inward direction
+module bed_edge(yf, s) difference() {
+    along_y(min(yf, yf + s * bed_chamfer) - 1, max(yf, yf + s * bed_chamfer) + 1) offset(delta = 5) octagon();
+    hull() {
+        along_y(yf - 0.01, yf + 0.01) octagon(bed_chamfer);
+        along_y(yf + s * bed_chamfer - 0.01, yf + s * bed_chamfer + 0.01) octagon();
+        along_y(yf + s * (bed_chamfer + 1) - 0.01, yf + s * (bed_chamfer + 1) + 0.01) octagon();
     }
 }
 
