@@ -76,9 +76,11 @@ diff_t   = 1.8;                  // the diffuser's face: flush with the face, th
 diff_collar = 0.6;               // a thin collar at its edge reaches back to the rim behind the wall
 ring_front = t + rim_t + diff_air;    // 7.0 behind the face
 ring_back  = ring_front + ring[2];    // 10.4
-lens_hole = 19;                  // through the diffuser: the C920's view from 5.4 mm back
-baffle   = [22, 8.3];            // the lens baffle: OD, and how far behind the face it ends (the lens
-                                 //   holder's square block starts at 8.8)
+lens_hole = 19;                  // the diffuser's opening at the face (the C920's view from 5.4 mm back)
+barrel_bore = 12;                // round the lens barrel (11 across its four small flanges)
+baffle   = [22, 8.6];            // the lens baffle: OD, and how far behind the face it ends - on the lens
+                                 //   holder's square cube (its top is 8.8 back): seals the LEDs' light
+                                 //   from the lens, and centres the mouth on it
 cam_b    = [80, 22, 1.3];        // bare C920 board (MEASURED)
 lens_h   = 14.0;                 // board front -> lens front (MEASURED)
 conn_clr = 9;                    // board front parts (connector 6, 8 with wires) + 1 -> behind the ring
@@ -259,9 +261,13 @@ module mouth_diffuser() {
             }
             for (a = [90, 210, 330]) rotate([0, 0, a])                         // legs: the ring rests on them
                 translate([ring[0] / 2 - 1.6, -1, t]) cube([1.4, 2, ring_front - t]);
-            cylinder(d = baffle[0], h = baffle[1]);                            // lens baffle
+            cylinder(d = baffle[0], h = baffle[1]);                            // lens baffle: down to the cube
         }
-        translate([0, 0, -1]) cylinder(d = lens_hole, h = baffle[1] + 2);
+        // the view: a cone from 19 at the face to the barrel's bore at the lens front (clears the C920's
+        // 78 deg diagonal by ~2 mm), then the bore round the barrel to the cube's top
+        lens_depth = hy[1] - (y_cam + lens_h);                                 // 5.4
+        translate([0, 0, -0.01]) cylinder(d1 = lens_hole, d2 = barrel_bore, h = lens_depth + 0.02);
+        translate([0, 0, lens_depth]) cylinder(d = barrel_bore, h = baffle[1]);
     }
 }
 
