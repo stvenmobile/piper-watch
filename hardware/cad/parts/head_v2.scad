@@ -48,7 +48,9 @@ lip      = [4, 1.6, 0.2];        // the cap's lip into the front: depth, thickne
 yoke_gap = 1.5;                  // the outside boss: wall to the cheek, on the bearing's inner race only
 boss_o   = 12;                   //   its diameter
 boss_in  = 6;                    // the insert boss inside the wall
-boss_in_d = 11;
+boss_in_d = 18;                  // (the coupon's was 11: bigger for strength) - flat at the back where
+                                 //   the cap's lip comes in
+boss_flat = y_split + lip[0] + 0.3;
 key_len  = 5;                    // the ear's key length (coupon); its socket 0.5 deeper
 
 // ---- the screen: Guition ESP32-2432S024 (MEASURED) -------------------------------------------------
@@ -106,6 +108,7 @@ module x_teardrop(d, x0, x1, y = 0, z = 0) hull() {
     x_cyl(d, x0, x1, y, z);
     translate([x0, y + d / 2 * sqrt(2) - 0.5, z - 0.5]) cube([x1 - x0, 0.5, 1]);
 }
+module behind_flat() intersection() { children(); translate([-hw, boss_flat, -hw]) cube([2 * hw, 2 * hw, 2 * hw]); }
 module oct_poly(w, h, c) polygon([[-w / 2 + c, -h / 2], [w / 2 - c, -h / 2], [w / 2, -h / 2 + c], [w / 2, h / 2 - c],
                                   [w / 2 - c, h / 2], [-w / 2 + c, h / 2], [-w / 2, h / 2 - c], [-w / 2, -h / 2 + c]]);
 module rrect2(w, h, r) offset(r) square([w - 2 * r, h - 2 * r], center = true);
@@ -123,10 +126,10 @@ module head_front_v2() {
             }
             for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0]) {       // pivots
                 x_cyl(boss_o, hw / 2 - 0.01, hw / 2 + yoke_gap);                      // outside: on the inner race
-                x_teardrop(boss_in_d, hw / 2 - t - boss_in, hw / 2 - t + 0.01);      // inside: the insert
+                behind_flat() x_teardrop(boss_in_d, hw / 2 - t - boss_in, hw / 2 - t + 0.01);   // inside: the insert
             }
-            hull() {                                                 // the crank (right wall, +x)
-                x_teardrop(13, crank_x0, hw / 2 - t + 0.01);
+            behind_flat() hull() {                                   // the crank (right wall, +x)
+                x_teardrop(boss_in_d, crank_x0, hw / 2 - t + 0.01);
                 x_teardrop(9, crank_x0, hw / 2 - t + 0.01, crank_pin[0], crank_pin[1]);
             }
             for (sx = [-1, 1], sz = [-1, 1])                          // CYD posts
