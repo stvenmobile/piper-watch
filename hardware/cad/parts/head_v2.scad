@@ -258,12 +258,12 @@ module board_models() {
 }
 
 module assembled() {
-    color("#eef0f3") head_front_v2();
-    color("#d9dde3") head_cap_v2();
+    color("#8a8d91") head_front_v2();                  // grey matte PETG
+    color("#8a8d91") head_cap_v2();
     color("#fff4e0") translate([0, hy[1], cam_z]) rotate([90, 0, 0]) mouth_diffuser();
     color("#6b8fb5") for (sx = [-1, 1]) translate([sx * clip_x, y_cam, cam_z]) rotate([90, 0, 0]) cam_clip();
     board_models();
-    color("#f2b84b") for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0])
+    color("#8cc8ec") for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0])
         translate([hw / 2 + yoke_gap + 13, 0, 0]) rotate([0, -90, 0]) ear(pivot_stub, 1, pivot_key);   // its z = 13: the boss
 }
 
