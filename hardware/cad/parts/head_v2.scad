@@ -93,6 +93,7 @@ clip     = [8, 2.5, 3.0, 0.5];   // width, thickness, bridge rise above the bloc
 // ---- back-cap screws: corner bosses ------------------------------------------------------------------
 cb_d     = 10;
 cb_len   = 8;                    // front's bosses: from the split forward
+cb_fillet = 2;                   //   fillets where their sides meet the corner wall
 cb_pts   = [for (sx = [-1, 1], p = [[40.2, 35.2], [40.2, -31.2]]) [sx * p[0], p[1]]];
 
 $fn = 48;
@@ -169,7 +170,13 @@ module corner_boss(p) {
     w = p + 9 * dir;                                        // the same circle, reaching into the wall
     intersection() {
         union() {
-            hull() { y_cyl(cb_d, y_split, y_split + cb_len, p[0], p[1]); y_cyl(cb_d, y_split, y_split + cb_len, w[0], w[1]); }
+            along_y(y_split, y_split + cb_len) intersection() {   // filleted where the sides meet the wall
+                offset(r = -cb_fillet) offset(delta = cb_fillet) union() {
+                    hull() { translate(p) circle(d = cb_d); translate(w) circle(d = cb_d); }
+                    difference() { octagon(); octagon(t); }
+                }
+                translate(p) circle(r = cb_d / 2 + 9 + cb_fillet + 1);
+            }
             hull() {                                        // the slope under its front end
                 y_cyl(cb_d, y_split, y_split + cb_len, p[0], p[1]);
                 y_cyl(cb_d, y_split, y_split + cb_len + 2 * cb_d, w[0], w[1]);
@@ -203,8 +210,8 @@ module head_cap_v2() {
                 along_y(y_split - 0.01, y_split + lip[0]) octagon(t + lip[2]);
                 along_y(y_split - 1, y_split + lip[0] + 1) octagon(t + lip[2] + lip[1]);
                 for (p = cb_pts) hull() {                     // notched round the corner bosses and their webs
-                    y_cyl(cb_d + 1, y_split - 1, y_split + lip[0] + 1, p[0], p[1]);
-                    y_cyl(cb_d + 1, y_split - 1, y_split + lip[0] + 1, p[0] + 9 * sign(p[0]) / sqrt(2), p[1] + 9 * sign(p[1]) / sqrt(2));
+                    y_cyl(cb_d + 1 + 2 * cb_fillet, y_split - 1, y_split + lip[0] + 1, p[0], p[1]);
+                    y_cyl(cb_d + 1 + 2 * cb_fillet, y_split - 1, y_split + lip[0] + 1, p[0] + 9 * sign(p[0]) / sqrt(2), p[1] + 9 * sign(p[1]) / sqrt(2));
                 }
             }
             for (p = cb_pts) intersection() {                         // screw tubes
