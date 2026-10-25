@@ -81,7 +81,8 @@ ring_front = diff_t + diff_air;       // 4.0 behind the face
 ring_back  = ring_front + ring[2];    // 7.4
 cham_wall = 2;                   // the chamber round the ring
 back_t   = 1.6;                  // its back wall (the ring rests on it)
-wire_slot = [8, 7];              // through the back wall at the top, for the ring's wires: width, from r 11.6 out
+wire_slot = [8, 7];              // through the back wall, for the ring's wires: width, from r 11.6 out - at the
+                                 //   side (+x), beside the cube's pocket and clear of the strap posts above / below
 // the C920 (MEASURED): bare board, lens holder = a 14 mm cube with two screw bosses beside it
 cam_b    = [80, 22, 1.3];        // board (81 with the microphones)
 cube     = [14, 10.3];           // lens holder: side, height above the board
@@ -232,8 +233,8 @@ module mouth_chamber_cuts() {
     y_cyl(bore_d + cal_hole, d2y(ring_back), hy[1] + 1, 0, cam_z);                                  // opening + bore
     translate([-pk / 2, y_pcb - 1, cam_z - pk / 2]) cube([pk, pcb_depth - cube_top + 1, pk]);          // the cube's pocket
     y_cyl(cube_lip[1] + cal_hole, d2y(cube_top) - 0.01, d2y(cube_top - cube_lip[0]) + 0.01, 0, cam_z);           // the barrel through the lip
-    translate([-wire_slot[0] / 2, d2y(ring_back + back_t) - 1, cam_z + ring[1] / 2])                  // the ring's wires
-        cube([wire_slot[0], back_t + 1.01, wire_slot[1]]);
+    translate([ring[1] / 2, d2y(ring_back + back_t) - 1, cam_z - wire_slot[0] / 2])                    // the ring's wires
+        cube([wire_slot[1], back_t + 1.01, wire_slot[0]]);
     for (s = [-1, 1]) y_cyl(insert_m3[0], y_pcb - 0.01, y_pcb + insert_m3[1] + 1, 0, cam_z + s * strap_post[1]);   // strap inserts
 }
 
