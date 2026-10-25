@@ -131,13 +131,21 @@ module head_front_v2() {
                 along_y(y_split, hy[1]) octagon();
                 along_y(y_split - 1, hy[1] - t) octagon(t);
             }
+            // printed face-down, these stick out sideways from the side walls: each gets a 45 deg wedge under it
+            // (toward the face) back into the wall - the same section, shifted forward by its length, at the wall
+            wall_x = hw / 2 - t;
             for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0]) {       // pivots
                 x_cyl(boss_o, hw / 2 - 0.01, hw / 2 + yoke_gap);                      // outside: on the inner race
-                behind_flat() x_teardrop(boss_in_d, hw / 2 - t - boss_in, hw / 2 - t + 0.01);   // inside: the insert
+                behind_flat() hull() {                                                // inside: the insert
+                    x_teardrop(boss_in_d, wall_x - boss_in, wall_x + 0.01);
+                    x_teardrop(boss_in_d, wall_x - 0.01, wall_x + 0.01, boss_in);
+                }
             }
             behind_flat() hull() {                                   // the crank (right wall, +x)
-                x_teardrop(boss_in_d, crank_x0, hw / 2 - t + 0.01);
-                x_teardrop(9, crank_x0, hw / 2 - t + 0.01, crank_pin[0], crank_pin[1]);
+                x_teardrop(boss_in_d, crank_x0, wall_x + 0.01);
+                x_teardrop(9, crank_x0, wall_x + 0.01, crank_pin[0], crank_pin[1]);
+                x_teardrop(boss_in_d, wall_x - 0.01, wall_x + 0.01, wall_x - crank_x0);
+                x_teardrop(9, wall_x - 0.01, wall_x + 0.01, crank_pin[0] + wall_x - crank_x0, crank_pin[1]);
             }
             for (sx = [-1, 1], sz = [-1, 1])                          // CYD posts
                 y_cyl(cyd_post_d, hy[1] - t - cyd_glass, hy[1] - t + 0.01, sx * cyd_holes[0] / 2, cyd_z + sz * cyd_holes[1] / 2);
