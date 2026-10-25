@@ -71,6 +71,9 @@ bore_d   = ring[0] + 2 * ring_fit;   // + cal_hole when cut
 mouth_d  = 34;                   // the face's opening (+ 0.3 and cal_hole when cut)
 diff_air = 3;                    // diffuser's back -> the ring's front... measured from the rim's back
 rim_t    = 1.5;
+diff_t   = 1.8;                  // the diffuser's face: flush with the face, the only material the light
+                                 //   passes (more than this is too diffusing even in clear-ish filament)
+diff_collar = 0.6;               // a thin collar at its edge reaches back to the rim behind the wall
 ring_front = t + rim_t + diff_air;    // 7.0 behind the face
 ring_back  = ring_front + ring[2];    // 10.4
 lens_hole = 19;                  // through the diffuser: the C920's view from 5.4 mm back
@@ -210,8 +213,14 @@ module head_cap_v2() {
 module mouth_diffuser() {
     difference() {
         union() {
-            cylinder(d = mouth_d, h = t);                                     // flush with the face
-            translate([0, 0, t]) cylinder(d = bore_d - 0.3, h = rim_t);       // the rim behind the wall
+            cylinder(d = mouth_d, h = diff_t);                                // the light passes only this
+            difference() {                                                     // a thin collar to the wall's back,
+                union() {                                                      //   then the rim behind the wall
+                    cylinder(d = mouth_d, h = t);
+                    translate([0, 0, t]) cylinder(d = bore_d - 0.3, h = rim_t);
+                }
+                translate([0, 0, -1]) cylinder(d = mouth_d - 2 * diff_collar, h = t + rim_t + 2);
+            }
             for (a = [90, 210, 330]) rotate([0, 0, a])                         // legs: the ring rests on them
                 translate([ring[0] / 2 - 1.6, -1, t]) cube([1.4, 2, ring_front - t]);
             cylinder(d = baffle[0], h = baffle[1]);                            // lens baffle
