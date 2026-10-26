@@ -44,6 +44,8 @@ hz       = [-54, 68];            // bottom .. top: 30 taller than the concept, a
                                  //   raising the axle, the head's back-bottom hits the tilt servo looking down)
 t        = 2.5;                  // walls
 chamfer  = 15;                   // octagon corners
+corners  = "chamfer";            // "chamfer" (an octagon) or "round"
+corner_r = 18;                   //   the rounded corners' radius
 y_split  = -12;                  // FRONT | CAP (behind the pivot bosses and the crank)
 bottom_open = 70;                // the underside is open this wide (link, cables, nodding)
 lip      = [4, 1.6, 0.2];        // the cap's lip into the front: depth, thickness, clearance
@@ -136,8 +138,11 @@ cb_pts   = [for (sx = [-1, 1], p = [[40.2, hz[1] - 12.8], [40.2, hz[0] + 12.8]])
 $fn = 48;
 
 // ---- helpers -------------------------------------------------------------------------------------------
-module octagon(inset = 0) {
-    offset(delta = -inset) polygon([
+module octagon(inset = 0) {      // the head's outline (x, z), shrunk by `inset`: chamfered or rounded corners
+    if (corners == "round")
+        offset(r = corner_r - inset, $fn = 96) offset(delta = -corner_r)
+            translate([-hw / 2, hz[0]]) square([hw, hz[1] - hz[0]]);
+    else offset(delta = -inset) polygon([
         [-hw / 2 + chamfer, hz[0]], [hw / 2 - chamfer, hz[0]], [hw / 2, hz[0] + chamfer], [hw / 2, hz[1] - chamfer],
         [hw / 2 - chamfer, hz[1]], [-hw / 2 + chamfer, hz[1]], [-hw / 2, hz[1] - chamfer], [-hw / 2, hz[0] + chamfer]]);
 }
