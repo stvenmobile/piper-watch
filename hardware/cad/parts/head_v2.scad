@@ -69,7 +69,7 @@ cyd_post_d = 6.5;
 // against a lip (lens front 3.5) | 7.4 - 9.0 the chamber's back wall | to 12.4 the cube pocket (its top 5 mm,
 // above the holder's screw bosses) | 17.7 the camera board's front, free | the strap behind it, on 2 posts.
 // The ring and the diffuser go in from the FRONT (the face's opening is the ring's bore); the cube from behind.
-cam_z    = -21;                  // lens = mouth centre
+cam_z    = -22;                  // lens = mouth centre (-21 before the snap-in diffuser widened the chamber)
 ring     = [36.8, 23.3, 3.4];    // OD, ID, thickness (4.8 with wires pressed flat)
 ring_fit = 0.25;                 // clearance round the ring in its bore
 bore_d   = ring[0] + 2 * ring_fit;   // the face's opening and the ring's bore (+ cal_hole when cut)
@@ -79,7 +79,18 @@ diff_air = 2.2;                  // the diffuser's back -> the ring's front: a l
 diff_ledge = 1.0;                //   ... this wide, outside the LEDs (they end at r 17.5)
 ring_front = diff_t + diff_air;       // 4.0 behind the face
 ring_back  = ring_front + ring[2];    // 7.4
-cham_wall = 2;                   // the chamber round the ring
+cham_wall = 1.5;                 // the chamber round the ring (its top stays under the CYD's glass)
+// the diffuser SNAPS in: 3 fingers run back beside the ring (centring it), a bump on each clicks into a pocket
+// in the chamber's wall. They sit outside the ring, so the face's opening is wider than the ring's bore.
+snap_a   = [30, 150, 270];       // where (deg round the mouth, from +x toward the top)
+snap_w   = 8;                    // each finger's width (along the arc)
+snap_t   = 1.0;                  // its thickness
+snap_gap = 0.2;                  // between the ring's bore and the fingers
+snap_bump = 0.4;                 // how far the bump stands out
+snap_at  = [6.0, 6.8];           // the bump's depth behind the face (the fingers end at 6.8)
+r_fin    = [bore_d / 2 + snap_gap, bore_d / 2 + snap_gap + snap_t];   // the fingers: inner, outer radius
+open_d   = 2 * (r_fin[1] + 0.15);     // 40.0: the face's opening and the chamber's bore (+ cal_hole when cut)
+diff_press = 0.3;                // the diffuser's face is drawn this much under the opening (a press fit)
 back_t   = 1.6;                  // its back wall (the ring rests on it)
 wire_slot = [8, 7];              // through the back wall, for the ring's wires: width, from r 11.6 out - at the
                                  //   side (+x), beside the cube's pocket and clear of the strap posts above / below
@@ -216,12 +227,23 @@ module corner_boss(p) {
     }
 }
 
+// in the mouth's frame: 2D (x, z) round the lens, extruded from depth d0 to d1 behind the face
+module in_mouth(d0, d1) translate([0, hy[1] - d0, cam_z]) rotate([90, 0, 0]) linear_extrude(d1 - d0) children();
+// an arc of an annulus r0 .. r1, w (mm, at r1) wide, centred at angle a
+module arc2d(r0, r1, a, w) {
+    h = w / 2 / r1 * 180 / PI;
+    intersection() {
+        difference() { circle(r = r1, $fn = 120); circle(r = r0, $fn = 120); }
+        polygon([[0, 0], 2 * r1 * [cos(a - h), sin(a - h)], 2 * r1 * [cos(a), sin(a)], 2 * r1 * [cos(a + h), sin(a + h)]]);
+    }
+}
+
 // the mouth chamber: the ring's bore behind the face's opening, its back wall with the lens holder (a lip and
 // the square pocket for the camera's cube) and the strap's two posts. Solids here, cuts in mouth_chamber_cuts().
 module mouth_chamber() {
     d2y = function(d) hy[1] - d;                                     // depth behind the face -> y
     pk = cube[0] + 2 * cube_fit;
-    y_cyl(bore_d + cal_hole + 2 * cham_wall, d2y(ring_back + back_t), hy[1] - t + 0.01, 0, cam_z);   // chamber
+    y_cyl(open_d + cal_hole + 2 * cham_wall, d2y(ring_back + back_t), hy[1] - t + 0.01, 0, cam_z);   // chamber
     y_cyl(2 * (ring[1] / 2 - 0.25), d2y(cube_top), d2y(cube_top - cube_lip[0]), 0, cam_z);                 // the lip (inside the ring)
     translate([-(pk / 2 + pocket_wall), d2y(pocket_end), cam_z - (pk / 2 + pocket_wall)])            // the pocket's walls
         cube([pk + 2 * pocket_wall, pocket_end - ring_back, pk + 2 * pocket_wall]);
@@ -230,7 +252,9 @@ module mouth_chamber() {
 module mouth_chamber_cuts() {
     d2y = function(d) hy[1] - d;
     pk = cube[0] + 2 * cube_fit;
-    y_cyl(bore_d + cal_hole, d2y(ring_back), hy[1] + 1, 0, cam_z);                                  // opening + bore
+    y_cyl(open_d + cal_hole, d2y(ring_back), hy[1] + 1, 0, cam_z);                                  // opening + bore
+    rb = (open_d + cal_hole) / 2;                                                                    // the snaps' pockets
+    for (a = snap_a) in_mouth(snap_at[0] - 0.1, snap_at[1] + 0.1) arc2d(rb - 0.1, rb + snap_bump + 0.1, a, snap_w + 1.5);
     translate([-pk / 2, y_pcb - 1, cam_z - pk / 2]) cube([pk, pcb_depth - cube_top + 1, pk]);          // the cube's pocket
     y_cyl(cube_lip[1] + cal_hole, d2y(cube_top) - 0.01, d2y(cube_top - cube_lip[0]) + 0.01, 0, cam_z);           // the barrel through the lip
     translate([ring[1] / 2, d2y(ring_back + back_t) - 1, cam_z - wire_slot[0] / 2])                    // the ring's wires
@@ -280,15 +304,22 @@ module bed_edge(yf, s) difference() {
 }
 
 // ==== DIFFUSER (white), in its own frame: z = 0 at the face, + = into the head ===============================
-// a press fit in the face's opening, in front of the LED ring (glue a dot if it's loose)
+// a press fit in the face's opening, flush, and it snaps in: 3 fingers beside the LED ring click into the chamber
 module mouth_diffuser() {
-    od = bore_d + cal_hole - 0.5;                                          // prints ~0.1 under the opening
+    od = open_d + cal_hole - diff_press;
     difference() {
         union() {
             cylinder(d = od, h = diff_t);                                      // the light passes only this
             difference() {                                                     // the ledge the ring rests on
-                cylinder(d = od, h = ring_front);
-                translate([0, 0, -1]) cylinder(d = od - 2 * diff_ledge, h = ring_front + 2);
+                cylinder(r = bore_d / 2 - 0.05, h = ring_front);
+                translate([0, 0, -1]) cylinder(r = bore_d / 2 - 0.05 - diff_ledge, h = ring_front + 2);
+            }
+            for (a = snap_a) {                                                 // the fingers ...
+                translate([0, 0, diff_t - 0.01]) linear_extrude(snap_at[1] - diff_t + 0.01) arc2d(r_fin[0], r_fin[1], a, snap_w);
+                hull() {                                                       // ... their bumps: a ramp at the tip,
+                    translate([0, 0, snap_at[0]]) linear_extrude(0.2) arc2d(r_fin[0], r_fin[1] + snap_bump, a, snap_w);
+                    translate([0, 0, snap_at[1] - 0.01]) linear_extrude(0.01) arc2d(r_fin[0], r_fin[1], a, snap_w);
+                }                                                              //   a square catch toward the face
             }
             cylinder(d = baffle_od, h = cube_top - cube_lip[0] - 0.2);              // the tube round the barrel, to the lip
         }
