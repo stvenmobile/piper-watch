@@ -63,7 +63,8 @@ cyd_holes = [68, 36];            // 4 x 3 mm holes, centres (centred on the boar
 cyd_glass = 4.3;                 // board front -> glass front: the posts' length
 cyd_lit  = [48.8, 39];           // viewable area
 cyd_lit_dx = -2.25;              // its centre from the board's centre (+x = the USB end)
-cyd_z    = 32;                   // (22 in the concept: up 10 for the mouth, 10 more between mouth and screen, -10 with the box)
+cyd_z    = 28;                   // (22 in the concept: up 10 for the mouth, 10 between mouth and screen, -10 with the box,
+                                 //   then down 4 by eye)
 cyd_x    = -cyd_lit_dx;          // the board sits off-centre so its VIEWABLE area (the window) is centred,
                                  //   in line with the mouth: +2.25 toward the USB end
 win_chamfer = 7;

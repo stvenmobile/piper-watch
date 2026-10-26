@@ -28,7 +28,7 @@ cyd_b    = [74, 43, 1.8];        // Guition ESP32-2432S024 (2.4"), landscape; se
 cyd_glass = [58.3, 43];         // the glass: centred on the board (7.85 in from each end, flush top and bottom)
 cyd_lit  = [48.8, 39];          // the viewable area: inside the black mask (2 top and bottom, 2.5 at the far end, 7 at the USB end)
 cyd_lit_dx = -2.25;              // its centre: 2.25 from the glass centre, AWAY from the USB end (+x = the USB end)
-cyd_z    = 32;                   // screen centre (from the axle)
+cyd_z    = 28;                   // screen centre (from the axle)
 cam_z    = -22;                  // camera lens centre = the mouth's centre
 cam_b    = [80, 22, 1.2];
 cam_back = 4.5;                  // lens this far behind the face: the board's front connector (8 mm with its plug) clears
