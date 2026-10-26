@@ -10,14 +10,14 @@ include <../parts/servo_test_stand.scad>
 part = "none";
 tilt = 0;
 pan  = 0;
-rod_c = 75;                      // longer link than the test stand's 40: lifts the head's pivot 35 mm so the
+rod_c = 85;                      // longer link than the test stand's 40: lifts the head's pivot 45 mm so the
                                  //   nodding head's lower edges clear the tilt servo below it
 show_cutaway = false;            // true: the head's near side wall removed to show inside
 
 // ---- the head (frame: the tilt axle at the origin, +Y forward, +Z up) ---------------------------------------
 hw       = 106;                  // outside width
 hy       = [-28, 47];            // back face .. front face (from the axle)
-hz       = [-44, 48];            // bottom edge .. top (from the axle)
+hz       = [-54, 68];            // bottom edge .. top (from the axle) - as parts/head_v2.scad (was [-44, 48], link 75)
 t        = 2.5;                  // walls
 chamfer  = 15;                   // the front outline is an octagon: 45 deg corners this far in (corner faces
                                  //   ~21 mm; long top, bottom and sides)
@@ -28,8 +28,8 @@ cyd_b    = [74, 43, 1.8];        // Guition ESP32-2432S024 (2.4"), landscape; se
 cyd_glass = [58.3, 43];         // the glass: centred on the board (7.85 in from each end, flush top and bottom)
 cyd_lit  = [48.8, 39];          // the viewable area: inside the black mask (2 top and bottom, 2.5 at the far end, 7 at the USB end)
 cyd_lit_dx = -2.25;              // its centre: 2.25 from the glass centre, AWAY from the USB end (+x = the USB end)
-cyd_z    = 22;                   // screen centre (from the axle)
-cam_z    = -21;                  // camera lens centre = the mouth's centre
+cyd_z    = 32;                   // screen centre (from the axle)
+cam_z    = -22;                  // camera lens centre = the mouth's centre
 cam_b    = [80, 22, 1.2];
 cam_back = 4.5;                  // lens this far behind the face: the board's front connector (8 mm with its plug) clears
                                  //   the ring by 1.6 mm; the 21 mm hole is far too shallow to cut into the view

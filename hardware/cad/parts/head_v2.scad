@@ -38,8 +38,10 @@ section = false;                 // "all": cut in half at x = 0 to show the insi
 // ---- the box (as the concept) ----------------------------------------------------------------------
 hw       = 106;                  // outside width
 hy       = [-28, 47];            // back face .. front face
-hz       = [-44, 78];            // bottom .. top (78: 30 taller than the concept, all of it upward - lower, the
-                                 //   head's back-bottom hits the tilt servo when looking down)
+hz       = [-54, 68];            // bottom .. top: 30 taller than the concept, and 10 lower round the axle so the
+                                 //   ears sit nearer the middle - the axle is 10 higher on the turret (link 85, was
+                                 //   75), so the bottom edge clears the tilt servo exactly as before (lower without
+                                 //   raising the axle, the head's back-bottom hits the tilt servo looking down)
 t        = 2.5;                  // walls
 chamfer  = 15;                   // octagon corners
 y_split  = -12;                  // FRONT | CAP (behind the pivot bosses and the crank)
@@ -61,7 +63,7 @@ cyd_holes = [68, 36];            // 4 x 3 mm holes, centres (centred on the boar
 cyd_glass = 4.3;                 // board front -> glass front: the posts' length
 cyd_lit  = [48.8, 39];           // viewable area
 cyd_lit_dx = -2.25;              // its centre from the board's centre (+x = the USB end)
-cyd_z    = 42;                   // (22 in the concept: up 10 for the mouth, 10 more between mouth and screen)
+cyd_z    = 32;                   // (22 in the concept: up 10 for the mouth, 10 more between mouth and screen, -10 with the box)
 cyd_x    = -cyd_lit_dx;          // the board sits off-centre so its VIEWABLE area (the window) is centred,
                                  //   in line with the mouth: +2.25 toward the USB end
 win_chamfer = 7;
@@ -72,7 +74,7 @@ cyd_post_d = 6.5;
 // against a lip (lens front 3.5) | 7.4 - 9.0 the chamber's back wall | to 12.4 the cube pocket (its top 5 mm,
 // above the holder's screw bosses) | 17.7 the camera board's front, free | the strap behind it, on 2 posts.
 // The ring and the diffuser go in from the FRONT (the face's opening is the ring's bore); the cube from behind.
-cam_z    = -12;                  // lens = mouth centre (-22 before the head grew: 10 more face below the mouth)
+cam_z    = -22;                  // lens = mouth centre (10 more face below it than the concept; -10 with the box)
 ring     = [36.8, 23.3, 3.4];    // OD, ID, thickness (4.8 with wires pressed flat)
 ring_fit = 0.25;                 // clearance round the ring in its bore
 bore_d   = ring[0] + 2 * ring_fit;   // the face's opening and the ring's bore (+ cal_hole when cut)
