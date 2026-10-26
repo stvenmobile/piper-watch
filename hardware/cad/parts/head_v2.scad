@@ -7,27 +7,31 @@
 //          PIVOT BOSSES (outside: a round boss on the bearing's inner race with the ear's square key
 //          socket; inside: the M3 insert), the CRANK (right side wall, 15 mm, an M3 insert for the
 //          link's rod end), the CYD posts (4 x M2.5 inserts), the MOUTH CHAMBER (the LED ring's bore
-//          behind the face's opening; behind it the lens holder: a square pocket the camera's cube pushes
-//          into, and 2 posts with M3 inserts for the strap), and 4 corner bosses with M3 inserts for the
+//          behind the face's opening, then the seat for the separate lens holder, with its 2 screw bosses),
+//          and 4 corner bosses with M3 inserts for the
 //          back cap. PRINT face-down, no supports.
 //   CAP    (head_cap_v2) the back: a lid with the cable exit, a lip that locates it inside the front,
 //          4 x M3 x 20 screws into the corner inserts. PRINT back-face down, no supports.
 //   EARS   2 x the coupon's ear (parts/head_pivot_coupon.scad), M3 x 20 each into the pivot inserts.
 //   DIFFUSER  white: a press fit in the face's opening, flush; a ledge round its edge holds the LED ring
 //          2.2 mm back, and a tube round the lens barrel keeps the LEDs' light off the lens. PRINT face-down.
-//   STRAP  across the camera board's back, behind the lens: 2 x M3 x 8 into the posts; its pad presses the
-//          board, so the cube stays in its pocket. The rest of the board floats.
+//   HOLDER (lens_holder) a disc that sits in a seat behind the LED ring (2 x M2.5 x 8 into the face's bosses):
+//          the ring rests on it; the camera's cube goes into its square pocket, the cube's own screw bosses
+//          stopping against its back; it carries the strap's 2 posts. PRINT face-down, no supports.
+//   STRAP  across the camera board's back, behind the lens: 2 x M3 x 8 into the holder's posts; its pad
+//          presses the board, so the cube stays in its pocket. The rest of the board floats.
 //
 // Fits from the coupons: pivot (params.scad pivot_*), inserts (insert_m3, insert_m25).
 // Frame: the tilt axle at the origin, +Y forward, +Z up, X across (+X = the CYD's USB end and the
 // crank side - Piper's right... seen from the front, +X is on the LEFT).
 //
 // ASSEMBLY ORDER: inserts (pivots through the crank's channel on the right; crank pin; CYD posts;
-// strap posts; corner bosses) -> the LED ring in from the FRONT (pads to the back, its wires through the
-// slot at the top of the chamber), then the diffuser -> the camera's cube into its pocket from behind,
-// the strap -> CYD glass to the window, 4 x M2.5 x 6 -> wires -> ears through the yoke's bearings -> cap.
+// the lens holder's 2 bosses; corner bosses; the holder's strap posts) -> the lens holder into its seat from
+// behind (2 x M2.5 x 8) -> the LED ring in from the FRONT (pads to the back, its wires through the holder's
+// slot), then the diffuser (it snaps in) -> the camera's cube into the holder's pocket from behind, the strap
+// -> CYD glass to the window, 4 x M2.5 x 6 -> wires -> ears through the yoke's bearings -> cap.
 //
-// part = "all" (assembled view) | "front" | "cap" | "ears" | "diffuser" | "strap" | "coupon"
+// part = "all" (assembled view) | "front" | "cap" | "ears" | "diffuser" | "holder" | "strap" | "coupon"
 //        ("coupon": the face only - window, CYD posts, the mouth chamber and lens holder - to check them first)
 include <servo_test_stand.scad>
 use <head_pivot_coupon.scad>
@@ -99,11 +103,15 @@ snap_at  = [6.0, 6.8];           // the bump's depth behind the face (the finger
 r_fin    = [bore_d / 2 + snap_gap, bore_d / 2 + snap_gap + snap_t];   // the fingers: inner, outer radius
 open_d   = 2 * (r_fin[1] + 0.15);     // 40.0: the face's opening and the chamber's bore (+ cal_hole when cut)
 diff_press = 0.3;                // the diffuser's face is drawn this much under the opening (a press fit)
-back_t   = 5.0;                  // its back wall (the ring rests on it): 7.4 .. 12.4 behind the face, relieved
-                                 //   over the white connector (7.6 off the board) - see conn_relief
-conn_relief = [10, 20, 2.2];     // that relief: from x, to x (both sides: either end of the board may be the
-                                 //   cable's), and the wall's thickness left there
-wire_slot = [8, 7];              // through the back wall, for the ring's wires: width, from r 11.6 out - at the
+// the LENS HOLDER: a separate disc (prints flat, no supports) in a seat at the back of the chamber, behind the
+// ring: the ring rests on its face, the camera's cube in its square pocket, the strap on its two posts.
+// (Moulded into the face, this back wall and its pocket hung in mid-air when printing - supports, rough.)
+seat_step = 1.5;                 // the seat: the chamber's bore steps out this much behind the ring - the holder's
+                                 //   face rests on the step (stepping OUT going back, it prints without support)
+hold_screw = [25.2, 7, 2.9];     // 2 x M2.5 x 8 at the sides (x +/-): radius, boss diameter, clearance hole
+conn_relief = [10, 20, 2.2];     // over the camera's white connector (7.6 off the board): from x, to x (both
+                                 //   sides: either end of the board may be the cable's), the holder left there
+wire_slot = [8, 7];              // through the holder, for the ring's wires: width, from r 11.6 out - at the
                                  //   side (+x), beside the cube's pocket and clear of the strap posts above / below
 // the C920 (MEASURED): bare board, lens holder = a 14 mm cube with two screw bosses beside it
 cam_b    = [80, 22, 1.3];        // board (81 with the microphones)
@@ -113,14 +121,16 @@ barrel_h = 4.1;                  // the lens barrel above the cube (MEASURED; wi
 lens_h   = cube[1] + barrel_h;   //   to the lens front - another measurement said 14.2)
 barrel_d = 8.8;
 cube_fit = 0.2;                  // clearance each side in the pocket
-cube_lip = [0.8, 12];            // the lip the cube's top stops against: thickness, its hole (the barrel: 8.8,
-                                 //   but 11 across four small flanges at its base)
+cube_lip = [0, 12];              // (no lip now) [unused, the diffuser's bore round the barrel: 8.8, but 11
+                                 //   across four small flanges at its base]
 cube_top = ring_back;            // 7.4 behind the face
 lens_depth = cube_top - (lens_h - cube[1]);   // 3.5: the lens front behind the face
 pcb_depth  = cube_top + cube[1];              // 17.7: the board's front behind the face
 y_pcb    = hy[1] - pcb_depth;                 // ... in the head's frame
-pocket_end = pcb_depth - cube_boss - 0.2;     // 12.4: the pocket's walls end just above the bosses
-pocket_wall = 2.4;
+pocket_end = pcb_depth - cube_boss;           // 12.6: the holder's back face - the cube's screw bosses stop
+                                              //   against it, which sets the lens's depth (no lip needed)
+hold_t   = pocket_end - ring_back;            // 5.2: the holder's thickness
+seat_d   = open_d + cal_hole + 2 * seat_step; // the seat's bore (drawn, as cut)
 lens_open = 16;                  // the diffuser's opening at the face (the C920's 78 deg view from 3.5 back)
 baffle_od = 15;                  // the diffuser's tube round the barrel, back to the lip
 // the strap: across the board's back behind the lens, its feet on two posts past the board's edges
@@ -253,32 +263,56 @@ module arc2d(r0, r1, a, w) {
     }
 }
 
-// the mouth chamber: the ring's bore behind the face's opening, its back wall with the lens holder (a lip and
-// the square pocket for the camera's cube) and the strap's two posts. Solids here, cuts in mouth_chamber_cuts().
+// the mouth chamber: a plain tube behind the face's opening - the ring's bore, then the lens holder's seat - and
+// the holder's two screw bosses. Every part of it grows straight up from the face (prints face-down, no supports).
+// Solids here, cuts in mouth_chamber_cuts().
 module mouth_chamber() {
     d2y = function(d) hy[1] - d;                                     // depth behind the face -> y
-    pk = cube[0] + 2 * cube_fit;
-    y_cyl(open_d + cal_hole + 2 * cham_wall, d2y(ring_back + back_t), hy[1] - t + 0.01, 0, cam_z);   // chamber
-    y_cyl(2 * (ring[1] / 2 - 0.25), d2y(cube_top), d2y(cube_top - cube_lip[0]), 0, cam_z);                 // the lip (inside the ring)
-    translate([-(pk / 2 + pocket_wall), d2y(pocket_end), cam_z - (pk / 2 + pocket_wall)])            // the pocket's walls
-        cube([pk + 2 * pocket_wall, pocket_end - ring_back, pk + 2 * pocket_wall]);
-    for (s = [-1, 1]) y_cyl(strap_post[0], y_pcb, d2y(ring_back) , 0, cam_z + s * strap_post[1]);    // strap posts
+    y_cyl(seat_d + 2 * cham_wall, d2y(pocket_end), hy[1] - t + 0.01, 0, cam_z);                       // the tube
+    for (s = [-1, 1]) hull() {                                                                        // holder bosses
+        y_cyl(hold_screw[1], d2y(ring_back), hy[1] - t + 0.01, s * hold_screw[0], cam_z);
+        y_cyl(hold_screw[1], d2y(ring_back), hy[1] - t + 0.01, s * (seat_d / 2), cam_z);
+    }
 }
 module mouth_chamber_cuts() {
     d2y = function(d) hy[1] - d;
-    pk = cube[0] + 2 * cube_fit;
     y_cyl(open_d + cal_hole, d2y(ring_back), hy[1] + 1, 0, cam_z);                                  // opening + bore
+    y_cyl(seat_d, d2y(pocket_end) - 1, d2y(ring_back), 0, cam_z);                                    // the holder's seat
     rb = (open_d + cal_hole) / 2;                                                                    // the snaps' pockets
     for (a = snap_a) in_mouth(snap_at[0] - 0.1, snap_at[1] + 0.1) arc2d(rb - 0.1, rb + snap_bump + 0.1, a, snap_w + 1.5);
-    translate([-pk / 2, y_pcb - 1, cam_z - pk / 2]) cube([pk, pcb_depth - cube_top + 1, pk]);          // the cube's pocket
-    y_cyl(cube_lip[1] + cal_hole, d2y(cube_top) - 0.01, d2y(cube_top - cube_lip[0]) + 0.01, 0, cam_z);           // the barrel through the lip
-    translate([ring[1] / 2, d2y(ring_back + back_t) - 1, cam_z - wire_slot[0] / 2])                    // the ring's wires
-        cube([wire_slot[1], back_t + 1.01, wire_slot[0]]);
-    for (s = [-1, 1]) y_cyl(insert_m3[0], y_pcb - 0.01, y_pcb + insert_m3[1] + 1, 0, cam_z + s * strap_post[1]);   // strap inserts
-    for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0])                                                 // over the connector
-        translate([conn_relief[0], y_pcb - 1, cam_z - cam_b[1] / 2 - 0.5])
-            cube([conn_relief[1] - conn_relief[0], d2y(ring_back + conn_relief[2]) - y_pcb + 1, cam_b[1] + 1]);
+    for (s = [-1, 1])                                                                                // M2.5 inserts
+        y_cyl(insert_m25[0], d2y(ring_back) - 0.01, d2y(ring_back) + insert_m25[1] + 0.5, s * hold_screw[0], cam_z);
+    for (s = [-1, 1]) hull() {                                                                       // the tabs' notches
+        y_cyl(hold_screw[1] + 0.6, d2y(pocket_end) - 1, d2y(ring_back), s * hold_screw[0], cam_z);
+        y_cyl(hold_screw[1] + 0.6, d2y(pocket_end) - 1, d2y(ring_back), s * (seat_d / 2 - 3), cam_z);
+    }
 }
+
+// ==== LENS HOLDER, in its own frame: z = 0 at its face (on the seat's step, 7.4 behind the face), + = back ====
+// PRINT face-down. The ring rests on its face; the camera's cube goes into its pocket from behind, the cube's
+// screw bosses stopping against its back face; the strap screws onto its posts.
+module lens_holder() {
+    pk = cube[0] + 2 * cube_fit;
+    post_h = pcb_depth - ring_back;                                   // 10.3: the posts' ends = the board's front
+    difference() {
+        union() {
+            cylinder(d = seat_d - 0.4, h = hold_t);
+            for (s = [-1, 1]) hull() {                                // tabs for its 2 screws
+                translate([s * hold_screw[0], 0, 0]) cylinder(d = hold_screw[1], h = hold_t);
+                translate([s * (seat_d / 2 - 3), 0, 0]) cylinder(d = hold_screw[1], h = hold_t);
+            }
+            for (s = [-1, 1]) translate([0, s * strap_post[1], 0]) cylinder(d = strap_post[0], h = post_h);   // strap posts
+        }
+        translate([-pk / 2, -pk / 2, -1]) cube([pk, pk, hold_t + 2]);                         // the cube's pocket
+        translate([ring[1] / 2, -wire_slot[0] / 2, -1]) cube([wire_slot[1], wire_slot[0], hold_t + 2]);   // ring's wires
+        for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0])                                        // over the connector
+            translate([conn_relief[0], -cam_b[1] / 2 - 0.5, conn_relief[2]]) cube([conn_relief[1] - conn_relief[0], cam_b[1] + 1, hold_t]);
+        for (s = [-1, 1]) translate([s * hold_screw[0], 0, -1]) cylinder(d = hold_screw[2] + cal_hole, h = hold_t + 2, $fn = 24);
+        for (s = [-1, 1]) translate([0, s * strap_post[1], post_h - insert_m3[1] - 1])        // strap inserts
+            cylinder(d = insert_m3[0], h = insert_m3[1] + 1.01, $fn = 24);
+    }
+}
+module lens_holder_placed() translate([0, hy[1] - ring_back, cam_z]) rotate([90, 0, 0]) lens_holder();
 
 // ==== CAP ===================================================================================================
 module head_cap_v2() {
@@ -386,6 +420,7 @@ module assembled() {
     color("#8a8d91") head_cap_v2();
     color("#fff4e0") translate([0, hy[1], cam_z]) rotate([90, 0, 0]) mouth_diffuser();
     color("#6b8fb5") translate([0, y_pcb, cam_z]) rotate([90, 0, 0]) cam_strap();
+    color("#8a8d91") lens_holder_placed();
     board_models();
     color("#8cc8ec") for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0])
         translate([hw / 2 + yoke_gap + 13, 0, 0]) rotate([0, -90, 0]) ear(pivot_stub, 1, pivot_key);   // its z = 13: the boss
@@ -400,6 +435,7 @@ if (part == "cap")      translate([0, 0, -hy[0]]) rotate([90, 0, 0]) head_cap_v2
 if (part == "ears")     for (i = [0, 1]) translate([i * 38, 0, 0]) ear(pivot_stub, 1, pivot_key);    // cap-down
 if (part == "diffuser") mouth_diffuser();                                                            // face-down
 if (part == "strap")    cam_strap();                                                                 // feet down
+if (part == "holder")   lens_holder();                                                               // face-down
 if (part == "coupon")   translate([0, 0, hy[1]]) rotate([-90, 0, 0]) intersection() {               // the face only
     head_front_v2();
     translate([-hw, y_pcb - 1, -hw]) cube([2 * hw, hy[1] - y_pcb + 2, 2 * hw]);
