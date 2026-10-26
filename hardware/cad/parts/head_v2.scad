@@ -44,7 +44,7 @@ hz       = [-54, 68];            // bottom .. top: 30 taller than the concept, a
                                  //   raising the axle, the head's back-bottom hits the tilt servo looking down)
 t        = 2.5;                  // walls
 chamfer  = 15;                   // octagon corners
-corners  = "chamfer";            // "chamfer" (an octagon) or "round"
+corners  = "round";              // "round" (chosen) or "chamfer" (an octagon)
 corner_r = 18;                   //   the rounded corners' radius
 y_split  = -12;                  // FRONT | CAP (behind the pivot bosses and the crank)
 bottom_open = 70;                // the underside is open this wide (link, cables, nodding)
