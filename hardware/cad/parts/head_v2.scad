@@ -38,7 +38,8 @@ section = false;                 // "all": cut in half at x = 0 to show the insi
 // ---- the box (as the concept) ----------------------------------------------------------------------
 hw       = 106;                  // outside width
 hy       = [-28, 47];            // back face .. front face
-hz       = [-44, 48];            // bottom .. top
+hz       = [-44, 78];            // bottom .. top (78: 30 taller than the concept, all of it upward - lower, the
+                                 //   head's back-bottom hits the tilt servo when looking down)
 t        = 2.5;                  // walls
 chamfer  = 15;                   // octagon corners
 y_split  = -12;                  // FRONT | CAP (behind the pivot bosses and the crank)
@@ -60,7 +61,9 @@ cyd_holes = [68, 36];            // 4 x 3 mm holes, centres (centred on the boar
 cyd_glass = 4.3;                 // board front -> glass front: the posts' length
 cyd_lit  = [48.8, 39];           // viewable area
 cyd_lit_dx = -2.25;              // its centre from the board's centre (+x = the USB end)
-cyd_z    = 22;
+cyd_z    = 42;                   // (22 in the concept: up 10 for the mouth, 10 more between mouth and screen)
+cyd_x    = -cyd_lit_dx;          // the board sits off-centre so its VIEWABLE area (the window) is centred,
+                                 //   in line with the mouth: +2.25 toward the USB end
 win_chamfer = 7;
 cyd_post_d = 6.5;
 
@@ -69,7 +72,7 @@ cyd_post_d = 6.5;
 // against a lip (lens front 3.5) | 7.4 - 9.0 the chamber's back wall | to 12.4 the cube pocket (its top 5 mm,
 // above the holder's screw bosses) | 17.7 the camera board's front, free | the strap behind it, on 2 posts.
 // The ring and the diffuser go in from the FRONT (the face's opening is the ring's bore); the cube from behind.
-cam_z    = -22;                  // lens = mouth centre (-21 before the snap-in diffuser widened the chamber)
+cam_z    = -12;                  // lens = mouth centre (-22 before the head grew: 10 more face below the mouth)
 ring     = [36.8, 23.3, 3.4];    // OD, ID, thickness (4.8 with wires pressed flat)
 ring_fit = 0.25;                 // clearance round the ring in its bore
 bore_d   = ring[0] + 2 * ring_fit;   // the face's opening and the ring's bore (+ cal_hole when cut)
@@ -91,7 +94,10 @@ snap_at  = [6.0, 6.8];           // the bump's depth behind the face (the finger
 r_fin    = [bore_d / 2 + snap_gap, bore_d / 2 + snap_gap + snap_t];   // the fingers: inner, outer radius
 open_d   = 2 * (r_fin[1] + 0.15);     // 40.0: the face's opening and the chamber's bore (+ cal_hole when cut)
 diff_press = 0.3;                // the diffuser's face is drawn this much under the opening (a press fit)
-back_t   = 1.6;                  // its back wall (the ring rests on it)
+back_t   = 5.0;                  // its back wall (the ring rests on it): 7.4 .. 12.4 behind the face, relieved
+                                 //   over the white connector (7.6 off the board) - see conn_relief
+conn_relief = [10, 20, 2.2];     // that relief: from x, to x (both sides: either end of the board may be the
+                                 //   cable's), and the wall's thickness left there
 wire_slot = [8, 7];              // through the back wall, for the ring's wires: width, from r 11.6 out - at the
                                  //   side (+x), beside the cube's pocket and clear of the strap posts above / below
 // the C920 (MEASURED): bare board, lens holder = a 14 mm cube with two screw bosses beside it
@@ -122,7 +128,7 @@ cb_d     = 10;
 cb_len   = 8;                    // front's bosses: from the split forward
 cb_fillet = 2;                   //   fillets where their sides meet the corner wall
 bed_chamfer = 0.6;               // the edges that print on the bed: the face (and its window) and the back
-cb_pts   = [for (sx = [-1, 1], p = [[40.2, 35.2], [40.2, -31.2]]) [sx * p[0], p[1]]];
+cb_pts   = [for (sx = [-1, 1], p = [[40.2, hz[1] - 12.8], [40.2, hz[0] + 12.8]]) [sx * p[0], p[1]]];
 
 $fn = 48;
 
@@ -147,6 +153,7 @@ module rrect2(w, h, r) offset(r) square([w - 2 * r, h - 2 * r], center = true);
 
 crank_pin = [arm_h * cos(crank_off), arm_h * sin(crank_off)];   // (y, z) of the link's pin
 crank_x0  = x_link + rod_ball_w / 2 + 0.5;                       // the crank's inner face (the rod end's side)
+crank_wedge = 0.84;              // its wedge's slope: 50 deg from vertical as printed (45 reached the camera board)
 
 // ==== FRONT ===============================================================================================
 module head_front_v2() {
@@ -168,12 +175,12 @@ module head_front_v2() {
             }
             behind_flat() hull() {                                   // the crank (right wall, +x)
                 x_teardrop(boss_in_d, crank_x0, wall_x + 0.01);
-                x_teardrop(9, crank_x0, wall_x + 0.01, crank_pin[0], crank_pin[1]);
-                x_teardrop(boss_in_d, wall_x - 0.01, wall_x + 0.01, wall_x - crank_x0);
-                x_teardrop(9, wall_x - 0.01, wall_x + 0.01, crank_pin[0] + wall_x - crank_x0, crank_pin[1]);
+                x_cyl(9, crank_x0, wall_x + 0.01, crank_pin[0], crank_pin[1]);              // (the wedge supports it)
+                x_teardrop(boss_in_d, wall_x - 0.01, wall_x + 0.01, crank_wedge * (wall_x - crank_x0));
+                x_cyl(9, wall_x - 0.01, wall_x + 0.01, crank_pin[0] + crank_wedge * (wall_x - crank_x0), crank_pin[1]);
             }
             for (sx = [-1, 1], sz = [-1, 1])                          // CYD posts
-                y_cyl(cyd_post_d, hy[1] - t - cyd_glass, hy[1] - t + 0.01, sx * cyd_holes[0] / 2, cyd_z + sz * cyd_holes[1] / 2);
+                y_cyl(cyd_post_d, hy[1] - t - cyd_glass, hy[1] - t + 0.01, cyd_x + sx * cyd_holes[0] / 2, cyd_z + sz * cyd_holes[1] / 2);
             mouth_chamber();
             for (p = cb_pts) corner_boss(p);
         }
@@ -187,8 +194,8 @@ module head_front_v2() {
         x_cyl(6.5, crank_x0 - 1, hw / 2 - t - boss_in + 0.01);        // right: reach the pivot insert through the crank
         x_cyl(insert_m3[0], crank_x0 - 0.01, crank_x0 + insert_m3[1] + 1, crank_pin[0], crank_pin[1]);   // crank pin insert
         // the face: screen window, mouth opening
-        translate([cyd_lit_dx, hy[1] + 1, cyd_z]) rotate([90, 0, 0]) linear_extrude(t + 2) oct_poly(cyd_lit[0] + 1, cyd_lit[1] + 1, win_chamfer);
-        translate([cyd_lit_dx, 0, cyd_z]) hull() {                                   // ... its edge chamfered on the face
+        translate([cyd_x + cyd_lit_dx, hy[1] + 1, cyd_z]) rotate([90, 0, 0]) linear_extrude(t + 2) oct_poly(cyd_lit[0] + 1, cyd_lit[1] + 1, win_chamfer);
+        translate([cyd_x + cyd_lit_dx, 0, cyd_z]) hull() {                                   // ... its edge chamfered on the face
             along_y(hy[1] - bed_chamfer, hy[1] - bed_chamfer + 0.01) oct_poly(cyd_lit[0] + 1, cyd_lit[1] + 1, win_chamfer);
             along_y(hy[1], hy[1] + 0.01) offset(delta = bed_chamfer) oct_poly(cyd_lit[0] + 1, cyd_lit[1] + 1, win_chamfer);
         }
@@ -196,7 +203,7 @@ module head_front_v2() {
         mouth_chamber_cuts();
         // CYD inserts (M2.5) from the posts' ends
         for (sx = [-1, 1], sz = [-1, 1])
-            y_cyl(insert_m25[0], hy[1] - t - cyd_glass - 0.01, hy[1] - t - cyd_glass + insert_m25[1], sx * cyd_holes[0] / 2, cyd_z + sz * cyd_holes[1] / 2);
+            y_cyl(insert_m25[0], hy[1] - t - cyd_glass - 0.01, hy[1] - t - cyd_glass + insert_m25[1], cyd_x + sx * cyd_holes[0] / 2, cyd_z + sz * cyd_holes[1] / 2);
         // corner inserts (M3) from the split
         for (p = cb_pts) y_cyl(insert_m3[0], y_split - 0.01, y_split + insert_m3[1] + 1, p[0], p[1]);
         // open below
@@ -260,6 +267,9 @@ module mouth_chamber_cuts() {
     translate([ring[1] / 2, d2y(ring_back + back_t) - 1, cam_z - wire_slot[0] / 2])                    // the ring's wires
         cube([wire_slot[1], back_t + 1.01, wire_slot[0]]);
     for (s = [-1, 1]) y_cyl(insert_m3[0], y_pcb - 0.01, y_pcb + insert_m3[1] + 1, 0, cam_z + s * strap_post[1]);   // strap inserts
+    for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0])                                                 // over the connector
+        translate([conn_relief[0], y_pcb - 1, cam_z - cam_b[1] / 2 - 0.5])
+            cube([conn_relief[1] - conn_relief[0], d2y(ring_back + conn_relief[2]) - y_pcb + 1, cam_b[1] + 1]);
 }
 
 // ==== CAP ===================================================================================================
@@ -353,8 +363,8 @@ module cam_strap() {
 
 // ==== views =====================================================================================================
 module board_models() {
-    color("#c98d1a") translate([-cyd_b[0] / 2, hy[1] - t - cyd_glass - cyd_b[2], cyd_z - cyd_b[1] / 2]) cube([cyd_b[0], cyd_b[2], cyd_b[1]]);
-    color("#0b0d10") translate([-58.3 / 2, hy[1] - t - cyd_glass, cyd_z - cyd_b[1] / 2]) cube([58.3, cyd_glass, cyd_b[1]]);
+    color("#c98d1a") translate([cyd_x - cyd_b[0] / 2, hy[1] - t - cyd_glass - cyd_b[2], cyd_z - cyd_b[1] / 2]) cube([cyd_b[0], cyd_b[2], cyd_b[1]]);
+    color("#0b0d10") translate([cyd_x - 58.3 / 2, hy[1] - t - cyd_glass, cyd_z - cyd_b[1] / 2]) cube([58.3, cyd_glass, cyd_b[1]]);
     color("#2e7d32") translate([-cam_b[0] / 2, y_pcb - cam_b[2], cam_z - cam_b[1] / 2]) cube([cam_b[0], cam_b[2], cam_b[1]]);
     color("#111") translate([-cube[0] / 2, y_pcb, cam_z - cube[0] / 2]) cube([cube[0], cube[1], cube[0]]);
     color("#111") for (s = [-1, 1]) y_cyl(4, y_pcb, y_pcb + cube_boss, s * (cube[0] / 2 + 2), cam_z);   // its screw bosses
