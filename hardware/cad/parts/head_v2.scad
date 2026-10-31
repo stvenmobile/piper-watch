@@ -106,7 +106,8 @@ open_d   = 2 * (r_fin[1] + 0.15);     // 40.0: the face's opening and the chambe
 diff_press = 0.15;               // the diffuser's face is drawn this much under the opening's drawn size:
                                  //   the opening (40.4 drawn) prints ~40.2, an outside edge prints ~0.2 under
                                  //   drawn, so 40.25 -> ~40.05: ~0.15 across. (0.3 left a visible gap.) Glue it.
-                                 //   Check with part="diff_gauge" (rings at -0.25 / -0.15 / -0.05)
+                                 //   Check with part="diff_gauge": rings at gauge_d from the opening's drawn size
+gauge_d  = [-0.15, 0.1, 0.35, 0.6, 0.85];   // (the first diffuser, at -0.3, showed ~0.5 gap per side)
 // the LENS HOLDER: a separate disc (prints flat, no supports) in a seat at the back of the chamber, behind the
 // ring: the ring rests on its face, the camera's cube in its square pocket, the strap on its two posts.
 // (Moulded into the face, this back wall and its pocket hung in mid-air when printing - supports, rough.)
@@ -444,8 +445,8 @@ if (part == "front")    translate([0, 0, hy[1]]) rotate([-90, 0, 0]) head_front_
 if (part == "cap")      translate([0, 0, -hy[0]]) rotate([90, 0, 0]) head_cap_v2();                  // back on the bed
 if (part == "ears")     for (i = [0, 1]) translate([i * 38, 0, 0]) ear(pivot_stub, 1, pivot_key);    // cap-down
 if (part == "diffuser") mouth_diffuser();                                                            // face-down
-if (part == "diff_gauge") for (i = [0 : 2]) translate([i * 45, 0, 0]) difference() {             // fit rings, 1-3 notches
-    od = open_d + cal_hole - [0.25, 0.15, 0.05][i];                                                   //   (2 = the diffuser)
+if (part == "diff_gauge") for (i = [0 : 4]) translate([(i % 3) * 45, floor(i / 3) * 45, 0]) difference() {   // fit rings,
+    od = open_d + cal_hole + gauge_d[i];                                                              //   1-5 notches
     cylinder(d = od, h = diff_t, $fn = 180);
     translate([0, 0, -1]) cylinder(d = od - 6, h = diff_t + 2, $fn = 180);
     for (k = [0 : i]) rotate([0, 0, 90 + (k - i / 2) * 12]) translate([od / 2 - 1.5, 0, diff_t - 0.6]) cube([3.2, 1.2, 1], center = true);
