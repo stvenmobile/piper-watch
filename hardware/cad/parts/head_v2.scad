@@ -342,9 +342,20 @@ module head_cap_v2() {
                     y_cyl(cb_d + 1 + 2 * cb_fillet, y_split - 1, y_split + lip[0] + 1, p[0] + 9 * sign(p[0]) / sqrt(2), p[1] + 9 * sign(p[1]) / sqrt(2));
                 }
             }
-            for (p = cb_pts) intersection() {                         // screw tubes
-                y_cyl(8, hy[0], y_split, p[0], p[1]);
-                along_y(hy[0], y_split) octagon();
+            for (p = cb_pts) intersection() {                         // screw tubes, webbed to the corner wall like
+                w = p + 9 * [sign(p[0]), sign(p[1])] / sqrt(2);       //   the front's bosses (a lone 8 mm tube tore
+                union() {                                             //   off at the head recess: 0.7 mm wall)
+                    along_y(hy[0], y_split) intersection() {
+                        offset(r = -cb_fillet) offset(delta = cb_fillet) union() {
+                            hull() { translate(p) circle(d = cb_d); translate(w) circle(d = cb_d); }
+                            difference() { octagon(); octagon(t); }
+                        }
+                        translate(p) circle(r = cb_d / 2 + 9 + cb_fillet + 1);
+                    }
+                    translate([p[0], hy[0] + t - 0.01, p[1]]) rotate([-90, 0, 0])   // 45 deg fillet onto the back
+                        cylinder(d1 = cb_d + 6, d2 = cb_d, h = 3, $fn = 48);
+                }
+                along_y(hy[0], y_split) octagon(0.01);
             }
         }
         for (p = cb_pts) {
