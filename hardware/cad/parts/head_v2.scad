@@ -15,7 +15,8 @@
 //   EARS   2 x the coupon's ear (parts/head_pivot_coupon.scad), M3 x 20 each into the pivot inserts.
 //   DIFFUSER  white: a press fit in the face's opening, flush; a ledge round its edge holds the LED ring
 //          2.2 mm back, and a tube round the lens barrel keeps the LEDs' light off the lens. PRINT face-down.
-//   HOLDER (lens_holder) a disc that sits in a seat behind the LED ring (2 x M2.5 x 8 into the face's bosses):
+//   HOLDER (lens_holder) a disc that sits in a seat behind the LED ring (3 x M2.5 x 8 into the face's bosses,
+//          two at the upper corners and one below - outside the camera board, reachable with it fitted):
 //          the ring rests on it; the camera's cube goes into its square pocket, the cube's own screw bosses
 //          stopping against its back; it carries the strap's 2 posts. PRINT face-down, no supports.
 //   STRAP  across the camera board's back, behind the lens: 2 x M3 x 8 into the holder's posts; its pad
@@ -27,7 +28,7 @@
 //
 // ASSEMBLY ORDER: inserts (pivots through the crank's channel on the right; crank pin; CYD posts;
 // the lens holder's 2 bosses; corner bosses; the holder's strap posts) -> the lens holder into its seat from
-// behind (2 x M2.5 x 8) -> the LED ring in from the FRONT (pads to the back, its wires through the holder's
+// behind (3 x M2.5 x 8) -> the LED ring in from the FRONT (pads to the back, its wires through the holder's
 // slot), then the diffuser (it snaps in) -> the camera's cube into the holder's pocket from behind, the strap
 // -> CYD glass to the window, 4 x M2.5 x 6 -> wires -> ears through the yoke's bearings -> cap.
 //
@@ -108,7 +109,10 @@ diff_press = 0.3;                // the diffuser's face is drawn this much under
 // (Moulded into the face, this back wall and its pocket hung in mid-air when printing - supports, rough.)
 seat_step = 1.5;                 // the seat: the chamber's bore steps out this much behind the ring - the holder's
                                  //   face rests on the step (stepping OUT going back, it prints without support)
-hold_screw = [25.2, 7, 2.9];     // 2 x M2.5 x 8 at the sides (x +/-): radius, boss diameter, clearance hole
+hold_screw = [25.2, 7, 2.9];     // 3 x M2.5 x 8: radius, boss diameter, clearance hole - at hold_a, OUTSIDE
+                                 //   the camera board (+/- 11 above / below the lens), so they're reachable
+hold_a   = [60, 120, 270];       //   with the camera fitted; none straight up (the CYD's glass is there)
+hp = function(a, r) r * [cos(a), sin(a)];   // a point round the lens: (x, up)
 conn_relief = [10, 20, 2.2];     // over the camera's white connector (7.6 off the board): from x, to x (both
                                  //   sides: either end of the board may be the cable's), the holder left there
 wire_slot = [8, 7];              // through the holder, for the ring's wires: width, from r 11.6 out - at the
@@ -269,9 +273,10 @@ module arc2d(r0, r1, a, w) {
 module mouth_chamber() {
     d2y = function(d) hy[1] - d;                                     // depth behind the face -> y
     y_cyl(seat_d + 2 * cham_wall, d2y(pocket_end), hy[1] - t + 0.01, 0, cam_z);                       // the tube
-    for (s = [-1, 1]) hull() {                                                                        // holder bosses
-        y_cyl(hold_screw[1], d2y(ring_back), hy[1] - t + 0.01, s * hold_screw[0], cam_z);
-        y_cyl(hold_screw[1], d2y(ring_back), hy[1] - t + 0.01, s * (seat_d / 2), cam_z);
+    for (a = hold_a) hull() {                                                                         // holder bosses
+        p = hp(a, hold_screw[0]); q = hp(a, seat_d / 2);
+        y_cyl(hold_screw[1], d2y(ring_back), hy[1] - t + 0.01, p[0], cam_z + p[1]);
+        y_cyl(hold_screw[1], d2y(ring_back), hy[1] - t + 0.01, q[0], cam_z + q[1]);
     }
 }
 module mouth_chamber_cuts() {
@@ -280,11 +285,13 @@ module mouth_chamber_cuts() {
     y_cyl(seat_d, d2y(pocket_end) - 1, d2y(ring_back), 0, cam_z);                                    // the holder's seat
     rb = (open_d + cal_hole) / 2;                                                                    // the snaps' pockets
     for (a = snap_a) in_mouth(snap_at[0] - 0.1, snap_at[1] + 0.1) arc2d(rb - 0.1, rb + snap_bump + 0.1, a, snap_w + 1.5);
-    for (s = [-1, 1])                                                                                // M2.5 inserts
-        y_cyl(insert_m25[0], d2y(ring_back) - 0.01, d2y(ring_back) + insert_m25[1] + 0.5, s * hold_screw[0], cam_z);
-    for (s = [-1, 1]) hull() {                                                                       // the tabs' notches
-        y_cyl(hold_screw[1] + 0.6, d2y(pocket_end) - 1, d2y(ring_back), s * hold_screw[0], cam_z);
-        y_cyl(hold_screw[1] + 0.6, d2y(pocket_end) - 1, d2y(ring_back), s * (seat_d / 2 - 3), cam_z);
+    for (a = hold_a) {
+        p = hp(a, hold_screw[0]); q = hp(a, seat_d / 2 - 3);
+        y_cyl(insert_m25[0], d2y(ring_back) - 0.01, d2y(ring_back) + insert_m25[1] + 0.5, p[0], cam_z + p[1]);   // M2.5 inserts
+        hull() {                                                                                     // the tabs' notches
+            y_cyl(hold_screw[1] + 0.6, d2y(pocket_end) - 1, d2y(ring_back), p[0], cam_z + p[1]);
+            y_cyl(hold_screw[1] + 0.6, d2y(pocket_end) - 1, d2y(ring_back), q[0], cam_z + q[1]);
+        }
     }
 }
 
@@ -297,9 +304,9 @@ module lens_holder() {
     difference() {
         union() {
             cylinder(d = seat_d - 0.4, h = hold_t);
-            for (s = [-1, 1]) hull() {                                // tabs for its 2 screws
-                translate([s * hold_screw[0], 0, 0]) cylinder(d = hold_screw[1], h = hold_t);
-                translate([s * (seat_d / 2 - 3), 0, 0]) cylinder(d = hold_screw[1], h = hold_t);
+            for (a = hold_a) hull() {                                 // tabs for its 3 screws
+                translate(hp(a, hold_screw[0])) cylinder(d = hold_screw[1], h = hold_t);
+                translate(hp(a, seat_d / 2 - 3)) cylinder(d = hold_screw[1], h = hold_t);
             }
             for (s = [-1, 1]) translate([0, s * strap_post[1], 0]) cylinder(d = strap_post[0], h = post_h);   // strap posts
         }
@@ -307,7 +314,7 @@ module lens_holder() {
         translate([ring[1] / 2, -wire_slot[0] / 2, -1]) cube([wire_slot[1], wire_slot[0], hold_t + 2]);   // ring's wires
         for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0])                                        // over the connector
             translate([conn_relief[0], -cam_b[1] / 2 - 0.5, conn_relief[2]]) cube([conn_relief[1] - conn_relief[0], cam_b[1] + 1, hold_t]);
-        for (s = [-1, 1]) translate([s * hold_screw[0], 0, -1]) cylinder(d = hold_screw[2] + cal_hole, h = hold_t + 2, $fn = 24);
+        for (a = hold_a) translate([each hp(a, hold_screw[0]), -1]) cylinder(d = hold_screw[2] + cal_hole, h = hold_t + 2, $fn = 24);
         for (s = [-1, 1]) translate([0, s * strap_post[1], post_h - insert_m3[1] - 1])        // strap inserts
             cylinder(d = insert_m3[0], h = insert_m3[1] + 1.01, $fn = 24);
     }
