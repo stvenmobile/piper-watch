@@ -103,12 +103,13 @@ snap_bump = 0.4;                 // how far the bump stands out
 snap_at  = [6.0, 6.8];           // the bump's depth behind the face (the fingers end at 6.8)
 r_fin    = [bore_d / 2 + snap_gap, bore_d / 2 + snap_gap + snap_t];   // the fingers: inner, outer radius
 open_d   = 2 * (r_fin[1] + 0.15);     // 40.0: the face's opening and the chamber's bore (+ cal_hole when cut)
-diff_press = 0.1;                // the diffuser's face is drawn this much under the opening's drawn size.
+diff_press = -0.1;               // the diffuser's face is drawn this much under the opening's drawn size.
+                                 //   2nd print at 40.3 still loose -> +0.2: drawn 40.5.
                                  //   MEASURED 2026-10-31: the opening, drawn 40.4, printed 40.0 (cal_hole holds at
                                  //   this size); the white diffuser, drawn 40.1, printed 39.7 (outside edges -0.4
                                  //   in the white filament). So 40.3 -> ~39.9: 0.1 across. Glue it.
                                  //   Check with part="diff_gauge": rings at gauge_d from the opening's drawn size
-gauge_d  = [-0.2, -0.1, 0.0];    // -> ~39.8 / 39.9 / 40.0 printed (ring 2 = the diffuser)
+gauge_d  = [0.0, 0.1, 0.2];      // -> rings 1-3 (ring 2 = the diffuser)
 // the LENS HOLDER: a separate disc (prints flat, no supports) in a seat at the back of the chamber, behind the
 // ring: the ring rests on its face, the camera's cube in its square pocket, the strap on its two posts.
 // (Moulded into the face, this back wall and its pocket hung in mid-air when printing - supports, rough.)
