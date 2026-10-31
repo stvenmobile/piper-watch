@@ -103,7 +103,10 @@ snap_bump = 0.4;                 // how far the bump stands out
 snap_at  = [6.0, 6.8];           // the bump's depth behind the face (the fingers end at 6.8)
 r_fin    = [bore_d / 2 + snap_gap, bore_d / 2 + snap_gap + snap_t];   // the fingers: inner, outer radius
 open_d   = 2 * (r_fin[1] + 0.15);     // 40.0: the face's opening and the chamber's bore (+ cal_hole when cut)
-diff_press = 0.3;                // the diffuser's face is drawn this much under the opening (a press fit)
+diff_press = 0.15;               // the diffuser's face is drawn this much under the opening's drawn size:
+                                 //   the opening (40.4 drawn) prints ~40.2, an outside edge prints ~0.2 under
+                                 //   drawn, so 40.25 -> ~40.05: ~0.15 across. (0.3 left a visible gap.) Glue it.
+                                 //   Check with part="diff_gauge" (rings at -0.25 / -0.15 / -0.05)
 // the LENS HOLDER: a separate disc (prints flat, no supports) in a seat at the back of the chamber, behind the
 // ring: the ring rests on its face, the camera's cube in its square pocket, the strap on its two posts.
 // (Moulded into the face, this back wall and its pocket hung in mid-air when printing - supports, rough.)
@@ -441,6 +444,12 @@ if (part == "front")    translate([0, 0, hy[1]]) rotate([-90, 0, 0]) head_front_
 if (part == "cap")      translate([0, 0, -hy[0]]) rotate([90, 0, 0]) head_cap_v2();                  // back on the bed
 if (part == "ears")     for (i = [0, 1]) translate([i * 38, 0, 0]) ear(pivot_stub, 1, pivot_key);    // cap-down
 if (part == "diffuser") mouth_diffuser();                                                            // face-down
+if (part == "diff_gauge") for (i = [0 : 2]) translate([i * 45, 0, 0]) difference() {             // fit rings, 1-3 notches
+    od = open_d + cal_hole - [0.25, 0.15, 0.05][i];                                                   //   (2 = the diffuser)
+    cylinder(d = od, h = diff_t, $fn = 180);
+    translate([0, 0, -1]) cylinder(d = od - 6, h = diff_t + 2, $fn = 180);
+    for (k = [0 : i]) rotate([0, 0, 90 + (k - i / 2) * 12]) translate([od / 2 - 1.5, 0, diff_t - 0.6]) cube([3.2, 1.2, 1], center = true);
+}
 if (part == "strap")    cam_strap();                                                                 // feet down
 if (part == "holder")   lens_holder();                                                               // face-down
 if (part == "coupon")   translate([0, 0, hy[1]]) rotate([-90, 0, 0]) intersection() {               // the face only
