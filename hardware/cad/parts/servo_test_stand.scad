@@ -29,6 +29,7 @@
 include <../params.scad>
 
 part = "assembly";
+turret_cheeks = true;       // false: the turret without its cheeks (parts/turret_v2.scad adds its own yoke plates)
 pan  = 0;
 tilt = 20;
 
@@ -218,7 +219,7 @@ module turret() {
                 translate([idl_ins[0], idl_ins[1], zb[1] - insert_m3[1] - 3]) cylinder(d = ins_boss, h = insert_m3[1] + 3, $fn = 32);
                 box([x_idler - clr - 10, x_idler - clr], [-99, 99], [-99, 99]);                    // ... stopping at the servo
             }
-            for (s = [-1, 1]) {                                                                  // cheeks
+            if (turret_cheeks) for (s = [-1, 1]) {                                               // cheeks
                 x0 = s > 0 ? x_cheek : -x_cheek - cheek_t;
                 hull() {
                     box([x0, x0 + cheek_t], [y_axle - 12, y_axle + 12], [z_ft - 0.01, z_ft + 6]);
@@ -229,7 +230,7 @@ module turret() {
         translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);              // cables down the hub
         // screwdriver access through both cheeks, on the servo's axis: left to the idler disc's centre screw (the
         // disc goes on after the servo is in the cradle), right to the horn's centre screw (through the disc's hole)
-        for (x0 = [-x_cheek - cheek_t - 1, x_cheek - 1])
+        if (turret_cheeks) for (x0 = [-x_cheek - cheek_t - 1, x_cheek - 1])
             translate([x0, y_srv, z_srv]) rotate([0, 90, 0]) cylinder(d = 4, h = cheek_t + 2, $fn = 24);
         // the servo's bottom face lies against the end wall: cut-outs for its raised block and its sockets
         // (the plugs come out through the wall)
@@ -247,7 +248,7 @@ module turret() {
             hole3(floor_t + 2);
         }
         translate([x_idler - clr - 4, y_srv, z_srv]) rotate([0, 90, 0]) cylinder(d = sts_horn_d + 1, h = 6, $fn = 48);   // idler disc
-        for (s = [-1, 1]) translate([s > 0 ? x_cheek - 1 : -x_cheek - cheek_t - 1, y_axle, z_axle]) rotate([0, 90, 0])
+        if (turret_cheeks) for (s = [-1, 1]) translate([s > 0 ? x_cheek - 1 : -x_cheek - cheek_t - 1, y_axle, z_axle]) rotate([0, 90, 0])
             cylinder(d = 4.4 + cal_hole, h = cheek_t + 2, $fn = 32);                            // axle screws (M4)
         // strap inserts: on the idler wall's top and the post's top
         translate([idl_ins[0], idl_ins[1], zb[1] - insert_m3[1]]) insert3();
