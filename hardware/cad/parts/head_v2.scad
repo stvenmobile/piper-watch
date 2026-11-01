@@ -78,7 +78,7 @@ win_chamfer = 7;
 cyd_post_d = 6.5;
 
 // ---- the mouth: NeoPixel Ring 12 + diffuser in front, the camera held by its lens holder behind -------------
-// Depths from the face (mm):  0 - 1.8 diffuser face | 1.8 - 3.4 air | 3.4 - 6.8 LED ring | 6.8 - 7.4 ring guide | 7.4 the cube's top
+// Depths from the face (mm):  0 - 1.6 diffuser face | 1.6 - 3.4 air | 3.4 - 6.8 LED ring | 6.8 - 7.4 ring guide | 7.4 the cube's top
 // against a lip (lens front 3.5) | 7.4 - 9.0 the chamber's back wall | to 12.4 the cube pocket (its top 5 mm,
 // above the holder's screw bosses) | 17.7 the camera board's front, free | the strap behind it, on 2 posts.
 // The ring and the diffuser go in from the FRONT (the face's opening is the ring's bore); the cube from behind.
@@ -86,9 +86,9 @@ cam_z    = -22;                  // lens = mouth centre (10 more face below it t
 ring     = [36.8, 23.3, 3.4];    // OD, ID, thickness (4.8 with wires pressed flat)
 ring_fit = 0.25;                 // clearance round the ring in its bore
 bore_d   = ring[0] + 2 * ring_fit;   // the face's opening and the ring's bore (+ cal_hole when cut)
-diff_t   = 1.8;                  // the diffuser's face: flush with the face, the only material the light
+diff_t   = 1.6;                  // the diffuser's face: flush with the face, the only material the light
                                  //   passes (more than this is too diffusing even in clear-ish filament)
-diff_air = 1.6;                  // the diffuser's back -> the ring's front: a ledge round its edge (2.2 before the guide)
+diff_air = 1.8;                  // the diffuser's back -> the ring's front: a ledge round its edge
 diff_ledge = 1.0;                //   ... this wide, outside the LEDs (they end at r 17.5)
 ring_front = diff_t + diff_air;       // 4.0 behind the face
 guide_t  = 0.6;                  // the ring guide's plate, between the ring and the holder
