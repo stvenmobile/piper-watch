@@ -28,11 +28,11 @@
 //
 // ASSEMBLY ORDER: inserts (pivots through the crank's channel on the right; crank pin; CYD posts;
 // the lens holder's 2 bosses; corner bosses; the holder's strap posts) -> the lens holder into its seat from
-// behind (3 x M2.5 x 8) -> the LED ring in from the FRONT (pads to the back, its wires through the holder's
+// behind (3 x M2.5 x 8) -> the LED ring pressed onto its guide, both in from the FRONT (pads to the back, its wires through the holder's
 // slot), then the diffuser (it snaps in) -> the camera's cube into the holder's pocket from behind, the strap
 // -> CYD glass to the window, 4 x M2.5 x 6 -> wires -> ears through the yoke's bearings -> cap.
 //
-// part = "all" (assembled view) | "front" | "cap" | "ears" | "diffuser" | "holder" | "strap" | "coupon"
+// part = "all" (assembled view) | "front" | "cap" | "ears" | "diffuser" | "holder" | "guide" | "strap" | "coupon"
 //        ("coupon": the face only - window, CYD posts, the mouth chamber and lens holder - to check them first)
 include <servo_test_stand.scad>
 use <head_pivot_coupon.scad>
@@ -78,7 +78,7 @@ win_chamfer = 7;
 cyd_post_d = 6.5;
 
 // ---- the mouth: NeoPixel Ring 12 + diffuser in front, the camera held by its lens holder behind -------------
-// Depths from the face (mm):  0 - 1.8 diffuser face | 1.8 - 4.0 air | 4.0 - 7.4 LED ring | 7.4 the cube's top
+// Depths from the face (mm):  0 - 1.8 diffuser face | 1.8 - 3.4 air | 3.4 - 6.8 LED ring | 6.8 - 7.4 ring guide | 7.4 the cube's top
 // against a lip (lens front 3.5) | 7.4 - 9.0 the chamber's back wall | to 12.4 the cube pocket (its top 5 mm,
 // above the holder's screw bosses) | 17.7 the camera board's front, free | the strap behind it, on 2 posts.
 // The ring and the diffuser go in from the FRONT (the face's opening is the ring's bore); the cube from behind.
@@ -88,10 +88,11 @@ ring_fit = 0.25;                 // clearance round the ring in its bore
 bore_d   = ring[0] + 2 * ring_fit;   // the face's opening and the ring's bore (+ cal_hole when cut)
 diff_t   = 1.8;                  // the diffuser's face: flush with the face, the only material the light
                                  //   passes (more than this is too diffusing even in clear-ish filament)
-diff_air = 2.2;                  // the diffuser's back -> the ring's front: a ledge round its edge
+diff_air = 1.6;                  // the diffuser's back -> the ring's front: a ledge round its edge (2.2 before the guide)
 diff_ledge = 1.0;                //   ... this wide, outside the LEDs (they end at r 17.5)
 ring_front = diff_t + diff_air;       // 4.0 behind the face
-ring_back  = ring_front + ring[2];    // 7.4
+guide_t  = 0.6;                  // the ring guide's plate, between the ring and the holder
+ring_back  = ring_front + ring[2] + guide_t;    // 7.4: the holder's face (unchanged)
 cham_wall = 1.5;                 // the chamber round the ring (its top stays under the CYD's glass)
 // the diffuser SNAPS in: 3 fingers run back beside the ring (centring it), a bump on each clicks into a pocket
 // in the chamber's wall. They sit outside the ring, so the face's opening is wider than the ring's bore.
@@ -110,6 +111,14 @@ diff_press = -0.1;               // the diffuser's face is drawn this much under
                                  //   in the white filament). So 40.3 -> ~39.9: 0.1 across. Glue it.
                                  //   Check with part="diff_gauge": rings at gauge_d from the opening's drawn size
 gauge_d  = [0.0, 0.1, 0.2];      // -> rings 1-3 (ring 2 = the diffuser)
+// the RING GUIDE: a thin C-shaped plate on the holder's face, its tabs centring the ring in the bore. Separate,
+// because the holder prints face-down: tabs on that face would hang in mid-air. Print it in white, plate down.
+guide_h  = 3.0;                  // the tabs above the plate (stop short of the ring's front: the diffuser's ledge)
+guide_press = 0.15;              // the tabs' grip on the ring, across its diameter
+guide_a_out = [90, 210, 330];    // outside the ring: between the diffuser's fingers
+guide_a_in  = [60, 180, 300];    // inside the ring: clear of the wire notch at +x
+guide_r_out = [(ring[0] + cal_hole - guide_press) / 2, (open_d + cal_hole - diff_press) / 2];   // the same fit as the diffuser in the bore
+guide_r_in  = [10.3, (ring[1] + cal_hole + guide_press) / 2];   // outside edges print 0.4 under drawn
 // the LENS HOLDER: a separate disc (prints flat, no supports) in a seat at the back of the chamber, behind the
 // ring: the ring rests on its face, the camera's cube in its square pocket, the strap on its two posts.
 // (Moulded into the face, this back wall and its pocket hung in mid-air when printing - supports, rough.)
@@ -327,6 +336,34 @@ module lens_holder() {
 }
 module lens_holder_placed() translate([0, hy[1] - ring_back, cam_z]) rotate([90, 0, 0]) lens_holder();
 
+// ==== RING GUIDE, in its own frame: z = 0 on the holder's face, + = toward the face of the head ====
+// PRINT plate down. Press the ring onto it, then both go in from the front, the notch over the holder's wire slot.
+module ring_guide() {
+    top = guide_t + guide_h;
+    lead = 0.5;                                                       // the tabs' tips: a lead-in for the ring
+    difference() {
+        union() {
+            linear_extrude(guide_t) {
+                difference() { circle(r = 18.2, $fn = 120); circle(r = guide_r_in[0], $fn = 120); }
+                for (a = guide_a_out) arc2d(17.5, guide_r_out[1], a, 6);
+            }
+            difference() {
+                linear_extrude(top) for (a = guide_a_out) arc2d(guide_r_out[0], guide_r_out[1], a, 6);
+                translate([0, 0, top - lead]) cylinder(r1 = guide_r_out[0], r2 = guide_r_out[0] + lead + 0.01, h = lead + 0.01, $fn = 120);
+            }
+            intersection() {
+                linear_extrude(top) for (a = guide_a_in) arc2d(guide_r_in[0], guide_r_in[1], a, 5);
+                union() {
+                    cylinder(r = guide_r_in[1], h = top - lead, $fn = 120);
+                    translate([0, 0, top - lead - 0.01]) cylinder(r1 = guide_r_in[1], r2 = guide_r_in[1] - lead, h = lead + 0.01, $fn = 120);
+                }
+            }
+        }
+        translate([8, -6, -1]) cube([30, 12, top + 2]);                // the notch for the ring's wires
+    }
+}
+module ring_guide_placed() translate([0, hy[1] - ring_back, cam_z]) rotate([90, 0, 0]) mirror([0, 0, 1]) ring_guide();
+
 // ==== CAP ===================================================================================================
 module head_cap_v2() {
     difference() {
@@ -436,7 +473,7 @@ module board_models() {
     color("#111") for (s = [-1, 1]) y_cyl(4, y_pcb, y_pcb + cube_boss, s * (cube[0] / 2 + 2), cam_z);   // its screw bosses
     color("#222") y_cyl(barrel_d, y_pcb + cube[1], y_pcb + lens_h, 0, cam_z);
     color("#ddd") translate([12.5, y_pcb, cam_z + cam_b[1] / 2 - 4]) cube([5, 7.6, 4]);   // the white connector + wires (~15 from the lens, at an edge)
-    color("#1d1d1d") difference() { y_cyl(ring[0], hy[1] - ring_back, hy[1] - ring_front, 0, cam_z); y_cyl(ring[1], hy[1] - ring_back - 1, hy[1], 0, cam_z); }
+    color("#1d1d1d") difference() { y_cyl(ring[0], hy[1] - ring_back + guide_t, hy[1] - ring_front, 0, cam_z); y_cyl(ring[1], hy[1] - ring_back - 1, hy[1], 0, cam_z); }
 }
 
 module assembled() {
@@ -445,6 +482,7 @@ module assembled() {
     color("#fff4e0") translate([0, hy[1], cam_z]) rotate([90, 0, 0]) mouth_diffuser();
     color("#6b8fb5") translate([0, y_pcb, cam_z]) rotate([90, 0, 0]) cam_strap();
     color("#8a8d91") lens_holder_placed();
+    color("#e8e8e8") ring_guide_placed();
     board_models();
     color("#8cc8ec") for (s = [-1, 1]) mirror([s < 0 ? 1 : 0, 0, 0])
         translate([hw / 2 + yoke_gap + 13, 0, 0]) rotate([0, -90, 0]) ear(pivot_stub, 1, pivot_key);   // its z = 13: the boss
@@ -465,6 +503,7 @@ if (part == "diff_gauge") for (i = [0 : len(gauge_d) - 1]) translate([i * 45, 0,
     for (k = [0 : i]) rotate([0, 0, 90 + (k - i / 2) * 12]) translate([od / 2 - 1.5, 0, diff_t - 0.6]) cube([3.2, 1.2, 1], center = true);
 }
 if (part == "strap")    cam_strap();                                                                 // feet down
+if (part == "guide")    ring_guide();                                                                // plate down
 if (part == "holder")   lens_holder();                                                               // face-down
 if (part == "coupon")   translate([0, 0, hy[1]]) rotate([-90, 0, 0]) intersection() {               // the face only
     head_front_v2();
