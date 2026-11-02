@@ -26,8 +26,8 @@ cut_v4 = false;                               // slice the view open on x > 0
 // ---- box --------------------------------------------------------------------------------------------------------------
 bw = 118;  bd = 120;  bwt = 3;  bfl = 4;  brr = 14;
 b_in = [bw - 2 * bwt, bd - 2 * bwt];          // 112 x 114
-ledge_w = 6;  lid_t4 = 6;  ledge_z = 34;      // heatsink top ~31.6 -> lid underside 34
-wall_top = ledge_z + lid_t4;                  // 40
+ledge_w = 6;  lid_t4 = 6;  ledge_z = 54;      // 60 mm box: lid underside 54 leaves ~22 mm over the Orin's fan (to confirm)
+wall_top = ledge_z + lid_t4;                  // 60
 vx = b_in[0] / 2;  vy = b_in[1] / 2;          // inner half sizes 56 x 57
 
 // ---- Orin carrier, plug zone ------------------------------------------------------------------------------------------
@@ -132,6 +132,87 @@ module skirt_extra4() difference() {
 }
 module skirt4s() { base(); skirt_extra4(); }
 
+// ==== TURRET v4 + HEAD v4 (stand frame: pan axis = origin, z = 0 at the plate top) =========================================
+// The head is a VERTICAL camera plate carried 20 mm in front of the tilt axle by two arms; the axle is only 32 mm above the floor.
+// The tilt servo lies behind the axle on the LEFT (x -22..10) and pulls a short, nearly horizontal rod to a crank on the left arm.
+ax_y = 6;  ax_z = z_ft + 32;                    // tilt axle (along X)
+ch_x = [42, 50];  ch_t4 = 8;                    // cheeks (608 pocket each), outer face r < 54.5 at y +-16
+arm_x = [38, 41];                               // pivot arms, 3 thick, inside the cheeks (1 mm washer gap)
+pl_x = 38;  pl_y = [20, 24];  pl_h = 30;        // camera plate: half-width, forward of the axle (rear/front face), height
+tsv = [-22, 10];  tsv_y = [-48.5, -48.5 + 45.22];  tsv_z = [z_ft, z_ft + 24.72];       // tilt servo body: x, y, z (shaft along X, near its back end)
+tsh = [-22, tsv_y[0] + 10.11, z_ft + 12.36];    // shaft: x of the horn face, y, z
+pin_s = [-27, tsh[1] + 12 * cos(60), tsh[2] + 12 * sin(60)];                           // servo crank pin (12 mm, 60 deg up/forward)
+pin_h = [-33, ax_y - 12, ax_z - 8];                                                    // head crank pin (14.4 from the axle, low and behind)
+hub_a = 30;                                     // flange screws at 30/120/210/300 deg: none under the tilt servo
+
+module hub4() difference() {                    // the stand's hub, its four flange inserts turned to hub_a + k*90 to clear the tilt servo
+    union() {
+        translate([0, 0, z_horn]) cylinder(d = hub_od, h = z_flange - z_horn + 0.01, $fn = 96);
+        translate([0, 0, z_flange]) cylinder(d = flange_d, h = flange_t, $fn = 128);
+    }
+    translate([0, 0, z_horn + hub_end]) cylinder(d = hub_id, h = 200, $fn = 64);
+    translate([0, 0, z_horn - 1]) cylinder(d = 6.5, h = hub_end + 2, $fn = 32);
+    for (a = [45 : 90 : 360]) rotate(a) translate([pcd / 2, 0, z_horn - 1]) {
+        hole3(hub_end + 2);
+        translate([0, 0, hub_end + 1]) cylinder(d = 6.2, h = 10, $fn = 24);
+    }
+    translate([0, 0, z_horn + hub_end + win[1] / 2 + 1]) rotate([0, 90, 0]) linear_extrude(hub_od) square([win[1], win[0]], center = true);
+    for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0, z_flange + flange_t - insert_m3[1]]) insert3();
+}
+module turret4() difference() {
+    union() {
+        translate([0, 0, z_floor]) linear_extrude(floor_t) intersection() { circle(r = 53.5, $fn = 160); square([104, 104], center = true); }
+        // cradle for the tilt servo: low walls round its footprint, closed at the shaft end only
+        difference() {
+            box([tsv[0] - 3, tsv[1] + 3], [tsv_y[0] - 3, tsv_y[1] + 3], [z_ft - 0.01, z_ft + 10]);
+            box([tsv[0], tsv[1]], [tsv_y[0], tsv_y[1]], [z_ft - 1, z_ft + 11]);
+            box([tsv[0] - 4, tsv[0] + 1], [tsv_y[0] + 20, tsv_y[0] + 40], [z_ft + 3, z_ft + 11]);           // the horn side open
+        }
+        for (s = [-1, 1]) hull() {                                                                         // cheeks
+            box(s > 0 ? ch_x : [-ch_x[1], -ch_x[0]], [ax_y - 16, ax_y + 16], [z_ft - 0.01, z_ft + 6]);
+            translate([s > 0 ? ch_x[0] : -ch_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 34, h = ch_t4, $fn = 60);
+        }
+    }
+    translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);                          // cables down the hub
+    for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0, z_floor - 1]) hole3(floor_t + 2);        // 4 x M3 into the hub flange
+    for (s = [-1, 1]) {                                                                                   // 608 pockets from the inner faces
+        translate([s > 0 ? ch_x[0] - 0.01 : -ch_x[0] - 7.99, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = pivot_pocket + cal_hole, h = 8, $fn = 100);
+        translate([s > 0 ? ch_x[0] : -ch_x[1] - 1, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 12 + cal_hole, h = ch_t4 + 1, $fn = 48);
+    }
+}
+module head4() {
+    color("#8a8d91") translate([-pl_x, ax_y + pl_y[0], ax_z - pl_h / 2]) cube([2 * pl_x, pl_y[1] - pl_y[0], pl_h]);           // camera plate
+    for (s = [-1, 1]) color("#6b8fb5") hull() {                                                                              // arms
+        translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 16, h = 3, $fn = 40);
+        translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y + pl_y[0], ax_z - pl_h / 2]) cube([3, pl_y[1] - pl_y[0], pl_h]);
+    }
+    for (s = [-1, 1]) color("#6b8fb5") translate([s > 0 ? arm_x[1] : -ch_x[1] - 0.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 8, h = (s > 0 ? ch_x[1] - arm_x[1] : ch_x[1] - arm_x[1] + 0.5 + (ch_x[1] - ch_x[1])) + 0.01, $fn = 24);   // axle stubs (into the 608s)
+    color("#6b8fb5") hull() {                                                                                                  // crank bracket on the left arm
+        translate([-arm_x[1] - 0.01, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 12, h = 3.01, $fn = 32);
+        translate([pin_h[0] + 1, pin_h[1], pin_h[2]]) rotate([0, 90, 0]) cylinder(d = 8, h = 6, $fn = 24);
+    }
+    if (part == "v4_view") {
+    color("#222") translate([-40, ax_y + pl_y[1], ax_z - 11]) cube([80, 10, 22]);                                          // camera board (80 x 22 to confirm)
+    color("#111") translate([0, ax_y + pl_y[1] + 10, ax_z]) rotate([-90, 0, 0]) cylinder(d = 16, h = 3, $fn = 40);        // lens
+    }
+}
+module tilt_rod4() color("#c0392b") hull() {
+    translate(pin_s) rotate([0, 90, 0]) cylinder(d = 4, h = 5, center = true, $fn = 20);
+    translate(pin_h) rotate([0, 90, 0]) cylinder(d = 4, h = 5, center = true, $fn = 20);
+}
+module turret_stack4() {                        // everything above the lid, stand frame
+    color("#6b8fb5") base();
+    color("#2b2b2b") translate([0, 0, z_case_bot - strap_t]) pan_strap();
+    color("#b0b6bd") translate([-pb[0] / 2, -pb[1] / 2, 0]) cube(pb);                                                     // pillow block
+    translate([0, 0, z_horn - disc_h]) rotate([0, 0, 90]) servo_model();                                                  // pan servo
+    color("#e8a33d") hub4();
+    color("#6b8fb5") turret4();
+    color("#b0b6bd") translate([tsv[0], tsv_y[0], tsv_z[0]]) cube([tsv[1] - tsv[0], tsv_y[1] - tsv_y[0], tsv_z[1] - tsv_z[0]]);   // tilt servo
+    color("#e8a33d") translate([tsh[0] - 3, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = 24, h = 3, $fn = 40);        // its horn
+    tilt_rod4();
+    head4();
+}
+
 // ==== ghosts + view ====================================================================================================
 module cutv(on = true) difference() { union() children(); if (on && cut_v4) translate([0, -300, -400]) cube([300, 600, 900]); }
 module ghosts4() {
@@ -149,10 +230,12 @@ module surround4() color("#d9dde2") difference() {                              
 if (part == "v4_view") {
     cutv() { color("#6b8fb5") tub4(); color("#b5c4d6") lid4(); color("#8fa9c4") translate([0, 0, z_pt]) skirt_extra4(); surround4(); }
     ghosts4();
-    translate([0, 0, z_pt]) assembly();
-    echo(str("base ", bw, " x ", bd, " x ", wall_top, "; plate top z ", z_pt, "; turret floor top z ", z_pt + z_ft, "; axle z ", z_pt + z_axle,
-             "; head top ~", z_pt + z_axle + 22, "; wall ", wall_h4, " tall, skirt ", z_pt - sk_z0 + 0, " tall"));
+    translate([0, 0, z_pt]) turret_stack4();
+    echo(str("base ", bw, " x ", bd, " x ", wall_top, "; plate top z ", z_pt, "; turret floor top z ", z_pt + z_ft, "; axle z ", z_pt + ax_z,
+             "; head top ~", z_pt + ax_z + pl_h / 2, "; wall ", wall_h4, " tall, skirt ", z_pt - sk_z0 + 0, " tall"));
 }
 if (part == "v4_tub") tub4();
 if (part == "v4_lid") translate([0, 0, -ledge_z]) lid4();
 if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
+if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
+if (part == "v4_head") translate([0, 0, -(ax_z - pl_h / 2)]) head4();
