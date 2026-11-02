@@ -145,7 +145,7 @@ tsh = [-22, tsv_y[0] + 10.11, z_ft + 12.36];    // shaft: x of the horn face, y,
 cr_s = 14;  sa0 = 100;                          // servo crank length, its angle at tilt 0 (from +Y, counter-clockwise seen from +X)
 cr_h = 17;  hb0 = 210;                          // head crank length, its direction at tilt 0 (210 = down and back)
 rod_L = 44.9;                                   // pin centre to pin centre (planar; +1.5 for the 6 mm X offset)
-show_fov = false;  fov_v = 43;                 // draw the camera's centre ray and its vertical field of view (C920 ~43 deg, to confirm)
+show_cowl = true;  show_fov = false;  fov_v = 43;                 // draw the camera's centre ray and its vertical field of view (C920 ~43 deg, to confirm)
 tilt4 = 0;  sa4 = 100;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
 pin_s = [-27, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin
 pin_h = [-33, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin (moves with the head)
@@ -210,6 +210,29 @@ module tilt_rod4() color("#c0392b") hull() {
     translate(pin_s) rotate([0, 90, 0]) cylinder(d = 4, h = 5, center = true, $fn = 20);
     translate(pin_h) rotate([0, 90, 0]) cylinder(d = 4, h = 5, center = true, $fn = 20);
 }
+// ==== COWL (hides the tilt servo, crank and rod) + CHEEK COVERS ===================================================================
+// The cowl is a low dome over the rear half of the turret floor (a circle segment behind y = cw_y, the cheeks' rear face), 2.5 mm wall,
+// vertical to 32 mm above the floor, then a 45 deg chamfer in to a flat top at 42 (the same height as the head's top).
+// Its front wall has a window for the head's crank bracket and the rod (left) and a notch for the camera cables (centre).
+cw_r = 57.5;  cw_t = 2.5;  cw_h = 42;  cw_wz = 32;  cw_ch = cw_h - cw_wz;  cw_y = 8;
+cowl_alpha = 1;                                 // < 1 to see through it
+module cw_fp(r) intersection() { circle(r = r, $fn = 160); translate([-100, -100]) square([200, 100 + cw_y]); }
+module cw_solid(r, y_front, h, ch) intersection() {
+    hull() {
+        translate([0, 0, z_ft]) linear_extrude(h - ch) cw_fp(r);
+        translate([0, 0, z_ft + h - 0.01]) linear_extrude(0.01) cw_fp(r - ch);
+    }
+    translate([-100, -100, z_ft - 1]) cube([200, 100 + y_front, 200]);
+}
+module cowl4() color("#d9dde2", cowl_alpha) difference() {
+    cw_solid(cw_r, cw_y, cw_h, cw_ch);
+    cw_solid(cw_r - cw_t, cw_y - cw_t, cw_h - cw_t, cw_ch);                              // hollow, front wall left 2.5 thick
+    translate([-42, cw_y - cw_t - 1, z_ft - 1]) cube([18, cw_t + 2, 35]);                  // window: head crank bracket + rod (x -42 .. -24)
+    translate([-9, cw_y - cw_t - 1, z_ft - 1]) cube([18, cw_t + 2, 17]);                   // notch: the camera's cables to the hub hole
+    for (a = [200, 270, 340]) rotate(a) translate([cw_r - 3, 0, z_ft + 14]) cube([8, 1.8, 10], center = true);   // vents (rear)
+}
+module covers4() for (sx = [-1, 1]) color("#d9dde2") translate([sx > 0 ? ch_x[1] : -ch_x[1] - 3.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 36, h = 3.5, $fn = 80);
+
 module turret_stack4() {                        // everything above the lid, stand frame
     color("#6b8fb5") base();
     color("#2b2b2b") translate([0, 0, z_case_bot - strap_t]) pan_strap();
@@ -218,10 +241,11 @@ module turret_stack4() {                        // everything above the lid, sta
     color("#e8a33d") hub4();
     color("#6b8fb5") turret4();
     color("#b0b6bd") translate([tsv[0], tsv_y[0], tsv_z[0]]) cube([tsv[1] - tsv[0], tsv_y[1] - tsv_y[0], tsv_z[1] - tsv_z[0]]);   // tilt servo
-    color("#e8a33d") translate([tsh[0] - 3, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = 24, h = 3, $fn = 40);        // its horn
+    color("#e8a33d") translate([tsh[0] - 3, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = sts_horn_d, h = 3, $fn = 40);        // its horn (19.2)
     crank4();
     tilt_rod4();
     head4();
+    if (show_cowl) { cowl4(); covers4(); }
     if (show_fov) for (da = [-fov_v / 2, 0, fov_v / 2]) color(da == 0 ? "#ffd400" : "#ff7a00") {
         a = tilt4 + da;  l0 = [ax_y + (pl_y[1] + 13) * cos(tilt4), ax_z + (pl_y[1] + 13) * sin(tilt4)];       // the lens
         hull() { translate([0, l0[0], l0[1]]) cube(0.8, center = true); translate([0, l0[0] + 220 * cos(a), l0[1] + 220 * sin(a)]) cube(0.8, center = true); }
@@ -253,4 +277,6 @@ if (part == "v4_tub") tub4();
 if (part == "v4_lid") translate([0, 0, -ledge_z]) lid4();
 if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
+if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
+if (part == "v4_cover") for (i = [0, 1]) translate([i * 40, 0, 0]) cylinder(d = 36, h = 3.5, $fn = 80);
 if (part == "v4_head") translate([0, 0, -(ax_z - pl_h / 2)]) head4();
