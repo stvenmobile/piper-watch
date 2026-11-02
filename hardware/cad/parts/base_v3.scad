@@ -44,13 +44,13 @@ ant_y = [-60, -45];  ant_z = 22;                  // antenna holes, left wall (t
 fan_h = 20;                                       // heatsink + fan above the PCB (to confirm)
 
 // ---- Waveshare adapter, turned -90 deg: footprint 33 (X) x 42 (Y) ------------------------------------------------------
-ad_o  = [-53, 16];                                    // jack + terminals stick out 12 mm past its front edge: 54 in all, 1.7 mm to the wall
+ad_o  = [-51.5, 16];                                    // jack + terminals stick out 12 mm past its front edge: 54 in all; 3 mm clear of the front-left column
 ad_pts = [for (xo = [2.5, 39.5], yo = [2.5, 30.5]) [ad_o[0] + yo, ad_o[1] + 42 - xo]];
 ad_usb_y = ad_o[1] + 17;                          // USB-C on the left edge
 // ---- fuse + terminal block and the 12 V jack (right wall) ----------------------------------------------------------------
-fuse_o   = [20, 44];  fuse_blk = [30, 20, 14];
+fuse_o   = [20, 40];  fuse_blk = [30, 20, 14];
 fuse_pts = [[fuse_o[0] + 5, fuse_o[1] + 10], [fuse_o[0] + 25, fuse_o[1] + 10]];
-jack_y = 54;  jack_z = 18;  jack_d = 11.5;
+jack_y = 50;  jack_z = 18;  jack_d = 11.5;
 
 // ---- lid corbels: all clear of the drum's circle (r 54 about the pan axis) ----------------------------------------------------
 pp = 4.5;  post_d = 10;
@@ -75,13 +75,18 @@ module corbel_web(p) hull() {
     translate([0, 0, lid_z - 0.01]) linear_extrude(0.01) web2d(p, post_d, 10.5, 11);
     translate([0, 0, lid_z - 23]) linear_extrude(0.01) hull() { translate(p) circle(d = 0.01); for (a = wdirs(p, 10.5)) wstrip(p, a, 5.5); }
 }
+full_boss = function(p) p[1] > 60 && abs(p[0]) > 45;                           // the front corners: nothing under them (adapter / fuse block kept clear)
+module corbel_column(p) translate([0, 0, fl - 0.01]) linear_extrude(lid_z - fl + 0.01) web2d(p, post_d, 10.5, 8);
 corbel_pairs = [for (i = [0 : len(lid_pts) - 1], j = [0 : len(lid_pts) - 1]) if (j > i && norm(lid_pts[i] - lid_pts[j]) < 16) [i, j]];
 module corbels() intersection() {                                              // clipped inside the outer skin (webs reach into the walls)
     union() {
         for (p = lid_pts) {
             corbel_web(p);
-            translate([p[0], p[1], lid_z - 18]) cylinder(d = post_d, h = 18, $fn = 40);        // the boss itself, 45 deg cone underneath
-            translate([p[0], p[1], lid_z - 23]) cylinder(d1 = 0.01, d2 = post_d, h = 5, $fn = 40);
+            if (full_boss(p)) corbel_column(p);                                          // clear all the way down: a full-height column
+            else {
+                translate([p[0], p[1], lid_z - 18]) cylinder(d = post_d, h = 18, $fn = 40);        // the boss itself, 45 deg cone underneath
+                translate([p[0], p[1], lid_z - 23]) cylinder(d1 = 0.01, d2 = post_d, h = 5, $fn = 40);
+            }
         }
         for (q = corbel_pairs) hull() { corbel_web(lid_pts[q[0]]); corbel_web(lid_pts[q[1]]); }   // two bosses together: filled between
     }
