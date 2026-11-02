@@ -24,9 +24,9 @@ the rendered part.
 
 ## Print first
 
-1. **`parts/tolerance_coupon.scad`**: tells us the hole clearance and heat-set insert bore that
+1. **`parts/prototype/tolerance_coupon.scad`**: tells us the hole clearance and heat-set insert bore that
    work on this printer with PETG. Update `clr_hole`, `insert_m3` and `insert_m4`.
-2. **`parts/ls_gauge.scad`**: a 2 mm ring with slotted holes and tick marks. Lay it on the
+2. **`parts/prototype/ls_gauge.scad`**: a 2 mm ring with slotted holes and tick marks. Lay it on the
    real lazy Susan and read off the true bolt-circle diameters (the numbers next to the ticks).
    Update `ls_outer_bc`, `ls_inner_bc` and `ls_hole_d`.
 

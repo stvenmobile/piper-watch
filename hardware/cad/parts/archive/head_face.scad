@@ -9,7 +9,7 @@
 //   * two tongues at the bottom: they hook into the floor's front tabs
 //
 // PRINT face down (as modelled: the face's front on the bed), no supports. PETG, 4 walls.
-include <../head.scad>
+include <../../head.scad>
 
 module face_body() {
     // the plate: front at y = face_y

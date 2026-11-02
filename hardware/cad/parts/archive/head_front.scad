@@ -16,7 +16,7 @@
 // Modelled in PRINT ORIENTATION: the face's outer surface lies on the bed (z = 0) and
 // everything else rises from its back, so it prints without supports. In this frame
 // X = across the face, Y = up the face, Z = into the head.
-include <../params.scad>
+include <../../params.scad>
 
 // ---- overall --------------------------------------------------------------------
 D       = head_size[0];      // 105  face diameter: the smallest circle around the 94 x 29 camera

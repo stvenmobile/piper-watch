@@ -2,7 +2,7 @@
 // pocket, plus a pin up the screw hole above it so the stand doesn't wobble. The eye stands
 // upright (no tilt - eye_test_foot.scad is the tilted alternative).
 // PRINT as modelled (disc on the bed), no supports.
-include <../params.scad>
+include <../../params.scad>
 
 base_d   = 80;
 base_t   = 5;

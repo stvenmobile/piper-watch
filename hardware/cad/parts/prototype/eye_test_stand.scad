@@ -14,9 +14,9 @@
 //   * Stem: ends in a 1/4"-20 nut pocket for a camera tripod, or plugs into eye_test_foot.scad.
 //
 // PRINT face-down (as modelled: front face on the bed), no supports. The stem lies flat.
-include <../params.scad>
-include <eye_cam_bracket_dims.scad>
-use <head_front.scad>
+include <../../params.scad>
+include <../archive/eye_cam_bracket_dims.scad>
+use <../archive/head_front.scad>
 
 // ---- ring / board positions (match head_front.scad) --------------------------------------
 ring_clr   = 0.25;

@@ -6,7 +6,7 @@
 //
 // PRINT front face down (as modelled in print orientation below): bosses and flanges stand up,
 // no supports.
-include <../head_cam.scad>
+include <../../head_cam.scad>
 
 module cam_plate() {               // in the LENS frame
     difference() {

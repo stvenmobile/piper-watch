@@ -3,11 +3,11 @@
 // intersection of two - empty = no clash).
 include <head.scad>
 include <head_cam.scad>
-use <parts/head_face.scad>
-use <parts/head_shell.scad>
-use <parts/head_cam_plate.scad>
-use <parts/head_cam_strap.scad>
-use <parts/head_floor.scad>
+use <parts/archive/head_face.scad>
+use <parts/archive/head_shell.scad>
+use <parts/archive/head_cam_plate.scad>
+use <parts/archive/head_cam_strap.scad>
+use <parts/archive/head_floor.scad>
 
 only  = "";             // "" = everything
 clash = [];             // e.g. ["shell", "cam_plate"]

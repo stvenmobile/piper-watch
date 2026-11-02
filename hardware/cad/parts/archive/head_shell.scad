@@ -12,8 +12,8 @@
 // PRINT upright (as modelled: open bottom on the bed). The arch's top needs supports INSIDE
 // only (tree supports, "touching build plate" off is fine - they stand on the bed through the
 // open bottom); the outside surface prints clean.
-include <../head.scad>
-include <../head_cam.scad>
+include <../../head.scad>
+include <../../head_cam.scad>
 
 module shell_outer() {
     translate([0, -hb_d / 2, 0]) rotate([-90, 0, 0]) mirror([0, 1, 0]) linear_extrude(hb_d - face_t) low2d();

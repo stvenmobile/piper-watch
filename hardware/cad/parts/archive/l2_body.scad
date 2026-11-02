@@ -24,7 +24,7 @@
 //
 // Frame: the deck frame (level2.scad) - deck top z = 0, so the body runs z = -l2_h .. -deck_t.
 // PRINT floor-down, no supports (the display window's top edge is a ~100 mm bridge). PETG.
-include <../level2.scad>
+include <../../level2.scad>
 
 z_bot   = -l2_h;                 // -90: underside of the floor
 z_top   = -deck_t;               // -4: the deck sits on the walls

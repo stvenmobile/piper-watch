@@ -7,8 +7,8 @@
 // pressure and not pull out by hand. Tell me which one is right (or both too tight / loose).
 // History (channel for the belt's 0.75 mm backing): arc 1 0.83 - only half in; arc 2 1.10 fits,
 // 1.25 loose. The teeth fitted from arc 1 on. No further test needed.
-use <turntable_pulley.scad>
-include <../params.scad>
+use <../archive/turntable_pulley.scad>
+include <../../params.scad>
 
 clamp_half = 21.6;
 z_cut = 8 + 24.5 - 3.2 - 1.6 - 2.2 - 1;      // just below the lower flange's chamfer

@@ -12,7 +12,7 @@
 //   E  horizontal holes through the tower: 3 (lower) and 5 (upper)
 //   F  pins, labelled 3 4 5 6 8 10 - outside diameter of each, at mid-height
 //   G  slots 1.0 1.2 1.4 1.6 1.8 2.0 - which ones a 1.5 mm GT2 belt / a 1.6 mm PCB slides into
-include <../params.scad>
+include <../../params.scad>
 
 base_t = 4;
 bar    = [80, 10];                 // the L's two bars

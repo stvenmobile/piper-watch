@@ -2,7 +2,7 @@
 // with the surface. Print flat on the bed (no supports) in white or natural (translucent)
 // PLA/PETG. Thinner = brighter, thicker = smoother: with the 3.5 mm air gap behind it, 2 mm of
 // natural PETG or 1.5-2 mm of white PLA blends the 24 LEDs into one glow.
-include <../params.scad>
+include <../../params.scad>
 
 ring_r = (ring_od + ring_id) / 4;              // radius of the LED centres
 

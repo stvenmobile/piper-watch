@@ -10,7 +10,7 @@
 //
 // This file makes the BODY (floor + walls + pivots). The lid is
 // parts/camera_pod_lid.scad, which reuses the modules below.
-include <../params.scad>
+include <../../params.scad>
 
 fit     = 0.4;            // clearance between camera and cavity, all round
 lip_h   = 2;              // room above the camera for the lid's lip (lip itself is lip_h - 0.4 = 1.6 mm); was 3, trimmed after fit test

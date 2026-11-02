@@ -11,7 +11,7 @@
 //   * Four corner screws (M3) into heat-set inserts in the body's corner posts.
 //
 // PRINT as modelled: underside on the bed (the nut pockets open onto it), no supports. PETG.
-include <../level2.scad>
+include <../../level2.scad>
 
 m3_clear = 3.4 + cal_hole;            // prints ~3.35 (PETG): an M3 slides through
 m5_clear = 6.0;                       // prints ~5.4 PLA (turntable pulley) / ~5.55 PETG: M5 + a little play

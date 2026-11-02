@@ -12,8 +12,8 @@
 //          back cap. PRINT face-down, no supports.
 //   CAP    (head_cap_v2) the back: a lid with the cable exit, a lip that locates it inside the front,
 //          4 x M3 x 20 screws into the corner inserts. PRINT back-face down, no supports.
-//   EARS   2 x the coupon's ear (parts/head_pivot_coupon.scad), M3 x 20 each into the pivot inserts.
-//   DIFFUSER  white: a press fit in the face's opening, flush; a ledge round its edge holds the LED ring
+//   EARS   2 x the coupon's ear (parts/prototype/head_pivot_coupon.scad), M3 x 20 each into the pivot inserts.
+//   DIFFUSER  (narrow-ring style: BLACK + a flat white "diffuser_ring" glued into a channel - see diff_style; "full": white) a press fit in the face's opening, flush; a ledge round its edge holds the LED ring
 //          2.2 mm back, and a tube round the lens barrel keeps the LEDs' light off the lens. PRINT face-down.
 //   HOLDER (lens_holder) a disc that sits in a seat behind the LED ring (3 x M2.5 x 8 into the face's bosses,
 //          two at the upper corners and one below - outside the camera board, reachable with it fitted):
@@ -35,7 +35,7 @@
 // part = "all" (assembled view) | "front" | "cap" | "ears" | "diffuser" | "holder" | "guide" | "strap" | "coupon"
 //        ("coupon": the face only - window, CYD posts, the mouth chamber and lens holder - to check them first)
 include <servo_test_stand.scad>
-use <head_pivot_coupon.scad>
+use <prototype/head_pivot_coupon.scad>
 
 part = "all";
 section = false;                 // "all": cut in half at x = 0 to show the inside
@@ -121,7 +121,7 @@ snap_bump = 0.4;                 // how far the bump stands out
 snap_at  = [6.0, 6.8];           // the bump's depth behind the face (the fingers end at 6.8)
 r_fin    = [bore_d / 2 + snap_gap, bore_d / 2 + snap_gap + snap_t];   // the fingers: inner, outer radius
 open_d   = 2 * (r_fin[1] + 0.15);     // 40.0: the face's opening and the chamber's bore (+ cal_hole when cut)
-diff_press = -0.2;               // the diffuser's face is drawn this much under the opening's drawn size.
+diff_press = -0.1;               // the diffuser's face is drawn this much under the opening's drawn size. // was -0.2 (face drawn 40.6): -0.1 -> 40.5, the full wall has less give
                                  //   40.5 printed a snug fit -> 40.6 for a press fit.
                                  //   2nd print at 40.3 still loose -> +0.2: drawn 40.5.
                                  //   MEASURED 2026-10-31: the opening, drawn 40.4, printed 40.0 (cal_hole holds at
@@ -172,6 +172,22 @@ pocket_end = pcb_depth - cube_boss;           // 12.6: the holder's back face - 
 hold_t   = pocket_end - hold_face;            // 5.2: the holder's thickness
 seat_d   = open_d + cal_hole + 2 * seat_step; // the seat's bore (drawn, as cut)
 lens_open = 16;                  // the diffuser's opening at the face (the C920's 78 deg view from 3.5 back)
+// NARROW-RING diffuser (diff_style "ring"): the diffuser is BLACK (opaque - it also keeps stray light off the lens) and the
+// light shows through a narrow ring: a WHITE flat ring ("diffuser_ring", ONE piece, 1.2 thick, flush with the face, glued
+// into a channel in the front). Under the ring the plate is cut through along 3 arcs (the lit part, only 1.2 of white for
+// the light to cross); at 3 bridges the plate is NOT cut, so those parts of the ring are dark - but they are white
+// from the front, so the ring still reads as a full ring. Black bars behind the plate at the bridges make them strong.
+// "full" = the old white disc, lit across its whole width.
+diff_style = "ring";             // "ring" = the narrow lit ring (black body + white ring); "full" = the white disc
+diff_slot  = [15.0, 2.0];        // the lit ring: centre radius (the LEDs' circle: (36.8 + 23.3) / 4), width (the LEDs are 5)
+diff_ring_t = 1.2;               // the white ring's thickness: all the light has to cross
+diff_chan_w = 4.0;               // the channel for the white ring: its width (the lit slot is narrower: the plate overlaps the ring's edges as a ledge)
+diff_slot_fit = 0.2;             // the white ring is this much narrower than the channel, each side (glue fills it)
+diff_bridge = [90, 210, 330];    // 3 bridges across the lit slot (dark parts of the ring): without them the slot would cut the
+diff_bridge_w = 2.0;             //   centre (the tube) loose. Between LEDs if you can - rotate them to suit the ring.
+diff_bar   = 0.8;                // the bridges' black bars stand this far behind the plate (from the channel's floor)
+diff_snaps = false;              // true: 3 snap fingers (old) instead of the full wall
+diff_wall_end = 6.8 - 1.5;       // the wall's end, behind the face: 5.3
 baffle_od = 15;                  // the diffuser's tube round the barrel, back to the lip
 baffle_flare = 20;             // the tube's base: this wide at the face (merges with the face plate outside the 16 opening) ...
 baffle_flare_h = 3.5;           // ... narrowing to the tube over this height (walls stay >= 0.7 beside the view's cone)
@@ -217,12 +233,16 @@ crank_wedge = 0.84;              // its wedge's slope: 50 deg from vertical as p
 
 // ==== USB EARS: separate hollow caps, glued over the windows in the side walls (both sides, identical) ===========
 // Right-hand ear in the head's frame; the base (x = hw / 2) is the glue face, with a flange into the wall's window.
-// Prints OUTER FACE DOWN: no bridging, the pocket opens upward, the sloped front face a 45 deg overhang.
+// Prints OUTER FACE DOWN: no bridging, the pocket opens upward, both side faces slope 20 deg from vertical (no support).
 // the ear's plan (x, y): the two outer vertical edges rounded (r = usb_fillet); drawn running into the wall and trimmed
 // back to it, so the base corners stay sharp
 usb_fillet = 3;
-module usb_ear_raw() offset(r = usb_fillet) offset(delta = -usb_fillet)
-    polygon([[hw / 2 - 3, hy[1] + 3], [hw / 2 + usb_out, hy[1] - usb_out], [hw / 2 + usb_out, usb_y0], [hw / 2 - 3, usb_y0]]);
+usb_slant  = 20;                 // both sloping faces lean this far from vertical as printed (the first ears' 45 deg face printed rough)
+module usb_ear_raw() offset(r = usb_fillet) offset(delta = -usb_fillet) {
+    k = tan(usb_slant);          // sideways run per mm out: the two faces mirror each other
+    polygon([[hw / 2 - 3, hy[1] + 3 * k], [hw / 2 + usb_out, hy[1] - usb_out * k],
+             [hw / 2 + usb_out, usb_y0 + usb_out * k], [hw / 2 - 3, usb_y0 - 3 * k]]);
+}
 module usb_ear_2d() intersection() {
     usb_ear_raw();
     translate([hw / 2, usb_y0 - 1]) square([usb_out + 1, hy[1] - 0.01 - usb_y0 + 1]);
@@ -487,7 +507,13 @@ module mouth_diffuser() {
                 cylinder(r = bore_d / 2 - 0.05, h = ring_front);
                 translate([0, 0, -1]) cylinder(r = bore_d / 2 - 0.05 - diff_ledge, h = ring_front + 2);
             }
-            for (a = snap_a) {                                                 // the fingers ...
+            // the wall: a FULL ring beside the LED ring instead of 3 fingers (no gaps for light to leak through). Its
+            // length sets how far the diffuser goes in (it stops on the guide plate): 1.5 mm shorter than the fingers
+            // were (their tips were at snap_at[1] = 6.8). No snap bumps: the diffuser is glued (set diff_snaps for the
+            // old fingers, which click into the chamber's pockets at 6.0 - 6.8).
+            if (!diff_snaps) translate([0, 0, diff_t - 0.01]) linear_extrude(diff_wall_end - diff_t + 0.01)
+                difference() { circle(r = r_fin[1], $fn = 120); circle(r = r_fin[0], $fn = 120); }
+            if (diff_snaps) for (a = snap_a) {                                 // the fingers ...
                 translate([0, 0, diff_t - 0.01]) linear_extrude(snap_at[1] - diff_t + 0.01) arc2d(r_fin[0], r_fin[1], a, snap_w);
                 hull() {                                                       // ... their bumps: a ramp at the tip,
                     translate([0, 0, snap_at[0]]) linear_extrude(0.2) arc2d(r_fin[0], r_fin[1] + snap_bump, a, snap_w);
@@ -498,12 +524,35 @@ module mouth_diffuser() {
             cylinder(d1 = baffle_flare, d2 = baffle_od, h = baffle_flare_h);        // ... flared into the face plate: the view's
                                                                                    //   opening (16) is wider than the tube (15),
                                                                                    //   so without this it hung in the air
+            if (diff_style == "ring") for (a = diff_bridge) rotate(a)               // the bridges' bars, behind the plate
+                translate([diff_slot[0] - diff_slot[1] / 2 - 2, -diff_bridge_w / 2, diff_ring_t])
+                    cube([diff_slot[1] + 4, diff_bridge_w, diff_t - diff_ring_t + diff_bar]);
         }
         // the view: a cone from 16 at the face to the barrel's bore at the lens front (clears the C920's
         // 78 deg diagonal), then the bore round the barrel
+        if (diff_style == "ring") {
+            c0 = diff_slot[0] - diff_chan_w / 2;  c1 = diff_slot[0] + diff_chan_w / 2;
+            translate([0, 0, -0.01]) difference() {                                  // the channel for the white ring, from the front
+                cylinder(r = c1 + cal_hole / 2, h = diff_ring_t + 0.01, $fn = 120);
+                translate([0, 0, -1]) cylinder(r = c0 - cal_hole / 2, h = diff_ring_t + 2, $fn = 120);
+            }
+            translate([0, 0, diff_ring_t - 0.01]) difference() {                     // the lit slot, through the rest of the plate
+                cylinder(r = diff_slot[0] + diff_slot[1] / 2 + cal_hole / 2, h = diff_t - diff_ring_t + 0.02, $fn = 120);
+                translate([0, 0, -1]) cylinder(r = diff_slot[0] - diff_slot[1] / 2 - cal_hole / 2, h = diff_t + 2, $fn = 120);
+                for (a = diff_bridge) rotate(a) translate([diff_slot[0] - diff_slot[1], -diff_bridge_w / 2, -1])
+                    cube([2 * diff_slot[1], diff_bridge_w, diff_t + 2]);               // the bridges stay
+            }
+        }
         translate([0, 0, -0.01]) cylinder(d1 = lens_open, d2 = cube_lip[1] + cal_hole, h = lens_depth + 0.02);
         translate([0, 0, lens_depth]) cylinder(d = cube_lip[1] + cal_hole, h = cube_top);
     }
+}
+
+// the narrow white ring: ONE flat piece, 1.2 thick, glued into the diffuser's channel, face flush. PRINT face-down,
+// translucent white or natural.
+module diffuser_ring() difference() {
+    cylinder(r = diff_slot[0] + diff_chan_w / 2 - diff_slot_fit, h = diff_ring_t, $fn = 120);
+    translate([0, 0, -1]) cylinder(r = diff_slot[0] - diff_chan_w / 2 + diff_slot_fit, h = diff_ring_t + 2, $fn = 120);
 }
 
 // ==== CAM STRAP: across the camera board's back behind the lens, in its own frame (z = 0 at the posts' ends =
@@ -562,6 +611,7 @@ if (part == "cap")      translate([0, 0, -hy[0]]) rotate([90, 0, 0]) head_cap_v2
 if (part == "ears")     for (i = [0, 1]) translate([i * 38, 0, 0]) ear(pivot_stub, 1, pivot_key);    // cap-down
 if (part == "usb_ears") for (i = [0, 1]) translate([i * 40, 0, 0])                                  // outer face down
     rotate([0, 90, 0]) translate([-(hw / 2 + usb_out), -usb_y0, 0]) usb_ear();   
+if (part == "diffuser_ring") diffuser_ring();                                                        // face-down
 if (part == "diffuser") mouth_diffuser();                                                            // face-down
 if (part == "diff_gauge") for (i = [0 : len(gauge_d) - 1]) translate([i * 45, 0, 0]) difference() {      // fit rings,
     od = open_d + cal_hole + gauge_d[i];                                                              //   1-5 notches

@@ -13,12 +13,12 @@
 // Frame: the Seeed mesh's own - centred, top skin at z 13.9..17.9 with the fan opening.
 // +Y = the robot's FRONT (the fan side), -Y = BACK (all the ports), +X = the robot's right (40-pin header).
 // part = "shell" | "plate" | "view"
-include <../params.scad>
+include <../../params.scad>
 
 part = "view";
 
-shell_stl = "../vitamins/models/seeed_orin_case_shell.stl";
-plate_stl = "../vitamins/models/seeed_orin_case_plate.stl";
+shell_stl = "../../vitamins/models/seeed_orin_case_shell.stl";
+plate_stl = "../../vitamins/models/seeed_orin_case_plate.stl";
 
 // ---- the Seeed shell (MEASURED from the mesh) -----------------------------------------------------------
 case_xy   = [114.9, 105.5];

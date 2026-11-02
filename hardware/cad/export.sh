@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Render every printable part in parts/ to out/<name>.3mf (Bambu Studio opens 3MF/STL).
+# Render every printable part in parts/ (and parts/prototype/ coupons, gauges, fit tests) to out/<name>.3mf (Bambu Studio opens 3MF/STL).
 #   ./export.sh            all parts
 #   ./export.sh ls_gauge   just one
 set -euo pipefail
@@ -18,8 +18,9 @@ BACKEND=()
 
 mkdir -p out
 parts=("$@")
-[ ${#parts[@]} -eq 0 ] && parts=($(cd parts && ls *.scad | sed 's/\.scad$//'))
+[ ${#parts[@]} -eq 0 ] && parts=($(cd parts && ls *.scad prototype/*.scad | sed 's/\.scad$//'))
 for p in "${parts[@]}"; do
     echo "rendering $p"
+    mkdir -p "out/$(dirname "$p")"
     "$OPENSCAD" "${BACKEND[@]}" -o "out/$p.3mf" "parts/$p.scad"
 done

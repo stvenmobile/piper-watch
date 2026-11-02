@@ -4,7 +4,7 @@
 // (side walls ~100 mm apart with 608 bearing bosses and M8 axles, a front wall carrying the 2.4" CYD), and
 // the base section widened to the Orin case's 100 mm main part.
 //   tilt = head angle (deg, + = up); pan = deg, + = left.
-include <../parts/servo_test_c920.scad>
+include <../parts/archive/servo_test_c920.scad>
 part = "none";
 tilt = 20;
 pan  = 0;

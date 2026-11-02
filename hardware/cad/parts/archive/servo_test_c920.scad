@@ -11,7 +11,7 @@
 //
 // Frame: the head's (as head() in servo_test_stand.scad): axle along X at the origin, +Y forward, +Z up.
 // part = "holder" | "rail" | "view"
-include <servo_test_stand.scad>
+include <../servo_test_stand.scad>
 part = "view";                       // (after the include: overrides the stand's own part)
 
 // ---- the board (MEASURED 2026-10-21) --------------------------------------------------------------

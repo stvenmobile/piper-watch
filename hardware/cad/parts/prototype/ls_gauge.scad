@@ -6,7 +6,7 @@
 // marks. Ticks are every 1 mm of radius = 2 mm of bolt-circle diameter; every 4th tick
 // is labelled with the bolt-circle diameter it stands for.
 // Then put the real values into params.scad (ls_outer_bc, ls_inner_bc, ls_hole_d).
-include <../params.scad>
+include <../../params.scad>
 
 t      = 2.0;      // gauge thickness
 span   = 6;        // slot reaches up to +/- this many mm of radius around the estimate

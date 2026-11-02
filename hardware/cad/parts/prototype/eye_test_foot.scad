@@ -1,6 +1,6 @@
 // Desk foot for eye_test_stand.scad: a weighted base with a socket the stand's stem plugs into,
 // tilted back so the eye looks up 10 deg (a seated person at a desk). Print flat, no supports.
-include <../params.scad>
+include <../../params.scad>
 
 stem     = [16, 16];            // the stand's stem cross-section
 fit      = 0.3;                 // each side: snug push fit

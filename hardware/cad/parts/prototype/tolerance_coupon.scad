@@ -4,7 +4,7 @@
 // Row 2: M4 holes, nominal + 0.0 ... 0.4 mm
 // Row 3: heat-set insert bores for M3 and M4 at two sizes each (pick the one that melts in straight)
 // Put the winners into params.scad (clr_hole, insert_m3, insert_m4).
-include <../params.scad>
+include <../../params.scad>
 
 steps = [0, 0.1, 0.2, 0.3, 0.4];
 pitch = 12;

@@ -22,7 +22,7 @@
 // race between the ear's shoulder (it reaches through the lip) and the wall's boss, and spreads the stub: the
 // ear and the wall should then turn together, freely, with the bearing - nothing rubbing on the bar.
 // PRINT: everything as laid out (bar flat, ears cap-down, wall inside-face up), no supports.
-include <../params.scad>
+include <../../params.scad>
 
 part = "all";                    // "all" | "bar" | "ears" | "wall"   ("ears" alone for round 2)
 

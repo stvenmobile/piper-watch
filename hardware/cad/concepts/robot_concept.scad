@@ -7,7 +7,7 @@
 // Origin: desk surface under the centre of the case; +Y = front (the Jetson's ports face -Y).
 include <../params.scad>
 use <../vitamins/lazy_susan.scad>
-use <../parts/turntable_pulley.scad>
+use <../parts/archive/turntable_pulley.scad>
 
 cutaway = false;          // true: cut away the front half to see inside
 

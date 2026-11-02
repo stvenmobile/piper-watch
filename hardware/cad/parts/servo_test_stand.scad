@@ -30,6 +30,7 @@ include <../params.scad>
 
 part = "assembly";
 turret_cheeks = true;       // false: the turret without its cheeks (parts/turret_v2.scad adds its own yoke plates)
+base_legs = true;          // false: the base's top plate and sleeve without the four legs (parts/base_v2.scad hangs it from the lid)
 pan  = 0;
 tilt = 20;
 
@@ -124,7 +125,7 @@ module base() {
             translate([0, 0, -plate_t]) linear_extrude(plate_t)                                  // top plate
                 translate([(plate[0][0] + plate[0][1]) / 2, (plate[1][0] + plate[1][1]) / 2])
                     rrect([plate[0][1] - plate[0][0], plate[1][1] - plate[1][0]], 6);
-            for (x = plate[0], y = plate[1])                                                     // legs
+            if (base_legs) for (x = plate[0], y = plate[1])                                      // legs
                 translate([x - (x > 0 ? leg : 0), y - (y > 0 ? leg : 0), z_desk]) cube([leg, leg, -z_desk - 0.01]);
             box([sx[0] - sleeve_t, sx[1] + sleeve_t], [sy[0] - sleeve_t, sy[1]], [z_case_bot, -plate_t + 0.01]);  // sleeve
             for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, z_case_bot])         // bosses for the strap inserts

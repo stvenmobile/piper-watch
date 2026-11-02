@@ -2,7 +2,7 @@
 // Top row: insert bores (blind) at 6.2 / 6.4 / 6.6 mm - pick the one that melts in straight
 // and holds firmly. Bottom row: clearance holes M5 + 0.3 / + 0.4 (through).
 // Put the winners into params.scad (insert_m5).
-include <../params.scad>
+include <../../params.scad>
 
 bores = [6.2, 6.4, 6.6];
 holes = [m5 + clr_hole, m5 + clr_hole + 0.1];

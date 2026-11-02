@@ -35,7 +35,7 @@ insert_m4   = [5.6, 6.0];        // coupon "M4a" confirmed
 m5          = 5.0;
 insert_m5   = [6.4, 7.0];        // EST - confirm with parts/m5_coupon.scad
 
-// --- Head pivot: 608-2RS bearing + printed "ear" pin (parts/head_pivot_coupon.scad, PETG, 2026-10-24) ----
+// --- Head pivot: 608-2RS bearing + printed "ear" pin (parts/prototype/head_pivot_coupon.scad, PETG, 2026-10-24) ----
 // Chosen: a smooth pivot with almost no play. Big holes shrink less than cal_hole says: the pocket that
 // HOLDS a 22.0 bearing (stays in upside down, light press) is drawn 21.8 + cal_hole (22.2 to the slicer).
 pivot_pocket   = 21.8;           // + cal_hole: the 608's pocket (22.2-22.6 and 21.9-22.1 drawn: bearing fell out)

@@ -2,7 +2,7 @@
 // circles. Lay the bearing on it, line up the holes, and push M5 screws through the
 // bearing into all eight holes. If they all drop straight in, ls_outer_bc and
 // ls_inner_bc in params.scad are right and the box top / top plate will line up.
-include <../params.scad>
+include <../../params.scad>
 
 t = 2.0;                               // thickness
 hole_d = m5 + clr_hole;                // M5 clearance (5.3), same rule the real parts use

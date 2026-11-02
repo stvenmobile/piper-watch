@@ -4,8 +4,8 @@
 // The notch marks the TOP edge. Check: screw the JC4827W543 on (image upright) (M3 x 6-8 into heat-set inserts); the image should fill the
 // window evenly with only black border showing, and the glass should sit flat on the wall.
 // PRINT as modelled: face down on the bed, posts up, no supports.
-use <l2_body.scad>
-include <../level2.scad>
+use <../archive/l2_body.scad>
+include <../../level2.scad>
 
 disp_zc = -l2_h / 2;                           // must match l2_body.scad
 half    = l2_size[0] / 2;

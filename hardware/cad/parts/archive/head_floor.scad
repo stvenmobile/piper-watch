@@ -9,7 +9,7 @@
 //
 // PRINT upside down? No - as modelled (bottom on the bed): the nut pockets underneath are
 // bridged (12 mm), the tabs stand up. PETG.
-include <../head.scad>
+include <../../head.scad>
 
 tab_w = 14;
 tab_d = 8;              // along Y

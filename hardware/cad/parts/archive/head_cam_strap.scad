@@ -3,7 +3,7 @@
 // against the plate.
 //
 // PRINT flat (as modelled), no supports.
-include <../head_cam.scad>
+include <../../head_cam.scad>
 
 strap_w = 10;
 strap_t = 2.5;

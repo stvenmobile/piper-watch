@@ -15,7 +15,7 @@
 // PRINT upside down - out/skirt.3mf is exported that way (print_flipped), top face on the bed - no
 // supports: the back opening then has no bridge, the pads sit on the bed, and the stops have
 // 45-degree undersides. PETG, 3-4 walls. Then four M3 heat-set inserts into the pads, from the top.
-include <../level2.scad>
+include <../../level2.scad>
 
 print_flipped = true;           // export it upside down, ready to print (assembly.scad uses skirt() the right way up)
 

@@ -4,7 +4,7 @@
 // Screw an M3 x 8 into each: pick the one that goes in firmly by hand with a screwdriver and holds
 // without the boss splitting, and set tap_m3 to it.
 // PRINT flat, as modelled, PETG, the body's settings.
-include <../params.scad>
+include <../../params.scad>
 
 sizes = [2.8, 2.9, 3.0];
 difference() {

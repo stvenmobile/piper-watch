@@ -15,8 +15,8 @@
 // Modelled in PRINT ORIENTATION: the plate's top (neck side) on the bed, the tube rising from
 // it, the teeth at the top. No supports: the flanges have 45 deg chamfers underneath, and the
 // clamp slots are open at the top so the belt presses in from the end of the tube.
-include <../params.scad>
-include <../head.scad>            // the head's floor screws (floor_mounts, head_rot_in_pulley)
+include <../../params.scad>
+include <../../head.scad>            // the head's floor screws (floor_mounts, head_rot_in_pulley)
 
 // ---- pulley -----------------------------------------------------------------------------
 pulley_T   = 100;                       // teeth

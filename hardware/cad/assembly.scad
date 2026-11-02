@@ -5,11 +5,11 @@
 // +Z = up. Level 2's own frame (level2.scad: origin = top of the drive deck) sits at z_l2.
 // F5 previews in colour.
 include <level2.scad>
-use <parts/l2_body.scad>
-use <parts/skirt.scad>
-use <parts/drive_deck.scad>
-use <parts/motor_bracket.scad>
-use <parts/turntable_pulley.scad>
+use <parts/archive/l2_body.scad>
+use <parts/archive/skirt.scad>
+use <parts/archive/drive_deck.scad>
+use <parts/archive/motor_bracket.scad>
+use <parts/archive/turntable_pulley.scad>
 use <vitamins/lazy_susan.scad>
 use <head_assembly.scad>
 include <head.scad>

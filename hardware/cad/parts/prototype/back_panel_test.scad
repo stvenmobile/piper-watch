@@ -7,7 +7,7 @@
 //   * barrel jack (5.5 x 2.1 IP68, 11.2 mm thread): 11.5 mm hole, flange + gasket outside, nut
 //     inside - goes in without forcing, nut pulls the gasket flat; its nut clears the fuse's
 // PRINT outer face down (as modelled here), no supports. PETG, same settings as the body.
-use <l2_body.scad>
+use <../archive/l2_body.scad>
 
 margin = 8;                        // wall kept round the features
 x0 = -40 - 11 - margin;            // fuse / jack column at x = -40 (fuse ring nut ~20 across) ...

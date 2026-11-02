@@ -4,7 +4,7 @@
 // together with ring_diffuser.scad.
 // Check: the diffuser presses in flush from the front; the ring drops in from the back and
 // sits flat on its PCB edges (not rocking on the LEDs); then light it to judge the glow.
-use <head_front.scad>
+use <../archive/head_front.scad>
 
 r_in  = 23;      // band inner radius (inside the diffuser seat)
 r_out = 37;      // band outer radius (outside the ring pocket wall)

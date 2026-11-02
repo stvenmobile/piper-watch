@@ -14,7 +14,7 @@
 //
 // Modelled in place (deck frame, see level2.scad) with the plate at the bottom.
 // PRINT as modelled: plate on the bed, walls up, no supports. PETG.
-include <../level2.scad>
+include <../../level2.scad>
 
 m3_clear  = 3.4 + cal_hole;               // prints ~3.35 (PETG): M3 slides through
 plate_u   = [-nema[0] / 2 - 0.5, 35];     // plate extent along the radial line (motor frame)
