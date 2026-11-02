@@ -141,8 +141,13 @@ arm_x = [38, 41];                               // pivot arms, 3 thick, inside t
 pl_x = 38;  pl_y = [20, 24];  pl_h = 30;        // camera plate: half-width, forward of the axle (rear/front face), height
 tsv = [-22, 10];  tsv_y = [-48.5, -48.5 + 45.22];  tsv_z = [z_ft, z_ft + 24.72];       // tilt servo body: x, y, z (shaft along X, near its back end)
 tsh = [-22, tsv_y[0] + 10.11, z_ft + 12.36];    // shaft: x of the horn face, y, z
-pin_s = [-27, tsh[1] + 12 * cos(60), tsh[2] + 12 * sin(60)];                           // servo crank pin (12 mm, 60 deg up/forward)
-pin_h = [-33, ax_y - 12, ax_z - 8];                                                    // head crank pin (14.4 from the axle, low and behind)
+// linkage (solved over the tilt range -35 .. +45 deg: monotonic, transmission angle >= 63 deg, 71 deg of servo travel)
+cr_s = 15;  sa0 = 100;                          // servo crank length, its angle at tilt 0 (from +Y, counter-clockwise seen from +X)
+cr_h = 18;  hb0 = 220;                          // head crank length, its direction at tilt 0 (220 = down and back)
+rod_L = 33.9;                                   // pin centre to pin centre (planar; +1.5 for the 6 mm X offset)
+tilt4 = 0;  sa4 = 100;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
+pin_s = [-27, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin
+pin_h = [-33, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin (moves with the head)
 hub_a = 30;                                     // flange screws at 30/120/210/300 deg: none under the tilt servo
 
 module hub4() difference() {                    // the stand's hub, its four flange inserts turned to hub_a + k*90 to clear the tilt servo
@@ -180,7 +185,7 @@ module turret4() difference() {
         translate([s > 0 ? ch_x[0] : -ch_x[1] - 1, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 12 + cal_hole, h = ch_t4 + 1, $fn = 48);
     }
 }
-module head4() {
+module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -ax_y, -ax_z]) {
     color("#8a8d91") translate([-pl_x, ax_y + pl_y[0], ax_z - pl_h / 2]) cube([2 * pl_x, pl_y[1] - pl_y[0], pl_h]);           // camera plate
     for (s = [-1, 1]) color("#6b8fb5") hull() {                                                                              // arms
         translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 16, h = 3, $fn = 40);
@@ -189,12 +194,16 @@ module head4() {
     for (s = [-1, 1]) color("#6b8fb5") translate([s > 0 ? arm_x[1] : -ch_x[1] - 0.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 8, h = (s > 0 ? ch_x[1] - arm_x[1] : ch_x[1] - arm_x[1] + 0.5 + (ch_x[1] - ch_x[1])) + 0.01, $fn = 24);   // axle stubs (into the 608s)
     color("#6b8fb5") hull() {                                                                                                  // crank bracket on the left arm
         translate([-arm_x[1] - 0.01, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 12, h = 3.01, $fn = 32);
-        translate([pin_h[0] + 1, pin_h[1], pin_h[2]]) rotate([0, 90, 0]) cylinder(d = 8, h = 6, $fn = 24);
+        translate([pin_h[0] + 1, ax_y + cr_h * cos(hb0), ax_z + cr_h * sin(hb0)]) rotate([0, 90, 0]) cylinder(d = 8, h = 6, $fn = 24);
     }
     if (part == "v4_view") {
     color("#222") translate([-40, ax_y + pl_y[1], ax_z - 11]) cube([80, 10, 22]);                                          // camera board (80 x 22 to confirm)
     color("#111") translate([0, ax_y + pl_y[1] + 10, ax_z]) rotate([-90, 0, 0]) cylinder(d = 16, h = 3, $fn = 40);        // lens
     }
+}
+module crank4() color("#e8a33d") hull() {
+    translate([tsh[0] - 3, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = 10, h = 5, $fn = 30);
+    translate([pin_s[0] - 1, pin_s[1], pin_s[2]]) rotate([0, 90, 0]) cylinder(d = 7, h = 4, $fn = 24);
 }
 module tilt_rod4() color("#c0392b") hull() {
     translate(pin_s) rotate([0, 90, 0]) cylinder(d = 4, h = 5, center = true, $fn = 20);
@@ -209,6 +218,7 @@ module turret_stack4() {                        // everything above the lid, sta
     color("#6b8fb5") turret4();
     color("#b0b6bd") translate([tsv[0], tsv_y[0], tsv_z[0]]) cube([tsv[1] - tsv[0], tsv_y[1] - tsv_y[0], tsv_z[1] - tsv_z[0]]);   // tilt servo
     color("#e8a33d") translate([tsh[0] - 3, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = 24, h = 3, $fn = 40);        // its horn
+    crank4();
     tilt_rod4();
     head4();
 }
