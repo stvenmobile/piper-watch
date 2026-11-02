@@ -8,12 +8,19 @@ part = "none";
 tilt = 0;
 pan  = 0;
 head_stl = "out/head_all.stl";
+show_skirt = false;              // the rotating skirt (rough concept): a thin drum from the turret floor down to just above the lid
+skirt_r    = 55;                 // the pan axis is 24 off-centre, so the front wall is 56 away: no more room
+skirt_gap  = 3;                  // above the lid
 
 module stack() {                         // the stand's frame: pan axis at X = Y = 0, Z = 0 at the plate's top face
     color("#2b2b2b") translate([0, 0, z_case_bot - strap_t]) pan_strap();
     color("#b0b6bd") translate([-pb[0] / 2, -pb[1] / 2, 0]) cube(pb);                             // pillow block
     translate([0, 0, z_horn - disc_h]) rotate([0, 0, 90]) servo_model();                           // pan servo
     rotate([0, 0, pan]) {
+        if (show_skirt) color("#d9dde2") difference() {
+            translate([0, 0, -plate_t + skirt_gap]) cylinder(r = skirt_r, h = z_floor + plate_t - skirt_gap, $fn = 120);
+            translate([0, 0, -plate_t + skirt_gap - 1]) cylinder(r = skirt_r - 2, h = z_floor + plate_t - skirt_gap + 2, $fn = 120);
+        }
         color("#e8a33d") hub();
         color("#2b2b2b") turret_v2();
         color("#6b8fb5") cheek_r();
