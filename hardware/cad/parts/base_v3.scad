@@ -63,6 +63,39 @@ module xz_cut(pts, y0 = -76, len = 5) translate([0, y0, 0]) rotate([90, 0, 0]) l
 module standoff(p, d, h) translate([p[0], p[1], fl - 0.01]) cylinder(d = d, h = h + 0.01, $fn = 40);
 module standoff_bore(p, h, ins) translate([p[0], p[1], fl + h - ins[1]]) cylinder(d = ins[0], h = ins[1] + 1, $fn = 24);
 
+// ---- webs: every boss near a wall is tied to it by a solid hull (circle + the wall strip beside it), never a tangent ----------
+function wdirs(p, th) = [for (a = [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (a[0] * p[0] + a[1] * p[1] > (a[0] != 0 ? x_in : y_in) - th) a];
+module wstrip(p, a, hw)                                                          // the wall's thickness, 2 hw wide, beside p
+    translate(a[0] != 0 ? [a[0] * (x_in + 1.5), p[1]] : [p[0], a[1] * (y_in + 1.5)])
+        rotate(a[0] != 0 ? 0 : 90) square([3, 2 * hw], center = true);
+module web2d(p, d, th, hw) hull() { translate(p) circle(d = d, $fn = 40); for (a = wdirs(p, th)) wstrip(p, a, hw); }
+
+// corbel: the web at the lid seat, tapering to a thin root on the wall 23 mm lower (steep sides, nothing to bridge)
+module corbel_web(p) hull() {
+    translate([0, 0, lid_z - 0.01]) linear_extrude(0.01) web2d(p, post_d, 10.5, 11);
+    translate([0, 0, lid_z - 23]) linear_extrude(0.01) hull() { translate(p) circle(d = 0.01); for (a = wdirs(p, 10.5)) wstrip(p, a, 5.5); }
+}
+corbel_pairs = [for (i = [0 : len(lid_pts) - 1], j = [0 : len(lid_pts) - 1]) if (j > i && norm(lid_pts[i] - lid_pts[j]) < 16) [i, j]];
+module corbels() intersection() {                                              // clipped inside the outer skin (webs reach into the walls)
+    union() {
+        for (p = lid_pts) {
+            corbel_web(p);
+            translate([p[0], p[1], lid_z - 18]) cylinder(d = post_d, h = 18, $fn = 40);        // the boss itself, 45 deg cone underneath
+            translate([p[0], p[1], lid_z - 23]) cylinder(d1 = 0.01, d2 = post_d, h = 5, $fn = 40);
+        }
+        for (q = corbel_pairs) hull() { corbel_web(lid_pts[q[0]]); corbel_web(lid_pts[q[1]]); }   // two bosses together: filled between
+    }
+    translate([0, 0, fl]) slab(bw - 1, bd - 1, rr - 0.5, lid_z);
+}
+module floor_webs() intersection() {                                           // low webs (1.5 under the standoff tops, so nothing touches the boards)
+    translate([0, 0, fl - 0.01]) linear_extrude(so_h - 1.5) union() {
+        for (p = orin_pts) web2d(p, 8, 14, 9);
+        for (p = ad_pts)   web2d(p, 6.5, 9, 8);
+        for (p = fuse_pts) web2d(p, 7, 12, 8);
+    }
+    translate([0, 0, fl - 1]) slab(bw - 1, bd - 1, rr - 0.5, 20);
+}
+
 // ==== TUB ============================================================================================================
 module tub() {
     difference() {
@@ -71,10 +104,8 @@ module tub() {
                 slab(bw, bd, rr, lid_z);
                 translate([0, 0, fl]) slab(2 * x_in, 2 * y_in, rr - wt, lid_z);
             }
-            for (p = lid_pts) {                                              // corbels at the wall tops, 45 deg cone underneath
-                translate([p[0], p[1], lid_z - 18]) cylinder(d = post_d, h = 18, $fn = 40);
-                translate([p[0], p[1], lid_z - 23]) cylinder(d1 = 0.01, d2 = post_d, h = 5, $fn = 40);
-            }
+            corbels();
+            floor_webs();
             for (p = orin_pts) standoff(p, 8, so_h);
             for (p = ad_pts) standoff(p, 6.5, so_h);
             for (p = fuse_pts) standoff(p, 7, so_h);
