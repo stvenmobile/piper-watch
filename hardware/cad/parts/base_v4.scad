@@ -145,6 +145,7 @@ tsh = [-22, tsv_y[0] + 10.11, z_ft + 12.36];    // shaft: x of the horn face, y,
 cr_s = 14;  sa0 = 100;                          // servo crank length, its angle at tilt 0 (from +Y, counter-clockwise seen from +X)
 cr_h = 17;  hb0 = 210;                          // head crank length, its direction at tilt 0 (210 = down and back)
 rod_L = 44.9;                                   // pin centre to pin centre (planar; +1.5 for the 6 mm X offset)
+show_fov = false;  fov_v = 43;                 // draw the camera's centre ray and its vertical field of view (C920 ~43 deg, to confirm)
 tilt4 = 0;  sa4 = 100;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
 pin_s = [-27, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin
 pin_h = [-33, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin (moves with the head)
@@ -221,6 +222,10 @@ module turret_stack4() {                        // everything above the lid, sta
     crank4();
     tilt_rod4();
     head4();
+    if (show_fov) for (da = [-fov_v / 2, 0, fov_v / 2]) color(da == 0 ? "#ffd400" : "#ff7a00") {
+        a = tilt4 + da;  l0 = [ax_y + (pl_y[1] + 13) * cos(tilt4), ax_z + (pl_y[1] + 13) * sin(tilt4)];       // the lens
+        hull() { translate([0, l0[0], l0[1]]) cube(0.8, center = true); translate([0, l0[0] + 220 * cos(a), l0[1] + 220 * sin(a)]) cube(0.8, center = true); }
+    }
 }
 
 // ==== ghosts + view ====================================================================================================
