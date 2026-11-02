@@ -4,9 +4,9 @@
 //
 //   TUB    floor + walls, open at the top. M3 standoffs (inserts) for the Orin (86 x 58), M2.5 for the adapter (turned -90 deg:
 //          servo ports toward the pan servo, power toward the front, USB-C to a hole in the left wall), 2 M3 for the fuse /
-//          terminal block, 12 corbels (M3 inserts) at the wall tops for the lid, port slot (back), antenna holes + inlet
+//          terminal block, 6 corbels (M3 inserts) at the wall tops for the lid, port slot (back), antenna holes + inlet
 //          slots (left), inlet slots (right), 12 V jack hole (right), 4 feet recesses.
-//   LID    8 mm plate on the 12 corbels. Sleeve slot (also the cable hole for the head's 3 cables), 6 nut traps for the pan
+//   LID    8 mm plate on the 6 corbels. Sleeve slot (also the cable hole for the head's 3 cables), 6 nut traps for the pan
 //          plate, vent slots over the Orin's fan.
 //   PLATE  the stand's base() without legs, bolted through the lid (as v2).
 //
@@ -53,10 +53,10 @@ fuse_pts = [[fuse_o[0] + 5, fuse_o[1] + 10], [fuse_o[0] + 25, fuse_o[1] + 10]];
 jack_y = 50;  jack_z = 18;  jack_d = 11.5;
 
 // ---- lid corbels: all clear of the drum's circle (r 54 about the pan axis) ----------------------------------------------------
-pp = 4.5;  post_d = 10;
+pp = 4.5;  post_d = 12;
+// 6 screws: a boss in each corner and one at the middle of each long side (level with the pan axis)
 lid_pts = concat([for (sx = [-1, 1], sy = [-1, 1]) [sx * (x_in - pp), sy * (y_in - pp)]],
-                 [[-(x_in - pp), -25], [-(x_in - pp), 55], [x_in - pp, -25], [x_in - pp, 55],
-                  [-40, y_in - pp], [40, y_in - pp], [-40, -(y_in - pp)], [40, -(y_in - pp)]]);
+                 [[-(x_in - pp), pan_y], [x_in - pp, pan_y]]);
 
 module slab(w, d, r, h) linear_extrude(h) offset(r = r) square([w - 2 * r, d - 2 * r], center = true);
 module xz_cut(pts, y0 = -76, len = 5) translate([0, y0, 0]) rotate([90, 0, 0]) linear_extrude(len) polygon(pts);
@@ -70,25 +70,24 @@ module wstrip(p, a, hw)                                                         
         rotate(a[0] != 0 ? 0 : 90) square([3, 2 * hw], center = true);
 module web2d(p, d, th, hw) hull() { translate(p) circle(d = d, $fn = 40); for (a = wdirs(p, th)) wstrip(p, a, hw); }
 
-// corbel: the web at the lid seat, tapering to a thin root on the wall 23 mm lower (steep sides, nothing to bridge)
+// corbel: a web at the lid seat tapering to a thin root on the wall (steep sides, nothing to bridge). Corners are the strong ones:
+// wider web (hw 14 vs 11); the front corners run full height to the floor, the back corners 40 deep (the Orin board is under them).
+function corner(p) = abs(p[1]) > 60;
+function cdepth(p) = p[1] < -60 ? 40 : 23;
+full_boss = function(p) p[1] > 60;                                              // the front corners: nothing under them (adapter / fuse block kept clear)
 module corbel_web(p) hull() {
-    translate([0, 0, lid_z - 0.01]) linear_extrude(0.01) web2d(p, post_d, 10.5, 11);
-    translate([0, 0, lid_z - 23]) linear_extrude(0.01) hull() { translate(p) circle(d = 0.01); for (a = wdirs(p, 10.5)) wstrip(p, a, 5.5); }
+    translate([0, 0, lid_z - 0.01]) linear_extrude(0.01) web2d(p, post_d, 10.5, corner(p) ? 14 : 11);
+    translate([0, 0, lid_z - cdepth(p)]) linear_extrude(0.01) hull() { translate(p) circle(d = 0.01); for (a = wdirs(p, 10.5)) wstrip(p, a, corner(p) ? 7 : 5.5); }
 }
-full_boss = function(p) p[1] > 60 && abs(p[0]) > 45;                           // the front corners: nothing under them (adapter / fuse block kept clear)
 module corbel_column(p) translate([0, 0, fl - 0.01]) linear_extrude(lid_z - fl + 0.01) web2d(p, post_d, 10.5, 8);
-corbel_pairs = [for (i = [0 : len(lid_pts) - 1], j = [0 : len(lid_pts) - 1]) if (j > i && norm(lid_pts[i] - lid_pts[j]) < 16) [i, j]];
 module corbels() intersection() {                                              // clipped inside the outer skin (webs reach into the walls)
-    union() {
-        for (p = lid_pts) {
-            corbel_web(p);
-            if (full_boss(p)) corbel_column(p);                                          // clear all the way down: a full-height column
-            else {
-                translate([p[0], p[1], lid_z - 18]) cylinder(d = post_d, h = 18, $fn = 40);        // the boss itself, 45 deg cone underneath
-                translate([p[0], p[1], lid_z - 23]) cylinder(d1 = 0.01, d2 = post_d, h = 5, $fn = 40);
-            }
+    union() for (p = lid_pts) {
+        corbel_web(p);
+        if (full_boss(p)) corbel_column(p);                                      // clear all the way down: a full-height column
+        else {
+            translate([p[0], p[1], lid_z - cdepth(p) + 5]) cylinder(d = post_d, h = cdepth(p) - 5, $fn = 40);   // the boss, 45 deg cone underneath
+            translate([p[0], p[1], lid_z - cdepth(p)]) cylinder(d1 = 0.01, d2 = post_d, h = 5, $fn = 40);
         }
-        for (q = corbel_pairs) hull() { corbel_web(lid_pts[q[0]]); corbel_web(lid_pts[q[1]]); }   // two bosses together: filled between
     }
     translate([0, 0, fl]) slab(bw - 1, bd - 1, rr - 0.5, lid_z);
 }
