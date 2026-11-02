@@ -1,7 +1,7 @@
 // CONCEPT v4 (first look, estimated sizes - not parts):
 //   - the base box holds only the electronics (Orin, servo adapter, fuse + 12 V jack); its lid carries everything above
-//   - the pan servo STANDS on the lid inside a fixed cylindrical WALL; the rotating turret's SKIRT slides down over that wall
-//     and hides the servo completely (skirt on the horn hub through the turret floor)
+//   - the pan servo STANDS on the lid inside a STATIONARY cylinder (bolted to the lid) that runs up to a few mm below the rotating
+//     tilt plate; the plate carries a short rotating SKIRT that hangs down over the top of the cylinder and hides the gap
 //   - narrow camera-only head, tilted by a servo + connecting rod (no LEDs, no LCD)
 // Frame: pan axis = (0,0) on the lid; +Y = front; Z = 0 at the underside of the base floor.
 // part = "view"   cut = true slices the box / wall / skirt open on the robot's right (x > 0) so the insides show
@@ -15,12 +15,12 @@ lid_z = 34;  lid_t = 8;  lid_top = lid_z + lid_t;               // heatsink top 
 box_y = 4;                                                       // box centre, behind the pan axis a little (Orin at the back)
 
 // ---- pan stack ---------------------------------------------------------------------------------------------------
-wall_r = 52;  wall_t = 4;  wall_h = 32;                          // fixed wall on the lid (houses the 32 tall pan servo)
-sk_in  = 54;  sk_out = 57.5;                                     // skirt: 2 mm over the wall, 3.5 thick
-sk_z0  = lid_top + 2;
-z_f    = lid_top + wall_h + 12;                                  // turret floor top (servo 32 + horn/hub ~10)
+gap_t  = 3;                                                      // fixed cylinder top -> underside of the rotating plate
+z_f    = lid_top + 32 + 12;                                      // turret floor top (servo 32 + horn/hub ~10)
 fl_t   = 4;
-
+wall_r = 54.5;  wall_t = 4;  wall_h = z_f - fl_t - gap_t - lid_top;   // fixed cylinder: ~37 tall, around the pan servo
+sk_in  = 56;  sk_out = 57.5;                                     // rotating skirt: 1.5 over the cylinder, 1.5 thick, flush with it
+sk_h   = 14;  sk_z0 = z_f - fl_t - sk_h;                         // hangs 14 below the plate = overlaps the cylinder top by 11
 // ---- head: camera board behind a window, ~84 wide ----------------------------------------------------------------
 hw = 84;  hh = 40;  hy = [-14, 22];                              // width, height, back..front from the axle
 ax_y = 10;  ax_z = z_f + 40;                                     // tilt axle (x), in the turret frame
