@@ -278,5 +278,5 @@ if (part == "v4_lid") translate([0, 0, -ledge_z]) lid4();
 if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
-if (part == "v4_cover") for (i = [0, 1]) translate([i * 40, 0, 0]) cylinder(d = 36, h = 3.5, $fn = 80);
+if (part == "v4_cover") cylinder(d = 36, h = 3.5, $fn = 80);   // print two
 if (part == "v4_head") translate([0, 0, -(ax_z - pl_h / 2)]) head4();
