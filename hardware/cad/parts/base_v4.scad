@@ -135,16 +135,16 @@ module skirt4s() { base(); skirt_extra4(); }
 // ==== TURRET v4 + HEAD v4 (stand frame: pan axis = origin, z = 0 at the plate top) =========================================
 // The head is a VERTICAL camera plate carried 20 mm in front of the tilt axle by two arms; the axle is only 32 mm above the floor.
 // The tilt servo lies behind the axle on the LEFT (x -22..10) and pulls a short, nearly horizontal rod to a crank on the left arm.
-ax_y = 6;  ax_z = z_ft + 32;                    // tilt axle (along X)
+ax_y = 18;  ax_z = z_ft + 26;                   // tilt axle (along X): forward, so the lens sits ~5 mm inside the rim
 ch_x = [42, 50];  ch_t4 = 8;                    // cheeks (608 pocket each), outer face r < 54.5 at y +-16
 arm_x = [38, 41];                               // pivot arms, 3 thick, inside the cheeks (1 mm washer gap)
-pl_x = 38;  pl_y = [20, 24];  pl_h = 30;        // camera plate: half-width, forward of the axle (rear/front face), height
+pl_x = 38;  pl_y = [14, 18];  pl_h = 30;        // camera plate: half-width, forward of the axle (rear/front face), height
 tsv = [-22, 10];  tsv_y = [-48.5, -48.5 + 45.22];  tsv_z = [z_ft, z_ft + 24.72];       // tilt servo body: x, y, z (shaft along X, near its back end)
 tsh = [-22, tsv_y[0] + 10.11, z_ft + 12.36];    // shaft: x of the horn face, y, z
-// linkage (solved over the tilt range -35 .. +45 deg: monotonic, transmission angle >= 63 deg, 71 deg of servo travel)
-cr_s = 15;  sa0 = 100;                          // servo crank length, its angle at tilt 0 (from +Y, counter-clockwise seen from +X)
-cr_h = 18;  hb0 = 220;                          // head crank length, its direction at tilt 0 (220 = down and back)
-rod_L = 33.9;                                   // pin centre to pin centre (planar; +1.5 for the 6 mm X offset)
+// linkage (solved: monotonic over -25 .. +45 deg; wanted -22 .. +23)
+cr_s = 14;  sa0 = 100;                          // servo crank length, its angle at tilt 0 (from +Y, counter-clockwise seen from +X)
+cr_h = 17;  hb0 = 210;                          // head crank length, its direction at tilt 0 (210 = down and back)
+rod_L = 44.9;                                   // pin centre to pin centre (planar; +1.5 for the 6 mm X offset)
 tilt4 = 0;  sa4 = 100;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
 pin_s = [-27, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin
 pin_h = [-33, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin (moves with the head)
@@ -166,7 +166,7 @@ module hub4() difference() {                    // the stand's hub, its four fla
 }
 module turret4() difference() {
     union() {
-        translate([0, 0, z_floor]) linear_extrude(floor_t) intersection() { circle(r = 53.5, $fn = 160); square([104, 104], center = true); }
+        translate([0, 0, z_floor]) linear_extrude(floor_t) intersection() { circle(r = 57.5, $fn = 160); square([116, 116], center = true); }
         // cradle for the tilt servo: low walls round its footprint, closed at the shaft end only
         difference() {
             box([tsv[0] - 3, tsv[1] + 3], [tsv_y[0] - 3, tsv_y[1] + 3], [z_ft - 0.01, z_ft + 10]);
@@ -174,7 +174,7 @@ module turret4() difference() {
             box([tsv[0] - 4, tsv[0] + 1], [tsv_y[0] + 20, tsv_y[0] + 40], [z_ft + 3, z_ft + 11]);           // the horn side open
         }
         for (s = [-1, 1]) hull() {                                                                         // cheeks
-            box(s > 0 ? ch_x : [-ch_x[1], -ch_x[0]], [ax_y - 16, ax_y + 16], [z_ft - 0.01, z_ft + 6]);
+            box(s > 0 ? ch_x : [-ch_x[1], -ch_x[0]], [ax_y - 10, ax_y + 10], [z_ft - 0.01, z_ft + 6]);
             translate([s > 0 ? ch_x[0] : -ch_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 34, h = ch_t4, $fn = 60);
         }
     }
