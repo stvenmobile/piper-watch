@@ -207,8 +207,29 @@ module oled_cuts() translate([0, ax_y, ax_z + oz]) {                            
     translate([-32.7, pl_y[0] - 1, -10.4]) cube([63, 2.8, 20.8]);                                                          // pocket for the glass (62.5 x 20.6 x 1.63), 2.2 front lip
     for (sx = [-36, 36], sz = [-7.75, 7.75]) translate([sx, pl_y[0] - 1, sz]) rotate([-90, 0, 0]) cylinder(d = 1.6, h = 3.5, $fn = 16);   // M2 pilots
 }
+// ---- camera board on the plate's front face + the front frame that grips its lens cube --------------------------------------------
+// The C920 board (82 x 23 x 1.6; the narrow middle is 17.7 wide) lies on the plate, lens cube (14 x 14 x 10.3, centred) forward. The cube's two screw
+// bosses (5.1 tall, on its +-X faces) carry a 3 mm FRAME that grips the cube's top 5.2 mm in a square pocket. One M2.5 x 16 screw from the front passes the
+// frame tab, the board's 4 mm edge SLOT (6 mm along from the cube, open to the bottom edge, ~5 deep) and the plate into an insert in a boss on the plate's
+// rear: tightening clamps frame -> bosses -> board -> plate. (If the board is fitted the other way round, mirror slot_x.)
+cb_t = 1.6;  cube_w = 14;  cube_h = 10.3;  boss_h = 5.1;  fr_t = 3;
+slot_x = -15;  slot_z = lens_z - 4.8;                                       // slot centre line / the round end's centre, relative to the axle height
+fr_y = pl_y[1] + cb_t + boss_h;                                              // the frame's rear face, relative to the axle's y
+module cam_boss() translate([slot_x, ax_y + pl_y[0] - 4, ax_z + slot_z]) rotate([-90, 0, 0]) cylinder(d = 7.5, h = 4.01, $fn = 40);
+module cam_holes() translate([slot_x, ax_y + pl_y[0] - 5, ax_z + slot_z]) rotate([-90, 0, 0]) {
+    cylinder(d = 2.8 + cal_hole, h = 10, $fn = 24);                                                             // M2.5 clearance through the plate
+    cylinder(d = insert_m25[0], h = insert_m25[1] + 1.5, $fn = 24);                                              // insert from the boss's rear end (y 10)
+}
+module camframe() difference() {
+    translate([0, ax_y + fr_y + fr_t, ax_z]) rotate([90, 0, 0]) linear_extrude(fr_t) difference() {
+        hull() { translate([0, lens_z]) square([25, 20], center = true); translate([slot_x, slot_z]) circle(d = 8, $fn = 40); }
+        translate([0, lens_z]) square(cube_w + 0.4, center = true);                                            // the cube's pocket
+        translate([slot_x, slot_z]) circle(d = 2.8 + cal_hole, $fn = 24);                                        // screw
+    }
+    translate([slot_x, ax_y + fr_y + fr_t - 1.5, ax_z + slot_z]) rotate([-90, 0, 0]) cylinder(d = 5.4 + cal_hole, h = 2, $fn = 32);   // head recess
+}
 module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -ax_y, -ax_z]) {
-    color("#8a8d91") difference() { ext_yz(-pl_x, pl_x); if (oled_head) oled_cuts(); }                                       // camera plate
+    color("#8a8d91") difference() { union() { ext_yz(-pl_x, pl_x); if (oled_head) cam_boss(); } if (oled_head) { oled_cuts(); cam_holes(); } }   // camera plate
     for (s = [-1, 1]) color("#6b8fb5") hull() {                                                                              // arms
         translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 16, h = 3, $fn = 40);
         ext_yz(s > 0 ? arm_x[0] : -arm_x[1], s > 0 ? arm_x[1] : -arm_x[0]);
@@ -223,8 +244,14 @@ module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -a
         translate([-37, ax_y + pl_y[0] - 2.8, ax_z + 5.4]) cube([7, 1.6, 3.2]);                                          // tie slot 3.2 x 1.6, along X
     }
     if (part == "v4_view") {
-    color("#222") translate([-41, ax_y + pl_y[1], ax_z + lens_z - 11.5]) cube([82, 10, 23]);                               // camera board (82 long, 23 wide at the lugs; from the photos)
-    color("#111") translate([0, ax_y + pl_y[1] + 10, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 16, h = 3, $fn = 40);   // lens
+    color("#1b5e20") difference() {                                                                                         // camera board (82 x 23 at the lugs; from the photos), with its edge slot
+        translate([-41, ax_y + pl_y[1], ax_z + lens_z - 11.5]) cube([82, cb_t, 23]);
+        translate([slot_x - 2, ax_y + pl_y[1] - 1, ax_z + lens_z - 12]) cube([4, cb_t + 2, 12 + slot_z - lens_z + 2]);
+    }
+    color("#222") translate([-cube_w / 2, ax_y + pl_y[1] + cb_t, ax_z + lens_z - cube_w / 2]) cube([cube_w, cube_h, cube_w]);   // lens cube
+    color("#222") for (s = [-1, 1]) translate([s * 8.5, ax_y + pl_y[1] + cb_t, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 6.5, h = boss_h, $fn = 24);   // its bosses
+    color("#111") translate([0, ax_y + pl_y[1] + cb_t + cube_h, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 11, h = 3, $fn = 40);   // lens
+    if (oled_head) color("#d9dde2") camframe();
     if (oled_head) translate([0, ax_y, ax_z + oz]) {
         color("#1b5e20") translate([-37.75, pl_y[0] - 1.2, -10.3]) cube([75.5, 1.2, 20.6]);                                // OLED PCB, on the plate's rear face
         color("#050505") translate([-32.5, pl_y[0], -10.3]) cube([62.5, 1.63, 20.6]);                                      // glass, in the pocket
@@ -316,4 +343,5 @@ if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_cover") cylinder(d = 36, h = 3.5, $fn = 80);   // print two
-if (part == "v4_head") translate([0, 0, -(ax_z + pl_z[0])]) head4();
+if (part == "v4_camframe") rotate([90, 0, 0]) translate([0, -(ax_y + fr_y), -ax_z]) camframe();      // rear face down, counterbore up
+if (part == "v4_head")translate([0, 0, -(ax_z + pl_z[0])]) head4();
