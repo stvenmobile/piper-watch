@@ -220,13 +220,23 @@ module cam_holes() translate([slot_x, ax_y + pl_y[0] - 5, ax_z + slot_z]) rotate
     cylinder(d = 2.8 + cal_hole, h = 10, $fn = 24);                                                             // M2.5 clearance through the plate
     cylinder(d = insert_m25[0], h = insert_m25[1] + 1.5, $fn = 24);                                              // insert from the boss's rear end (y 10)
 }
-module camframe() difference() {
-    translate([0, ax_y + fr_y + fr_t, ax_z]) rotate([90, 0, 0]) linear_extrude(fr_t) difference() {
-        hull() { translate([0, lens_z]) square([25, 20], center = true); translate([slot_x, slot_z]) circle(d = 8, $fn = 40); }
-        translate([0, lens_z]) square(cube_w + 0.4, center = true);                                            // the cube's pocket
-        translate([slot_x, slot_z]) circle(d = 2.8 + cal_hole, $fn = 24);                                        // screw
+// EYES: the camera board's LEDs (amber SMD packages, they shine blue; D3 top-right [hidden under the cable boot in the photo, mirrored from D6] and D6 bottom-right
+// in the photo) sit 30.2 mm either side of the lens and 3.1 mm off its centre line. The cover is now the whole 82 x 23 front of the head: 2.5 mm holes over
+// those two LEDs, each on a short light-tight spigot, a pocket over each (unused) mic can, the lens cube through a 14.4 square hole, the screw at the board's slot.
+eye_x = 30.2;  eye_z = lens_z + 3.1;  spg = 3.2;
+module camcover() difference() {
+    union() {
+        translate([0, ax_y + fr_y + fr_t, ax_z]) rotate([90, 0, 0]) linear_extrude(fr_t)
+            translate([0, lens_z]) offset(r = 3) square([82 - 6, 23 - 6], center = true);
+        for (sx = [-1, 1]) translate([sx * eye_x, ax_y + fr_y + 0.01, ax_z + eye_z]) rotate([90, 0, 0]) cylinder(d = 6, h = spg, $fn = 32);   // spigots toward the board
     }
-    translate([slot_x, ax_y + fr_y + fr_t - 1.5, ax_z + slot_z]) rotate([-90, 0, 0]) cylinder(d = 5.4 + cal_hole, h = 2, $fn = 32);   // head recess
+    translate([-cube_w / 2 - 0.2, ax_y + fr_y - 1, ax_z + lens_z - cube_w / 2 - 0.2]) cube([cube_w + 0.4, fr_t + 2, cube_w + 0.4]);   // the cube's pocket
+    for (sx = [-1, 1]) {
+        translate([sx * eye_x, ax_y + fr_y - spg - 1, ax_z + eye_z]) rotate([-90, 0, 0]) cylinder(d = 2.5, h = spg + fr_t + 2, $fn = 24);   // eye holes
+        translate([sx * 40.5, ax_y + fr_y - 1, ax_z + lens_z - 2.1]) rotate([-90, 0, 0]) cylinder(d = 11, h = 2.4, $fn = 40);              // mic can pockets
+    }
+    translate([slot_x, ax_y + fr_y - 1, ax_z + slot_z]) rotate([-90, 0, 0]) cylinder(d = 2.8 + cal_hole, h = fr_t + 2, $fn = 24);          // screw
+    translate([slot_x, ax_y + fr_y + fr_t - 1.5, ax_z + slot_z]) rotate([-90, 0, 0]) cylinder(d = 5.4 + cal_hole, h = 2, $fn = 32);       // head recess
 }
 module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -ax_y, -ax_z]) {
     color("#8a8d91") difference() { union() { ext_yz(-pl_x, pl_x); if (oled_head) cam_boss(); } if (oled_head) { oled_cuts(); cam_holes(); } }   // camera plate
@@ -251,7 +261,7 @@ module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -a
     color("#222") translate([-cube_w / 2, ax_y + pl_y[1] + cb_t, ax_z + lens_z - cube_w / 2]) cube([cube_w, cube_h, cube_w]);   // lens cube
     color("#222") for (s = [-1, 1]) translate([s * 8.5, ax_y + pl_y[1] + cb_t, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 6.5, h = boss_h, $fn = 24);   // its bosses
     color("#111") translate([0, ax_y + pl_y[1] + cb_t + cube_h, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 11, h = 3, $fn = 40);   // lens
-    if (oled_head) color("#d9dde2") camframe();
+    if (oled_head) color("#d9dde2") camcover();
     if (oled_head) translate([0, ax_y, ax_z + oz]) {
         color("#1b5e20") translate([-37.75, pl_y[0] - 1.2, -10.3]) cube([75.5, 1.2, 20.6]);                                // OLED PCB, on the plate's rear face
         color("#050505") translate([-32.5, pl_y[0], -10.3]) cube([62.5, 1.63, 20.6]);                                      // glass, in the pocket
@@ -343,7 +353,7 @@ if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_cover") cylinder(d = 36, h = 3.5, $fn = 80);   // print two
-if (part == "v4_camframe") rotate([90, 0, 0]) translate([0, -(ax_y + fr_y), -ax_z]) camframe();      // rear face down, counterbore up
+if (part == "v4_camframe") translate([0, 0, ax_y + fr_y + fr_t]) rotate([-90, 0, 0]) camcover();       // front face down on the bed, spigots and pockets up
 if (part == "v4_head") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0]) head4();                       // front face down on the bed
 if (part == "v4_plate") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0])                               // fit coupon: the camera/OLED plate only (no arms)
     intersection() { head4(); translate([-pl_x, ax_y + 9, 0]) cube([2 * pl_x, 20, 300]); }
