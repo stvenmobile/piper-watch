@@ -154,6 +154,7 @@ show_cowl = true;  show_fov = false;  fov_v = 43;                 // draw the ca
 tilt4 = 0;  sa4 = 100;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
 pin_s = [-27, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin
 pin_h = [-33, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin (moves with the head)
+xi_x = [27.5, 49.3];  xi_y = [-15.2, 3.4];     // XIAO ESP32-S3 pocket interior (board 21 x 17.8 + 0.4 each side; USB-C end at x min, pointing at the hub hole)
 hub_a = 30;                                     // flange screws at 30/120/210/300 deg: none under the tilt servo
 
 module hub4() difference() {                    // the stand's hub, its four flange inserts turned to hub_a + k*90 to clear the tilt servo
@@ -179,6 +180,12 @@ module turret4() difference() {
             box([tsv[0], tsv[1]], [tsv_y[0], tsv_y[1]], [z_ft - 1, z_ft + 11]);
             box([tsv[0] - 4, tsv[0] + 1], [tsv_y[0] + 20, tsv_y[0] + 40], [z_ft + 3, z_ft + 11]);           // the horn side open
             box([tsv[0] - 4, tsv[0] + 1], [tsh[1] - 8, tsh[1] + 8], [z_ft + 5, z_ft + 11]);                  // and round the shaft: the crank hub (d 10, centre z_ft + 12.4) swings through
+            box([tsv[1] - 1, tsv[1] + 4], [xi_y[0], 0], [z_ft - 1, z_ft + 11]);                              // and at the +y end of the right wall: the XIAO's USB plug and cable come through here
+        }
+        difference() {                                                                                       // pocket for the XIAO ESP32-S3 (hot-glued in; no holes), the USB-C end open toward -x
+            box([xi_x[0] - 2, xi_x[1] + 2], [xi_y[0] - 2, xi_y[1] + 2], [z_ft - 0.01, z_ft + 5]);
+            box([xi_x[0], xi_x[1]], [xi_y[0], xi_y[1]], [z_ft - 1, z_ft + 6]);
+            box([xi_x[0] - 3, xi_x[0] + 0.1], [xi_y[0], xi_y[1]], [z_ft - 1, z_ft + 6]);
         }
         for (s = [-1, 1]) hull() {                                                                         // cheeks
             box(s > 0 ? ch_x : [-ch_x[1], -ch_x[0]], [ax_y - 10, ax_y + 10], [z_ft - 0.01, z_ft + 6]);
@@ -264,6 +271,12 @@ module turret_stack4() {                        // everything above the lid, sta
     crank4();
     tilt_rod4();
     head4();
+    if (part == "v4_view") {                                                                                   // XIAO ghost, its USB-C plug (straight, 11 x 6.5 x 16) and the cable round to the hub hole
+        yc = (xi_y[0] + xi_y[1]) / 2;
+        color("#2e7d32") translate([xi_x[0] + 0.4, yc - 8.9, z_ft + 0.3]) cube([21, 17.8, 3.5]);
+        color("#222") translate([xi_x[0] - 16, yc - 5.5, z_ft + 1.2]) cube([16.5, 11, 6.5]);
+        color("#222") for (p = [[[xi_x[0] - 15.5, yc], [xi_x[0] - 15.5, 2]], [[xi_x[0] - 15.5, 2], [6, 2]]]) hull() for (q = p) translate([q[0], q[1], z_ft + 4.5]) sphere(d = 3.5, $fn = 12);
+    }
     if (show_cowl) { cowl4(); covers4(); }
     if (show_fov) for (da = [-fov_v / 2, 0, fov_v / 2]) color(da == 0 ? "#ffd400" : "#ff7a00") {
         a = tilt4 + da;  lr = pl_y[1] + 13;
