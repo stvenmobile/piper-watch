@@ -223,18 +223,19 @@ module cam_holes() translate([slot_x, ax_y + pl_y[0] - 5, ax_z + slot_z]) rotate
 // EYES: the camera board's LEDs (amber SMD packages, they shine blue; D3 top-right [hidden under the cable boot in the photo, mirrored from D6] and D6 bottom-right
 // in the photo) sit 30.2 mm either side of the lens and 3.1 mm off its centre line. The cover is now the whole 82 x 23 front of the head: 2.5 mm holes over
 // those two LEDs, each on a short light-tight spigot, a pocket over each (unused) mic can, the lens cube through a 14.4 square hole, the screw at the board's slot.
-eye_x = 30.2;  eye_z = lens_z + 3.1;  spg = 3.2;
+eye_x = 30.2;  eye_z = lens_z + 3.1;  spg = 5.0;  eye_d = 3.0;      // spigot 5.0 long: its tip stops 0.1 above the board face
 module camcover() difference() {
     union() {
         translate([0, ax_y + fr_y + fr_t, ax_z]) rotate([90, 0, 0]) linear_extrude(fr_t)
             translate([0, lens_z]) offset(r = 3) square([82 - 6, 23 - 6], center = true);
-        for (sx = [-1, 1]) translate([sx * eye_x, ax_y + fr_y + 0.01, ax_z + eye_z]) rotate([90, 0, 0]) cylinder(d = 6, h = spg, $fn = 32);   // spigots toward the board
+        for (sx = [-1, 1]) translate([sx * eye_x, ax_y + fr_y + 0.01, ax_z + eye_z]) rotate([90, 0, 0]) cylinder(d = 5, h = spg, $fn = 32);   // spigots toward the board
     }
     translate([-cube_w / 2 - 0.2, ax_y + fr_y - 1, ax_z + lens_z - cube_w / 2 - 0.2]) cube([cube_w + 0.4, fr_t + 2, cube_w + 0.4]);   // the cube's pocket
     for (sx = [-1, 1]) {
-        translate([sx * eye_x, ax_y + fr_y - spg - 1, ax_z + eye_z]) rotate([-90, 0, 0]) cylinder(d = 2.5, h = spg + fr_t + 2, $fn = 24);   // eye holes
+        translate([sx * eye_x, ax_y + fr_y - spg - 1, ax_z + eye_z]) rotate([-90, 0, 0]) cylinder(d = eye_d, h = spg + fr_t + 2, $fn = 24);   // eye holes
         translate([sx * 40.5, ax_y + fr_y - 1, ax_z + lens_z - 2.1]) rotate([-90, 0, 0]) cylinder(d = 11, h = 2.4, $fn = 40);              // mic can pockets
     }
+    translate([12, ax_y + fr_y - 1, ax_z + lens_z - 0.8]) cube([5.9, 1 + 1.5, 9.5]);                                                       // 1.5 deep pocket for the tall white camera-cable connector
     translate([slot_x, ax_y + fr_y - 1, ax_z + slot_z]) rotate([-90, 0, 0]) cylinder(d = 2.8 + cal_hole, h = fr_t + 2, $fn = 24);          // screw
     translate([slot_x, ax_y + fr_y + fr_t - 1.5, ax_z + slot_z]) rotate([-90, 0, 0]) cylinder(d = 5.4 + cal_hole, h = 2, $fn = 32);       // head recess
 }
