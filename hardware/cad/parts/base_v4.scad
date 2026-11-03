@@ -218,6 +218,10 @@ module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -a
         translate([-arm_x[1] - 0.01, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 12, h = 3.01, $fn = 32);
         translate([pin_h[0] + 1, ax_y + cr_h * cos(hb0), ax_z + cr_h * sin(hb0)]) rotate([0, 90, 0]) cylinder(d = 8, h = 6, $fn = 24);
     }
+    if (oled_head) color("#8a8d91") difference() {                                                                       // zip-tie tab for the OLED wires: rear face, above the PCB's left (header) end
+        translate([-36, ax_y + pl_y[0] - 4, ax_z + 4]) cube([5, 4.01, 6]);
+        translate([-37, ax_y + pl_y[0] - 2.8, ax_z + 5.4]) cube([7, 1.6, 3.2]);                                          // tie slot 3.2 x 1.6, along X
+    }
     if (part == "v4_view") {
     color("#222") translate([-41, ax_y + pl_y[1], ax_z + lens_z - 11.5]) cube([82, 10, 23]);                               // camera board (82 long, 23 wide at the lugs; from the photos)
     color("#111") translate([0, ax_y + pl_y[1] + 10, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 16, h = 3, $fn = 40);   // lens
