@@ -223,7 +223,7 @@ module cam_holes() translate([slot_x, ax_y + pl_y[0] - 5, ax_z + slot_z]) rotate
 // EYES: the camera board's LEDs (amber SMD packages, they shine blue; D3 top-right [hidden under the cable boot in the photo, mirrored from D6] and D6 bottom-right
 // in the photo) sit 30.2 mm either side of the lens and 3.1 mm off its centre line. The cover is now the whole 82 x 23 front of the head: 2.5 mm holes over
 // those two LEDs, each on a short light-tight spigot, a pocket over each (unused) mic can, the lens cube through a 14.4 square hole, the screw at the board's slot.
-eye_x = 30.2;  eye_z = lens_z + 3.1;  spg = 5.0;  eye_d = 3.0;  eye_seat_d = 4.9;  eye_seat = 2.2;      // spigot 5.0 long: its tip stops 0.1 above the board face
+eye_x = 30.2;  eye_z = lens_z + 3.1;  spg = 5.0;  eye_d = 3.0;  eye_seat_d = 4.9;  eye_seat = 2.5;      // spigot 5.0 long: its tip stops 0.1 above the board face
 module camcover() difference() {
     union() {
         translate([0, ax_y + fr_y + fr_t, ax_z]) rotate([90, 0, 0]) linear_extrude(fr_t)
