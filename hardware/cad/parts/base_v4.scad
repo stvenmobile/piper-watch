@@ -138,7 +138,12 @@ module skirt4s() { base(); skirt_extra4(); }
 ax_y = 18;  ax_z = z_ft + 26;                   // tilt axle (along X): forward, so the lens sits ~5 mm inside the rim
 ch_x = [42, 50];  ch_t4 = 8;                    // cheeks (608 pocket each), outer face r < 54.5 at y +-16
 arm_x = [38, 41];                               // pivot arms, 3 thick, inside the cheeks (1 mm washer gap)
-pl_x = 38;  pl_y = [14, 18];  pl_h = 30;        // camera plate: half-width, forward of the axle (rear/front face), height
+oled_head = true;                               // true: tall plate carrying the 2.08" OLED (eyes) under the camera; false: the plain 30 mm plate
+pl_x = 38;  pl_y = [14, 18];                    // camera plate: half-width, forward of the axle (rear/front face)
+pl_z = oled_head ? [-20, 30] : [-15, 15];       // plate bottom/top relative to the axle (bottom limited by the floor at -22 deg tilt)
+pl_h = pl_z[1] - pl_z[0];
+lens_z = oled_head ? 18 : 0;                    // lens height above the axle (OLED head: camera on top, the "third eye")
+oz = -7.5;  ox = -3.9;                          // OLED centre: height rel. the axle; active area is 3.9 mm left of the PCB centre (header end)
 tsv = [-22, 10];  tsv_y = [-48.5, -48.5 + 45.22];  tsv_z = [z_ft, z_ft + 24.72];       // tilt servo body: x, y, z (shaft along X, near its back end)
 tsh = [-22, tsv_y[0] + 10.11, z_ft + 12.36];    // shaft: x of the horn face, y, z
 // linkage (solved: monotonic over -25 .. +45 deg; wanted -22 .. +23)
@@ -186,11 +191,19 @@ module turret4() difference() {
         translate([s > 0 ? ch_x[0] : -ch_x[1] - 1, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 12 + cal_hole, h = ch_t4 + 1, $fn = 48);
     }
 }
+module plate_prof() polygon([[ax_y + pl_y[0], ax_z + pl_z[0]], [ax_y + pl_y[1] - 3, ax_z + pl_z[0]], [ax_y + pl_y[1], ax_z + pl_z[0] + 3],
+                             [ax_y + pl_y[1], ax_z + pl_z[1]], [ax_y + pl_y[0], ax_z + pl_z[1]]]);   // y,z section; the front-bottom edge is chamfered 3 (floor clearance)
+module ext_yz(x0, x1) translate([x0, 0, 0]) rotate([90, 0, 90]) linear_extrude(x1 - x0) plate_prof();
+module oled_cuts() translate([0, ax_y, ax_z + oz]) {                                                                        // local frame: x, y rel. the axle, z rel. the OLED centre
+    translate([ox - 26.6, pl_y[0] - 2, -7.39]) cube([53.2, pl_y[1] - pl_y[0] + 4, 14.78]);                                   // window (viewing area 53.18 x 14.78)
+    translate([-32.7, pl_y[0] - 1, -10.4]) cube([63, 2.8, 20.8]);                                                          // pocket for the glass (62.5 x 20.6 x 1.63), 2.2 front lip
+    for (sx = [-36, 36], sz = [-7.75, 7.75]) translate([sx, pl_y[0] - 1, sz]) rotate([-90, 0, 0]) cylinder(d = 1.6, h = 3.5, $fn = 16);   // M2 pilots
+}
 module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -ax_y, -ax_z]) {
-    color("#8a8d91") translate([-pl_x, ax_y + pl_y[0], ax_z - pl_h / 2]) cube([2 * pl_x, pl_y[1] - pl_y[0], pl_h]);           // camera plate
+    color("#8a8d91") difference() { ext_yz(-pl_x, pl_x); if (oled_head) oled_cuts(); }                                       // camera plate
     for (s = [-1, 1]) color("#6b8fb5") hull() {                                                                              // arms
         translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 16, h = 3, $fn = 40);
-        translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y + pl_y[0], ax_z - pl_h / 2]) cube([3, pl_y[1] - pl_y[0], pl_h]);
+        ext_yz(s > 0 ? arm_x[0] : -arm_x[1], s > 0 ? arm_x[1] : -arm_x[0]);
     }
     for (s = [-1, 1]) color("#6b8fb5") translate([s > 0 ? arm_x[1] : -ch_x[1] - 0.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 8, h = (s > 0 ? ch_x[1] - arm_x[1] : ch_x[1] - arm_x[1] + 0.5 + (ch_x[1] - ch_x[1])) + 0.01, $fn = 24);   // axle stubs (into the 608s)
     color("#6b8fb5") hull() {                                                                                                  // crank bracket on the left arm
@@ -198,8 +211,13 @@ module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -a
         translate([pin_h[0] + 1, ax_y + cr_h * cos(hb0), ax_z + cr_h * sin(hb0)]) rotate([0, 90, 0]) cylinder(d = 8, h = 6, $fn = 24);
     }
     if (part == "v4_view") {
-    color("#222") translate([-40, ax_y + pl_y[1], ax_z - 11]) cube([80, 10, 22]);                                          // camera board (80 x 22 to confirm)
-    color("#111") translate([0, ax_y + pl_y[1] + 10, ax_z]) rotate([-90, 0, 0]) cylinder(d = 16, h = 3, $fn = 40);        // lens
+    color("#222") translate([-41, ax_y + pl_y[1], ax_z + lens_z - 11.5]) cube([82, 10, 23]);                               // camera board (82 long, 23 wide at the lugs; from the photos)
+    color("#111") translate([0, ax_y + pl_y[1] + 10, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 16, h = 3, $fn = 40);   // lens
+    if (oled_head) translate([0, ax_y, ax_z + oz]) {
+        color("#1b5e20") translate([-37.75, pl_y[0] - 1.2, -10.3]) cube([75.5, 1.2, 20.6]);                                // OLED PCB, on the plate's rear face
+        color("#050505") translate([-32.5, pl_y[0], -10.3]) cube([62.5, 1.63, 20.6]);                                      // glass, in the pocket
+        color("#9fd6ff") translate([ox - 25.59, pl_y[0] + 1.64, -6.39]) cube([51.18, 0.15, 12.78]);                          // active area, lit
+    }
     }
 }
 module crank4() color("#e8a33d") hull() {
@@ -247,7 +265,8 @@ module turret_stack4() {                        // everything above the lid, sta
     head4();
     if (show_cowl) { cowl4(); covers4(); }
     if (show_fov) for (da = [-fov_v / 2, 0, fov_v / 2]) color(da == 0 ? "#ffd400" : "#ff7a00") {
-        a = tilt4 + da;  l0 = [ax_y + (pl_y[1] + 13) * cos(tilt4), ax_z + (pl_y[1] + 13) * sin(tilt4)];       // the lens
+        a = tilt4 + da;  lr = pl_y[1] + 13;
+        l0 = [ax_y + lr * cos(tilt4) - lens_z * sin(tilt4), ax_z + lr * sin(tilt4) + lens_z * cos(tilt4)];   // the lens
         hull() { translate([0, l0[0], l0[1]]) cube(0.8, center = true); translate([0, l0[0] + 220 * cos(a), l0[1] + 220 * sin(a)]) cube(0.8, center = true); }
     }
 }
@@ -271,7 +290,7 @@ if (part == "v4_view") {
     ghosts4();
     translate([0, 0, z_pt]) turret_stack4();
     echo(str("base ", bw, " x ", bd, " x ", wall_top, "; plate top z ", z_pt, "; turret floor top z ", z_pt + z_ft, "; axle z ", z_pt + ax_z,
-             "; head top ~", z_pt + ax_z + pl_h / 2, "; wall ", wall_h4, " tall, skirt ", z_pt - sk_z0 + 0, " tall"));
+             "; head top ~", z_pt + ax_z + pl_z[1], "; wall ", wall_h4, " tall, skirt ", z_pt - sk_z0 + 0, " tall"));
 }
 if (part == "v4_tub") tub4();
 if (part == "v4_lid") translate([0, 0, -ledge_z]) lid4();
@@ -279,4 +298,4 @@ if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_cover") cylinder(d = 36, h = 3.5, $fn = 80);   // print two
-if (part == "v4_head") translate([0, 0, -(ax_z - pl_h / 2)]) head4();
+if (part == "v4_head") translate([0, 0, -(ax_z + pl_z[0])]) head4();
