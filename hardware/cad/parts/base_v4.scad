@@ -344,4 +344,6 @@ if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_cover") cylinder(d = 36, h = 3.5, $fn = 80);   // print two
 if (part == "v4_camframe") rotate([90, 0, 0]) translate([0, -(ax_y + fr_y), -ax_z]) camframe();      // rear face down, counterbore up
-if (part == "v4_head")translate([0, 0, -(ax_z + pl_z[0])]) head4();
+if (part == "v4_head") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0]) head4();                       // front face down on the bed
+if (part == "v4_plate") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0])                               // fit coupon: the camera/OLED plate only (no arms)
+    intersection() { head4(); translate([-pl_x, ax_y + 9, 0]) cube([2 * pl_x, 20, 300]); }
