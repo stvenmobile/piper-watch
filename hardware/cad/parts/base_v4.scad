@@ -178,6 +178,7 @@ module turret4() difference() {
             box([tsv[0] - 3, tsv[1] + 3], [tsv_y[0] - 3, tsv_y[1] + 3], [z_ft - 0.01, z_ft + 10]);
             box([tsv[0], tsv[1]], [tsv_y[0], tsv_y[1]], [z_ft - 1, z_ft + 11]);
             box([tsv[0] - 4, tsv[0] + 1], [tsv_y[0] + 20, tsv_y[0] + 40], [z_ft + 3, z_ft + 11]);           // the horn side open
+            box([tsv[0] - 4, tsv[0] + 1], [tsh[1] - 8, tsh[1] + 8], [z_ft + 5, z_ft + 11]);                  // and round the shaft: the crank hub (d 10, centre z_ft + 12.4) swings through
         }
         for (s = [-1, 1]) hull() {                                                                         // cheeks
             box(s > 0 ? ch_x : [-ch_x[1], -ch_x[0]], [ax_y - 10, ax_y + 10], [z_ft - 0.01, z_ft + 6]);
