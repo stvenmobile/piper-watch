@@ -202,7 +202,10 @@ module turret4() difference() {
         }
     }
     for (b = sb_x) translate([(b[0] + b[1]) / 2, (sb_y[0] + sb_y[1]) / 2, sb_top - insert_m3[1]]) insert3();   // M3 inserts for the strap
-    translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);                          // cables down the hub
+    intersection() {                                                                                      // cables down the hub: the half under the tilt servo's cradle (y < its front wall) stays solid
+        translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);
+        box([-20, 20], [tsv_y[1] + 3, 20], [z_floor - 2, z_floor + floor_t + 2]);
+    }
     for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0, z_floor - 1]) hole3(floor_t + 2);        // 4 x M3 into the hub flange
     for (s = [-1, 1]) {                                                                                   // 608 pockets from the inner faces
         translate([s > 0 ? ch_x[0] - 0.01 : -ch_x[0] - 7.99, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = pivot_pocket + cal_hole, h = 8, $fn = 100);
