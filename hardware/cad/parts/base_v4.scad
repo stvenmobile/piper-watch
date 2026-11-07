@@ -243,8 +243,9 @@ module turret4() difference() {
         box([-20, 20], [tsv_y[1] + 3, 20], [z_floor - 2, z_floor + floor_t + 2]);
     }
     for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0, z_floor - 1]) hole3(floor_t + 2);        // 4 x M3 into the hub flange
+    for (s = [-1, 1], c = cv_pts) translate([s > 0 ? ch_x[1] + 0.01 : -ch_x[1] - 0.01, ax_y + c[0], ax_z + c[1]]) rotate([0, s > 0 ? -90 : 90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1] + 0.2, $fn = 24);   // M3 inserts for the cheek covers
     for (s = [-1, 1]) {                                                                                   // 608 pockets from the inner faces
-        translate([s > 0 ? ch_x[0] - 0.01 : -ch_x[0] - 7.99, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = pivot_pocket + cal_hole, h = 8, $fn = 100);
+        translate([s > 0 ? ch_x[0] - 0.01 : -ch_x[0] - 6.99, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = pivot_pocket + cal_hole, h = 7.01, $fn = 100);   // 608 is 7 thick: 1 mm lip left on the outer face
         translate([s > 0 ? ch_x[0] : -ch_x[1] - 1, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 12 + cal_hole, h = ch_t4 + 1, $fn = 48);
     }
 }
@@ -360,11 +361,23 @@ module cowl4() color("#d9dde2", cowl_alpha) difference() {
         translate([cw_t + 1 - 1.6, 0, 0]) rotate([0, 90, 0]) cylinder(d = 6.2, h = 3, $fn = 32);
     }
     for (s = [-1, 1]) hull() {                                                                 // the cheeks' round rear (608 boss, d 34) pokes behind y = cw_y: notch the front wall round it, 0.5 clear
-        translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 0.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 35, h = ch_t4 + 1, $fn = 60);
+        translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 8, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 35, h = ch_t4 + 8.5, $fn = 60);   // also takes the cover, d 34
         translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 0.5, ax_y - 10.5, z_ft - 1]) cube([ch_t4 + 1, 21, 7.5]);
     }
 }
-module covers4() for (sx = [-1, 1]) color("#d9dde2") translate([sx > 0 ? ch_x[1] : -ch_x[1] - 3.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 36, h = 3.5, $fn = 80);
+cv_d = 34;  cv_t = 3.5;  cv_pts = [for (a = [90, 210, 330]) [14 * cos(a), 14 * sin(a)]];       // cheek cover: d 34 (the cheek's own), 3.5 thick, 3 x M3 x 8 into inserts at r 14; spigot into the 12.4 lip bore
+module cover4() color("#d9dde2") difference() {                  // local z = 0 on the cheek's outer face, outwards +z (print face down: z = cv_t on the bed ... print as is, spigot up)
+    union() {
+        cylinder(d = cv_d, h = cv_t, $fn = 96);
+        translate([0, 0, -0.8]) cylinder(d = 11.6, h = 0.81, $fn = 48);
+    }
+    translate([0, 0, -1]) cylinder(d = 8.8, h = 1.9, $fn = 40);                                  // clear of the axle stub's end
+    for (c = cv_pts) translate([-c[1], c[0], -1]) {                // local (u, v) = (-dz, dy) for the right cover
+        cylinder(d = 3.4 + cal_hole, h = cv_t + 2, $fn = 24);
+        translate([0, 0, cv_t + 1 - 1.6]) cylinder(d = 6.2, h = 3, $fn = 32);
+    }
+}
+module covers4() for (sx = [-1, 1]) translate([sx > 0 ? ch_x[1] : -ch_x[1], ax_y, ax_z]) rotate([0, sx > 0 ? 90 : -90, 0]) scale([1, 1, 1]) mirror([sx > 0 ? 0 : 1, 0, 0]) cover4();
 
 module turret_stack4() {                        // everything above the lid, stand frame
     color("#6b8fb5") base();
@@ -420,7 +433,7 @@ if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_strap") strap4();
-if (part == "v4_cover") cylinder(d = 36, h = 3.5, $fn = 80);   // print two
+if (part == "v4_cover") translate([0, 0, cv_t]) rotate([180, 0, 0]) cover4();   // print two, face down (spigot up)
 if (part == "v4_camframe") translate([0, 0, ax_y + fr_y + fr_t]) rotate([-90, 0, 0]) camcover();       // front face down on the bed, spigots and pockets up
 if (part == "v4_head") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0]) head4();                       // front face down on the bed
 if (part == "v4_plate") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0])                               // fit coupon: the camera/OLED plate only (no arms)
