@@ -172,6 +172,13 @@ module hub4() difference() {                    // the stand's hub, its four fla
     translate([0, 0, z_horn + hub_end + win[1] / 2 + 1]) rotate([0, 90, 0]) linear_extrude(hub_od) square([win[1], win[0]], center = true);
     for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0, z_flange + flange_t - insert_m3[1]]) insert3();
 }
+// tilt servo hold-down: two posts beside the cradle's side walls (M3 insert in each top) and a flat strap across the servo's top, 2 x M3 x 8
+sb_x = [[-33, -22], [10, 21]];  sb_y = [-42, -34];  sb_t = 3;
+sb_top = z_ft + (tsv_z[1] - tsv_z[0]);          // servo top face
+module strap4() color("#6b8fb5") difference() {
+    box([sb_x[0][0], sb_x[1][1]], sb_y, [sb_top, sb_top + sb_t]);
+    for (b = sb_x) translate([(b[0] + b[1]) / 2, (sb_y[0] + sb_y[1]) / 2, sb_top - 1]) hole3(sb_t + 2);
+}
 module turret4() difference() {
     union() {
         translate([0, 0, z_floor]) linear_extrude(floor_t) intersection() { circle(r = 57.5, $fn = 160); square([116, 116], center = true); }
@@ -183,6 +190,7 @@ module turret4() difference() {
             box([tsv[0] - 4, tsv[0] + 1], [tsh[1] - 11, tsh[1] + 11], [z_ft + 1, z_ft + 11]);                  // and round the shaft: the crank hub (d 10, centre z_ft + 12.4) swings through
             box([tsv[1] - 1, tsv[1] + 4], [xi_y[0], 0], [z_ft - 1, z_ft + 11]);                              // and at the +y end of the right wall: the XIAO's USB plug and cable come through here
         }
+        for (b = sb_x) box(b, sb_y, [z_ft - 0.01, sb_top]);                                                  // hold-down posts (insert in the top)
         difference() {                                                                                       // pocket for the XIAO ESP32-S3 (hot-glued in; no holes), the USB-C end open toward -x
             box([xi_x[0] - 2, xi_x[1] + 2], [xi_y[0] - 2, xi_y[1] + 2], [z_ft - 0.01, z_ft + 5]);
             box([xi_x[0], xi_x[1]], [xi_y[0], xi_y[1]], [z_ft - 1, z_ft + 6]);
@@ -193,6 +201,7 @@ module turret4() difference() {
             translate([s > 0 ? ch_x[0] : -ch_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 34, h = ch_t4, $fn = 60);
         }
     }
+    for (b = sb_x) translate([(b[0] + b[1]) / 2, (sb_y[0] + sb_y[1]) / 2, sb_top - insert_m3[1]]) insert3();   // M3 inserts for the strap
     translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);                          // cables down the hub
     for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0, z_floor - 1]) hole3(floor_t + 2);        // 4 x M3 into the hub flange
     for (s = [-1, 1]) {                                                                                   // 608 pockets from the inner faces
@@ -319,6 +328,7 @@ module turret_stack4() {                        // everything above the lid, sta
     color("#6b8fb5") turret4();
     color("#b0b6bd") translate([tsv[0], tsv_y[0], tsv_z[0]]) cube([tsv[1] - tsv[0], tsv_y[1] - tsv_y[0], tsv_z[1] - tsv_z[0]]);   // tilt servo
     color("#e8a33d") translate([tsh[0] - 3, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = sts_horn_d, h = 3, $fn = 40);        // its horn (19.2)
+    strap4();
     crank4();
     tilt_rod4();
     head4();
@@ -362,6 +372,7 @@ if (part == "v4_lid") translate([0, 0, -ledge_z]) lid4();
 if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
+if (part == "v4_strap") strap4();
 if (part == "v4_cover") cylinder(d = 36, h = 3.5, $fn = 80);   // print two
 if (part == "v4_camframe") translate([0, 0, ax_y + fr_y + fr_t]) rotate([-90, 0, 0]) camcover();       // front face down on the bed, spigots and pockets up
 if (part == "v4_head") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0]) head4();                       // front face down on the bed
