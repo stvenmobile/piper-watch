@@ -175,9 +175,37 @@ module hub4() difference() {                    // the stand's hub, its four fla
 // tilt servo hold-down: two posts beside the cradle's side walls (M3 insert in each top) and a flat strap across the servo's top, 2 x M3 x 8
 sb_x = [[-33, -22], [10, 21]];  sb_y = [-42, -34];  sb_t = 3;
 sb_top = z_ft + (tsv_z[1] - tsv_z[0]);          // servo top face
-// cowl screws: three M3 x 8 button-head screws go in from OUTSIDE, radially through the cowl wall (head in a counterbore) into M3 inserts pressed
-// (cowl off) into the outer faces of three posts on the turret floor. Posts stand 0.5 inside the cowl wall, behind the head, clear of the cradle, strap posts, XIAO pocket and crank.
-cs_ang = [215, 303, 325];  cs_z = 7;  cs_in = 54.5;  cs_r0 = 46;  cs_w = 10;  cs_h = 14;
+// cowl screws: two M3 x 8 button-head screws go in from OUTSIDE, radially through the cowl wall (head in a counterbore) into M3 inserts pressed
+// (cowl off) into the outer faces of two posts on the turret floor. Posts stand 0.5 inside the cowl wall, behind the head, clear of the cradle, strap posts, XIAO pocket and crank.
+cs_ang = [215, 325];  cs_z = 7;  cs_in = 54.5;  cs_r0 = 46;  cs_w = 10;  cs_h = 14;
+// fillets where the turret's raised features meet the floor: concave quarter-round, radius fl_r, built from thin stepped layers on the outer footprints
+// (never inside the servo cradle or XIAO pocket, never across the cable openings / hub hole / flange screws, never into the cowl wall or the cowl's cheek notch)
+fl_r = 2;  fl_n = 8;
+module feet2d() {
+    translate([tsv[0] - 3, tsv_y[0] - 3]) square([tsv[1] - tsv[0] + 6, tsv_y[1] - tsv_y[0] + 6]);              // servo cradle
+    translate([xi_x[0] - 2, xi_y[0] - 2]) square([xi_x[1] - xi_x[0] + 4, xi_y[1] - xi_y[0] + 4]);              // XIAO pocket
+    for (b = sb_x) translate([b[0], sb_y[0]]) square([b[1] - b[0], sb_y[1] - sb_y[0]]);                       // strap posts
+    for (a = cs_ang) rotate(a) translate([cs_r0, -cs_w / 2]) square([cs_in - cs_r0, cs_w]);                  // cowl screw posts
+    for (c = [ch_x, [-ch_x[1], -ch_x[0]]]) translate([c[0], ax_y - 10]) square([c[1] - c[0], 20]);              // cheeks
+}
+module fillet_ring2d(d) difference() {
+    intersection() {
+        offset(delta = d) feet2d();
+        circle(r = 54.4, $fn = 160);
+    }
+    feet2d();
+    translate([xi_x[0] - 30, xi_y[0] - 1]) square([30, xi_y[1] - xi_y[0] + 2]);                               // the XIAO plug's way out
+    translate([tsv[1] - 2, xi_y[0] - 1]) square([8, 1 - xi_y[0]]);                                              // and the cable's way through the cradle's right wall
+    translate([tsv[0] - 6, tsv_y[0] + 17]) square([8, 25]);                                                    // horn side opening
+    translate([-60, cw_y - cw_t - 0.1]) square([120, cw_t + 0.2]);                                              // the cowl's front wall (y 5.5 .. 8)
+    circle(d = 20, $fn = 48);                                                                                  // hub hole
+    for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0]) circle(d = 9, $fn = 24);                   // flange screws
+    for (sx = [-1, 1]) translate([sx > 0 ? 38 : -54, -60]) square([16, 68]);                                    // cowl's cheek notch: no fillet behind y = 8
+}
+module fillets4() for (k = [0 : fl_n - 1]) {
+    t = fl_r / fl_n;  z = k * t;  d = fl_r - sqrt(fl_r * fl_r - (fl_r - z - t / 2) * (fl_r - z - t / 2));
+    translate([0, 0, z_ft - 0.01 + z]) linear_extrude(t + 0.01) fillet_ring2d(d);
+}
 module strap4() color("#6b8fb5") difference() {
     box([sb_x[0][0], sb_x[1][1]], sb_y, [sb_top, sb_top + sb_t]);
     for (b = sb_x) translate([(b[0] + b[1]) / 2, (sb_y[0] + sb_y[1]) / 2, sb_top - 1]) hole3(sb_t + 2);
@@ -195,6 +223,7 @@ module turret4() difference() {
             box([tsv[1] - 1, tsv[1] + 4], [xi_y[0], 0], [z_ft - 1, z_ft + 11]);                              // and at the +y end of the right wall: the XIAO's USB plug and cable come through here
         }
         }
+        fillets4();
         for (a = cs_ang) rotate(a) translate([cs_r0, -cs_w / 2, z_ft - 0.01]) cube([cs_in - cs_r0, cs_w, cs_h + 0.01]);   // cowl screw posts
         for (b = sb_x) box(b, sb_y, [z_ft - 0.01, sb_top]);                                                  // hold-down posts (insert in the top)
         difference() {                                                                                       // pocket for the XIAO ESP32-S3 (hot-glued in; no holes), the USB-C end open toward -x
