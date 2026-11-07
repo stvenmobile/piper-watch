@@ -264,6 +264,7 @@ module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -a
     color("#222") for (s = [-1, 1]) translate([s * 8.5, ax_y + pl_y[1] + cb_t, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 6.5, h = boss_h, $fn = 24);   // its bosses
     color("#111") translate([0, ax_y + pl_y[1] + cb_t + cube_h, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 11, h = 3, $fn = 40);   // lens
     if (oled_head) color("#d9dde2") camcover();
+    if (oled_head) color("#f4f4f4") for (sx = [-1, 1]) translate([sx * eye_x, ax_y + fr_y + fr_t - eye_seat, ax_z + eye_z]) rotate([-90, 0, 0]) cylinder(d = 4.66, h = 3.3, $fn = 32);   // glass eyes (sawn-off LED domes)
     if (oled_head) translate([0, ax_y, ax_z + oz]) {
         color("#1b5e20") translate([-37.75, pl_y[0] - 1.2, -10.3]) cube([75.5, 1.2, 20.6]);                                // OLED PCB, on the plate's rear face
         color("#050505") translate([-32.5, pl_y[0], -10.3]) cube([62.5, 1.63, 20.6]);                                      // glass, in the pocket
