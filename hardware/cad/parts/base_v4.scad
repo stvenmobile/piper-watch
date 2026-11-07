@@ -182,13 +182,15 @@ module strap4() color("#6b8fb5") difference() {
 module turret4() difference() {
     union() {
         translate([0, 0, z_floor]) linear_extrude(floor_t) intersection() { circle(r = 57.5, $fn = 160); square([116, 116], center = true); }
-        // cradle for the tilt servo: low walls round its footprint, closed at the shaft end only
+        // cradle for the tilt servo: low walls round its footprint, closed at the shaft end only (corners trimmed to r 54.5 inside the cowl)
+        intersection() { translate([0, 0, z_ft - 1]) cylinder(r = 54.5, h = 40, $fn = 160);
         difference() {
             box([tsv[0] - 3, tsv[1] + 3], [tsv_y[0] - 3, tsv_y[1] + 3], [z_ft - 0.01, z_ft + 10]);
             box([tsv[0], tsv[1]], [tsv_y[0], tsv_y[1]], [z_ft - 1, z_ft + 11]);
             box([tsv[0] - 4, tsv[0] + 1], [tsv_y[0] + 20, tsv_y[0] + 40], [z_ft + 3, z_ft + 11]);           // the horn side open
             box([tsv[0] - 4, tsv[0] + 1], [tsh[1] - 11, tsh[1] + 11], [z_ft + 1, z_ft + 11]);                  // and round the shaft: the crank hub (d 10, centre z_ft + 12.4) swings through
             box([tsv[1] - 1, tsv[1] + 4], [xi_y[0], 0], [z_ft - 1, z_ft + 11]);                              // and at the +y end of the right wall: the XIAO's USB plug and cable come through here
+        }
         }
         for (b = sb_x) box(b, sb_y, [z_ft - 0.01, sb_top]);                                                  // hold-down posts (insert in the top)
         difference() {                                                                                       // pocket for the XIAO ESP32-S3 (hot-glued in; no holes), the USB-C end open toward -x
@@ -319,6 +321,10 @@ module cowl4() color("#d9dde2", cowl_alpha) difference() {
     translate([-42, cw_y - cw_t - 1, z_ft - 1]) cube([22, cw_t + 2, 35]);                  // window: head crank bracket + rod ends (x -42 .. -20)
     translate([-9, cw_y - cw_t - 1, z_ft - 1]) cube([18, cw_t + 2, 17]);                   // notch: the camera's cables to the hub hole
     for (a = [200, 270, 340]) rotate(a) translate([cw_r - 3, 0, z_ft + 14]) cube([8, 1.8, 10], center = true);   // vents (rear)
+    for (s = [-1, 1]) hull() {                                                                 // the cheeks' round rear (608 boss, d 34) pokes behind y = cw_y: notch the front wall round it, 0.5 clear
+        translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 0.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 35, h = ch_t4 + 1, $fn = 60);
+        translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 0.5, ax_y - 10.5, z_ft - 1]) cube([ch_t4 + 1, 21, 7.5]);
+    }
 }
 module covers4() for (sx = [-1, 1]) color("#d9dde2") translate([sx > 0 ? ch_x[1] : -ch_x[1] - 3.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 36, h = 3.5, $fn = 80);
 
