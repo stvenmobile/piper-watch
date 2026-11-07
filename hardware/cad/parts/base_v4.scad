@@ -145,13 +145,13 @@ pl_h = pl_z[1] - pl_z[0];
 lens_z = oled_head ? 18 : 0;                    // lens height above the axle (OLED head: camera on top, the "third eye")
 oz = -7.5;  ox = -3.9;                          // OLED centre: height rel. the axle; active area is 3.9 mm left of the PCB centre (header end)
 tsv = [-22, 10];  tsv_y = [-48.5, -48.5 + 45.22];  tsv_z = [z_ft, z_ft + 24.72];       // tilt servo body: x, y, z (shaft along X, near its back end)
-tsh = [-22, tsv_y[0] + 10.11, z_ft + 12.36];    // shaft: x of the horn face, y, z
+tsh = [-22, tsv_y[1] - 10.11, z_ft + 12.36];    // shaft: x of the horn face, y, z
 // linkage (solved: monotonic over -25 .. +45 deg; wanted -22 .. +23)
-cr_s = 14;  sa0 = 100;                          // servo crank length, its angle at tilt 0 (from +Y, counter-clockwise seen from +X)
-cr_h = 17;  hb0 = 210;                          // head crank length, its direction at tilt 0 (210 = down and back)
-rod_L = 44.9;                                   // pin centre to pin centre (planar; +1.5 for the 6 mm X offset)
+cr_s = 12;  sa0 = 75.7;                         // servo crank length, its angle at tilt 0 (from +Y, counter-clockwise seen from +X); the servo is turned end for end (shaft 13.4 behind the rod's front)
+cr_h = 11;  hb0 = 255;                         // head crank length, its direction at tilt 0 (255 = down and a little back)
+rod_L = 27;                                     // pin centre to pin centre (planar; about 28 with the 7 mm X offset)
 show_cowl = true;  show_fov = false;  fov_v = 43;                 // draw the camera's centre ray and its vertical field of view (C920 ~43 deg, to confirm)
-tilt4 = 0;  sa4 = 100;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
+tilt4 = 0;  sa4 = 75.7;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
 pin_s = [-33.5, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin: the rod end's centre (5 wide: x -36 .. -31, outside the crank's pin boss)
 pin_h = [-26.5, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin: rod end centre (x -29 .. -24, on the inner face of the bracket's boss)
 xi_x = [27.5, 49.3];  xi_y = [-15.2, 3.4];     // XIAO ESP32-S3 pocket interior (board 21 x 17.8 + 0.4 each side; USB-C end at x min, pointing at the hub hole)
