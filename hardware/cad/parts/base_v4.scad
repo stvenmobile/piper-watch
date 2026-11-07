@@ -175,9 +175,9 @@ module hub4() difference() {                    // the stand's hub, its four fla
 // tilt servo hold-down: two posts beside the cradle's side walls (M3 insert in each top) and a flat strap across the servo's top, 2 x M3 x 8
 sb_x = [[-33, -22], [10, 21]];  sb_y = [-42, -34];  sb_t = 3;
 sb_top = z_ft + (tsv_z[1] - tsv_z[0]);          // servo top face
-// cowl screws: three M3 x 10 through lugs inside the cowl wall into inserts in 4 mm posts on the turret floor (all behind the head, clear of the cradle, posts, XIAO pocket and crank)
-cs_ang = [215, 303, 325];  cs_r = 49.5;  cs_post = 4;  cs_lug = [cs_post + 0.2, cs_post + 3.2];
-function cs_pos(a) = [cs_r * cos(a), cs_r * sin(a)];
+// cowl screws: three M3 x 8 button-head screws go in from OUTSIDE, radially through the cowl wall (head in a counterbore) into M3 inserts pressed
+// (cowl off) into the outer faces of three posts on the turret floor. Posts stand 0.5 inside the cowl wall, behind the head, clear of the cradle, strap posts, XIAO pocket and crank.
+cs_ang = [215, 303, 325];  cs_z = 7;  cs_in = 54.5;  cs_r0 = 46;  cs_w = 10;  cs_h = 14;
 module strap4() color("#6b8fb5") difference() {
     box([sb_x[0][0], sb_x[1][1]], sb_y, [sb_top, sb_top + sb_t]);
     for (b = sb_x) translate([(b[0] + b[1]) / 2, (sb_y[0] + sb_y[1]) / 2, sb_top - 1]) hole3(sb_t + 2);
@@ -195,7 +195,7 @@ module turret4() difference() {
             box([tsv[1] - 1, tsv[1] + 4], [xi_y[0], 0], [z_ft - 1, z_ft + 11]);                              // and at the +y end of the right wall: the XIAO's USB plug and cable come through here
         }
         }
-        for (a = cs_ang) translate([each cs_pos(a), z_ft - 0.01]) cylinder(d = 10, h = cs_post + 0.01, $fn = 32);   // cowl screw posts
+        for (a = cs_ang) rotate(a) translate([cs_r0, -cs_w / 2, z_ft - 0.01]) cube([cs_in - cs_r0, cs_w, cs_h + 0.01]);   // cowl screw posts
         for (b = sb_x) box(b, sb_y, [z_ft - 0.01, sb_top]);                                                  // hold-down posts (insert in the top)
         difference() {                                                                                       // pocket for the XIAO ESP32-S3 (hot-glued in; no holes), the USB-C end open toward -x
             box([xi_x[0] - 2, xi_x[1] + 2], [xi_y[0] - 2, xi_y[1] + 2], [z_ft - 0.01, z_ft + 5]);
@@ -208,7 +208,7 @@ module turret4() difference() {
         }
     }
     for (b = sb_x) translate([(b[0] + b[1]) / 2, (sb_y[0] + sb_y[1]) / 2, sb_top - insert_m3[1]]) insert3();   // M3 inserts for the strap
-    for (a = cs_ang) translate([each cs_pos(a), z_ft + cs_post - insert_m3[1]]) insert3();                       // M3 inserts for the cowl
+    for (a = cs_ang) rotate(a) translate([cs_in + 0.01, 0, z_ft + cs_z]) rotate([0, -90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1] + 0.2, $fn = 24);   // radial M3 insert bores, pressed in from the outer face
     intersection() {                                                                                      // cables down the hub: the half under the tilt servo's cradle (y < its front wall) stays solid
         translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);
         box([-20, 20], [tsv_y[1] + 3, 20], [z_floor - 2, z_floor + floor_t + 2]);
@@ -321,22 +321,15 @@ module cw_solid(r, y_front, h, ch) intersection() {
     translate([-100, -100, z_ft - 1]) cube([200, 100 + y_front, 200]);
 }
 module cowl4() color("#d9dde2", cowl_alpha) difference() {
-    union() {
     cw_solid(cw_r, cw_y, cw_h, cw_ch);
-    intersection() {                                                                         // screw lugs, tapering up into the wall (prints without support, cowl upside down)
-        translate([0, 0, z_ft]) cylinder(r = cw_r - 1, h = 30, $fn = 160);
-        for (a = cs_ang) hull() {
-            translate([each cs_pos(a), z_ft + cs_lug[0]]) cylinder(d = 10, h = cs_lug[1] - cs_lug[0], $fn = 32);
-            rotate(a) translate([cw_r - cw_t - 1, 0, z_ft + 12]) cube([2, 10, 2], center = true);
-            rotate(a) translate([cw_r - cw_t - 1, 0, z_ft + cs_lug[0] + 1.5]) cube([2, 10, 3], center = true);
-        }
-    }
-    }
     cw_solid(cw_r - cw_t, cw_y - cw_t, cw_h - cw_t, cw_ch);                              // hollow, front wall left 2.5 thick
     translate([-42, cw_y - cw_t - 1, z_ft - 1]) cube([22, cw_t + 2, 35]);                  // window: head crank bracket + rod ends (x -42 .. -20)
     translate([-9, cw_y - cw_t - 1, z_ft - 1]) cube([18, cw_t + 2, 17]);                   // notch: the camera's cables to the hub hole
     for (a = [200, 270, 340]) rotate(a) translate([cw_r - 3, 0, z_ft + 14]) cube([8, 1.8, 10], center = true);   // vents (rear)
-    for (a = cs_ang) translate([each cs_pos(a), z_ft + cs_lug[0] - 1]) cylinder(d = 3.4 + cal_hole, h = 8, $fn = 24);   // screw holes
+    for (a = cs_ang) rotate(a) translate([cw_r - cw_t - 1, 0, z_ft + cs_z]) {                                      // screw holes through the wall + head counterbore
+        rotate([0, 90, 0]) cylinder(d = 3.4 + cal_hole, h = cw_t + 2, $fn = 24);
+        translate([cw_t + 1 - 1.6, 0, 0]) rotate([0, 90, 0]) cylinder(d = 6.2, h = 3, $fn = 32);
+    }
     for (s = [-1, 1]) hull() {                                                                 // the cheeks' round rear (608 boss, d 34) pokes behind y = cw_y: notch the front wall round it, 0.5 clear
         translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 0.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 35, h = ch_t4 + 1, $fn = 60);
         translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 0.5, ax_y - 10.5, z_ft - 1]) cube([ch_t4 + 1, 21, 7.5]);
