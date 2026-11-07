@@ -152,9 +152,10 @@ cr_h = 17;  hb0 = 210;                          // head crank length, its direct
 rod_L = 44.9;                                   // pin centre to pin centre (planar; +1.5 for the 6 mm X offset)
 show_cowl = true;  show_fov = false;  fov_v = 43;                 // draw the camera's centre ray and its vertical field of view (C920 ~43 deg, to confirm)
 tilt4 = 0;  sa4 = 100;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
-pin_s = [-27, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin
-pin_h = [-33, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin (moves with the head)
+pin_s = [-33.5, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin: the rod end's centre (5 wide: x -36 .. -31, outside the crank's pin boss)
+pin_h = [-26.5, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin: rod end centre (x -29 .. -24, on the inner face of the bracket's boss)
 xi_x = [27.5, 49.3];  xi_y = [-15.2, 3.4];     // XIAO ESP32-S3 pocket interior (board 21 x 17.8 + 0.4 each side; USB-C end at x min, pointing at the hub hole)
+stub_d = 7.85;                                  // axle stubs into the 608 bores (8.0): 0.15 slip, like the stand's hub (CHECK on the first print)
 hub_a = 30;                                     // flange screws at 30/120/210/300 deg: none under the tilt servo
 
 module hub4() difference() {                    // the stand's hub, its four flange inserts turned to hub_a + k*90 to clear the tilt servo
@@ -179,7 +180,7 @@ module turret4() difference() {
             box([tsv[0] - 3, tsv[1] + 3], [tsv_y[0] - 3, tsv_y[1] + 3], [z_ft - 0.01, z_ft + 10]);
             box([tsv[0], tsv[1]], [tsv_y[0], tsv_y[1]], [z_ft - 1, z_ft + 11]);
             box([tsv[0] - 4, tsv[0] + 1], [tsv_y[0] + 20, tsv_y[0] + 40], [z_ft + 3, z_ft + 11]);           // the horn side open
-            box([tsv[0] - 4, tsv[0] + 1], [tsh[1] - 8, tsh[1] + 8], [z_ft + 5, z_ft + 11]);                  // and round the shaft: the crank hub (d 10, centre z_ft + 12.4) swings through
+            box([tsv[0] - 4, tsv[0] + 1], [tsh[1] - 11, tsh[1] + 11], [z_ft + 1, z_ft + 11]);                  // and round the shaft: the crank hub (d 10, centre z_ft + 12.4) swings through
             box([tsv[1] - 1, tsv[1] + 4], [xi_y[0], 0], [z_ft - 1, z_ft + 11]);                              // and at the +y end of the right wall: the XIAO's USB plug and cable come through here
         }
         difference() {                                                                                       // pocket for the XIAO ESP32-S3 (hot-glued in; no holes), the USB-C end open toward -x
@@ -246,10 +247,12 @@ module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -a
         translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 16, h = 3, $fn = 40);
         ext_yz(s > 0 ? arm_x[0] : -arm_x[1], s > 0 ? arm_x[1] : -arm_x[0]);
     }
-    for (s = [-1, 1]) color("#6b8fb5") translate([s > 0 ? arm_x[1] : -ch_x[1] - 0.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 8, h = (s > 0 ? ch_x[1] - arm_x[1] : ch_x[1] - arm_x[1] + 0.5 + (ch_x[1] - ch_x[1])) + 0.01, $fn = 24);   // axle stubs (into the 608s)
-    color("#6b8fb5") hull() {                                                                                                  // crank bracket on the left arm
+    for (s = [-1, 1]) color("#6b8fb5") translate([s > 0 ? arm_x[1] : -ch_x[1] - 0.5, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = stub_d, h = (s > 0 ? ch_x[1] - arm_x[1] : ch_x[1] - arm_x[1] + 0.5 + (ch_x[1] - ch_x[1])) + 0.01, $fn = 24);   // axle stubs (into the 608s)
+    color("#6b8fb5") difference() { hull() {                                                                                    // crank bracket on the left arm
         translate([-arm_x[1] - 0.01, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 12, h = 3.01, $fn = 32);
-        translate([pin_h[0] + 1, ax_y + cr_h * cos(hb0), ax_z + cr_h * sin(hb0)]) rotate([0, 90, 0]) cylinder(d = 8, h = 6, $fn = 24);
+        translate([pin_h[0] - 2.5 - 6, ax_y + cr_h * cos(hb0), ax_z + cr_h * sin(hb0)]) rotate([0, 90, 0]) cylinder(d = 9, h = 6.01, $fn = 32);   // boss x -35 .. -29
+    }
+    translate([pin_h[0] - 2.5 + 0.01, ax_y + cr_h * cos(hb0), ax_z + cr_h * sin(hb0)]) rotate([0, -90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1] + 0.2, $fn = 24);   // M3 insert bore from the free face
     }
     if (oled_head) color("#8a8d91") difference() {                                                                       // zip-tie tab for the OLED wires: rear face, above the PCB's left (header) end
         translate([-36, ax_y + pl_y[0] - 4, ax_z + 4]) cube([5, 4.01, 6]);
@@ -272,13 +275,17 @@ module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -a
     }
     }
 }
-module crank4() color("#e8a33d") hull() {
-    translate([tsh[0] - 3, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = 10, h = 5, $fn = 30);
-    translate([pin_s[0] - 1, pin_s[1], pin_s[2]]) rotate([0, 90, 0]) cylinder(d = 7, h = 4, $fn = 24);
+module crank4() color("#e8a33d") difference() {                    // hub on the horn's 4 x M3 (PCD 14) + arm to the 14 mm pin; M3 insert in the pin boss, rod end bolted on its free face
+    hull() {
+        translate([tsh[0] - 6, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = 20, h = 3, $fn = 48);              // hub x -28 .. -25
+        translate([pin_s[0] + 2.5, pin_s[1], pin_s[2]]) rotate([0, 90, 0]) cylinder(d = 9, h = 6, $fn = 32);       // pin boss x -31 .. -25
+    }
+    translate([pin_s[0] + 2.5 - 0.01, pin_s[1], pin_s[2]]) rotate([0, 90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1] + 0.2, $fn = 24);   // insert bore from the free face
+    translate([tsh[0] - 7, tsh[1], tsh[2]]) rotate([0, 90, 0]) for (a = [45 : 90 : 360]) rotate(a) translate([sts_horn_pcd / 2, 0, 0]) cylinder(d = 3.4 + cal_hole, h = 5, $fn = 24);   // horn screws
 }
-module tilt_rod4() color("#c0392b") hull() {
-    translate(pin_s) rotate([0, 90, 0]) cylinder(d = 4, h = 5, center = true, $fn = 20);
-    translate(pin_h) rotate([0, 90, 0]) cylinder(d = 4, h = 5, center = true, $fn = 20);
+module tilt_rod4() color("#c0392b") {                                // M3 threaded rod + two rose-joint rod ends (eye d 10, 5 wide, as on the test stand)
+    hull() for (p = [pin_s, pin_h]) translate(p) sphere(d = 3, $fn = 12);
+    for (p = [pin_s, pin_h]) translate(p) rotate([0, 90, 0]) cylinder(d = 10, h = 5, center = true, $fn = 32);
 }
 // ==== COWL (hides the tilt servo, crank and rod) + CHEEK COVERS ===================================================================
 // The cowl is a low dome over the rear half of the turret floor (a circle segment behind y = cw_y, the cheeks' rear face), 2.5 mm wall,
@@ -297,7 +304,7 @@ module cw_solid(r, y_front, h, ch) intersection() {
 module cowl4() color("#d9dde2", cowl_alpha) difference() {
     cw_solid(cw_r, cw_y, cw_h, cw_ch);
     cw_solid(cw_r - cw_t, cw_y - cw_t, cw_h - cw_t, cw_ch);                              // hollow, front wall left 2.5 thick
-    translate([-42, cw_y - cw_t - 1, z_ft - 1]) cube([18, cw_t + 2, 35]);                  // window: head crank bracket + rod (x -42 .. -24)
+    translate([-42, cw_y - cw_t - 1, z_ft - 1]) cube([22, cw_t + 2, 35]);                  // window: head crank bracket + rod ends (x -42 .. -20)
     translate([-9, cw_y - cw_t - 1, z_ft - 1]) cube([18, cw_t + 2, 17]);                   // notch: the camera's cables to the hub hole
     for (a = [200, 270, 340]) rotate(a) translate([cw_r - 3, 0, z_ft + 14]) cube([8, 1.8, 10], center = true);   // vents (rear)
 }
@@ -360,3 +367,5 @@ if (part == "v4_camframe") translate([0, 0, ax_y + fr_y + fr_t]) rotate([-90, 0,
 if (part == "v4_head") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0]) head4();                       // front face down on the bed
 if (part == "v4_plate") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0])                               // fit coupon: the camera/OLED plate only (no arms)
     intersection() { head4(); translate([-pl_x, ax_y + 9, 0]) cube([2 * pl_x, 20, 300]); }
+
+if (part == "v4_crank") translate([0, -tsh[1], 25]) rotate([0, 90, 0]) translate([0, 0, 0]) crank4();     // face x = -25 (against the horn) down, insert bore up
