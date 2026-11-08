@@ -256,7 +256,7 @@ module plate_prof() polygon([[ax_y + pl_y[0], ax_z + pl_z[0]], [ax_y + pl_y[1] -
 module ext_yz(x0, x1) translate([x0, 0, 0]) rotate([90, 0, 90]) linear_extrude(x1 - x0) plate_prof();
 module oled_cuts() translate([0, ax_y, ax_z + oz]) {                                                                        // local frame: x, y rel. the axle, z rel. the OLED centre
     translate([ox - 26.6, pl_y[0] - 2, -7.39]) cube([53.2, pl_y[1] - pl_y[0] + 4, 14.78]);                                   // window (viewing area 53.18 x 14.78)
-    translate([-32.7, pl_y[0] - 1, -10.4]) cube([63, 2.8, 20.8]);                                                          // pocket for the glass (62.5 x 20.6 x 1.63), 2.2 front lip
+    translate([-33.75, pl_y[0] - 1, -10.4]) cube([67.5, 2.8, 20.8]);                                                        // pocket: symmetric, 67.5 long = 1 mm short of the mounting holes (x +-36, d 2.5): takes the glass, the connector at the far end and the solder joints at the header end; 2.2 front lip
     for (sx = [-36, 36], sz = [-7.75, 7.75]) translate([sx, pl_y[0] - 1, sz]) rotate([-90, 0, 0]) cylinder(d = 1.6, h = 3.5, $fn = 16);   // M2 pilots
 }
 // ---- camera board on the plate's front face + the front frame that grips its lens cube --------------------------------------------
