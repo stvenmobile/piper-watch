@@ -151,6 +151,7 @@ cr_s = 12;  sa0 = 75.7;                         // servo crank length, its angle
 cr_h = 11;  hb0 = 255;                         // head crank length, its direction at tilt 0 (255 = down and a little back)
 rod_L = 27;                                     // pin centre to pin centre (planar; about 28 with the 7 mm X offset)
 show_cowl = true;  show_fov = false;  fov_v = 43;                 // draw the camera's centre ray and its vertical field of view (C920 ~43 deg, to confirm)
+xp_cam = 0;  xp_cov = 0;  xp_oled = 0;                 // exploded-view offsets for the head renders (mm along y)
 tilt4 = 0;  sa4 = 75.7;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
 pin_s = [-33.5, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin: the rod end's centre (5 wide: x -36 .. -31, outside the crank's pin boss)
 pin_h = [-26.5, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin: rod end centre (x -29 .. -24, on the inner face of the bracket's boss)
@@ -308,17 +309,20 @@ module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -a
         translate([-36, ax_y + pl_y[0] - 4, ax_z + 4]) cube([5, 4.01, 6]);
         translate([-37, ax_y + pl_y[0] - 2.8, ax_z + 5.4]) cube([7, 1.6, 3.2]);                                          // tie slot 3.2 x 1.6, along X
     }
-    if (part == "v4_view") {
-    color("#1b5e20") difference() {                                                                                         // camera board (82 x 23 at the lugs; from the photos), with its edge slot
+    if (part == "v4_view" || part == "head_view") {
+    translate([0, xp_cam, 0]) { color("#1b5e20") difference() {                                                                                         // camera board (82 x 23 at the lugs; from the photos), with its edge slot
         translate([-41, ax_y + pl_y[1], ax_z + lens_z - 11.5]) cube([82, cb_t, 23]);
         translate([slot_x - 2, ax_y + pl_y[1] - 1, ax_z + lens_z - 12]) cube([4, cb_t + 2, 12 + slot_z - lens_z + 2]);
     }
     color("#222") translate([-cube_w / 2, ax_y + pl_y[1] + cb_t, ax_z + lens_z - cube_w / 2]) cube([cube_w, cube_h, cube_w]);   // lens cube
     color("#222") for (s = [-1, 1]) translate([s * 8.5, ax_y + pl_y[1] + cb_t, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 6.5, h = boss_h, $fn = 24);   // its bosses
     color("#111") translate([0, ax_y + pl_y[1] + cb_t + cube_h, ax_z + lens_z]) rotate([-90, 0, 0]) cylinder(d = 11, h = 3, $fn = 40);   // lens
+    }
+    translate([0, xp_cov, 0]) {
     if (oled_head) color("#d9dde2") camcover();
     if (oled_head) color("#f4f4f4") for (sx = [-1, 1]) translate([sx * eye_x, ax_y + fr_y + fr_t - eye_seat, ax_z + eye_z]) rotate([-90, 0, 0]) cylinder(d = 4.66, h = 3.3, $fn = 32);   // glass eyes (sawn-off LED domes)
-    if (oled_head) translate([0, ax_y, ax_z + oz]) {
+    }
+    if (oled_head) translate([0, ax_y - xp_oled, ax_z + oz]) {
         color("#1b5e20") translate([-37.75, pl_y[0] - 1.2, -10.3]) cube([75.5, 1.2, 20.6]);                                // OLED PCB, on the plate's rear face
         color("#050505") translate([-32.5, pl_y[0], -10.3]) cube([62.5, 1.63, 20.6]);                                      // glass, in the pocket
         color("#9fd6ff") translate([ox - 25.59, pl_y[0] + 1.64, -6.39]) cube([51.18, 0.15, 12.78]);                          // active area, lit
@@ -442,3 +446,4 @@ if (part == "v4_plate") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0])   
 
 if (part == "v4_crank") translate([0, -tsh[1], 25]) rotate([0, 90, 0]) translate([0, 0, 0]) crank4();     // face x = -25 (against the horn) down, insert bore up
 if (part == "v4_hub") translate([0, 0, z_flange + flange_t]) rotate([180, 0, 0]) hub4();                         // flange on the bed, inserts up (bores open at the flange's top face)
+if (part == "head_view") head4();
