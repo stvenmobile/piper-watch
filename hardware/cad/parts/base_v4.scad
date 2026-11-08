@@ -156,7 +156,8 @@ pin_s = [-33.5, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];            
 pin_h = [-26.5, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin: rod end centre (x -29 .. -24, on the inner face of the bracket's boss)
 xi_x = [27.5, 49.3];  xi_y = [-15.2, 3.4];     // XIAO ESP32-S3 pocket interior (board 21 x 17.8 + 0.4 each side; USB-C end at x min, pointing at the hub hole)
 stub_d = 7.85;                                  // axle stubs into the 608 bores (8.0): 0.15 slip, like the stand's hub (CHECK on the first print)
-hub_a = 30;                                     // flange screws at 30/120/210/300 deg: none under the tilt servo
+hub_a = 35;                                     // flange screws at 35/125/215/305 deg
+flange_d = 82;  flange_r = 36;                  // wider flange (the stand's is 66 / r 29): the four screws sit >= 4.5 from the cradle walls, strap posts and XIAO pocket
 
 module hub4() difference() {                    // the stand's hub, its four flange inserts turned to hub_a + k*90 to clear the tilt servo
     union() {
@@ -440,3 +441,4 @@ if (part == "v4_plate") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0])   
     intersection() { head4(); translate([-pl_x, ax_y + 9, 0]) cube([2 * pl_x, 20, 300]); }
 
 if (part == "v4_crank") translate([0, -tsh[1], 25]) rotate([0, 90, 0]) translate([0, 0, 0]) crank4();     // face x = -25 (against the horn) down, insert bore up
+if (part == "v4_hub") translate([0, 0, z_flange + flange_t]) rotate([180, 0, 0]) hub4();                         // flange on the bed, inserts up (bores open at the flange's top face)
