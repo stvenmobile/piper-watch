@@ -33,6 +33,7 @@ module out2d() offset(r = 3) offset(delta = -3) polygon([[cam_dx - hwl, zb], [ca
 module ring2d() difference() { out2d(); offset(delta = -wt6) out2d(); }
 
 // bolt/boss positions
+xb3 = 24;  zb3 = -13.5;                       // third joint bolt, bottom right (clear of the cable slot, x -34 .. 16): boss on the bottom wall, M2.5 x 8
 xj = 47.5;  zj = 27;                           // joint bosses (x = cam_dx +- xj)
 xcs = 44.5;                                    // camera strap bosses (x = cam_dx +- xcs, at lens height)
 zos = 7.7;  xos = 14;                          // OLED strap boss: height and x (clear of the lens cube, which spans x -10.9 .. 3.1)
@@ -61,6 +62,7 @@ module front6a() color("#8a8d91") difference() {
         ey(yj, yf) ring2d();                                       // side walls, visor and bottom: the closed shell, from the front wall to the back piece
         ey(yj, yf) zclip(zb - 1, zb + 3.5) out2d();               // bottom wall 3.5 thick (the chamfer below slices its front part)
         for (sx = [-1, 1]) fwd(cam_dx + sx * xj, yj, zj, 7, yc - yj + 0.5);                       // joint bosses
+        fwd(xb3, yj, zb3, 7, 21 - yj);                                                              // bottom joint boss
         fwd(xos, yb_ol, zos, 4.6, yc - yb_ol + 0.5);                                                // OLED strap boss
         for (sx = [-1, 1]) translate([cam_dx + sx * eye_x, ax_y + yc + 0.01, ax_z + eye_z]) rotate([90, 0, 0]) cylinder(d = 5, h = spg, $fn = 32);   // eye spigots
         translate([-26, ax_y + yo - 2.6, ax_z + oz - 14.3 - 0.3]) cube([52, 2.61, 4.0]);                  // rim: floor (0.3 under the PCB's bottom edge, oz - 10.3) ...
@@ -80,6 +82,7 @@ module front6a() color("#8a8d91") difference() {
     for (sx = [-1, 1]) fwd(cam_dx + sx * xj, yj - 1, zj, insert_m25[0], insert_m25[1] + 2.5);               // M2.5 insert bores from the rear end
     for (sx = [-1, 1]) fwd(cam_dx + sx * xj, yj, zj, 2.6, 9);                                                // and the screw's path on
     fwd(xos, yb_ol - 1, zos, 1.6, 4.8);
+    fwd(xb3, yj - 1, zb3, insert_m25[0], insert_m25[1] + 2.5);  fwd(xb3, yj, zb3, 2.6, 7);        // bottom joint: insert bore + screw path
     translate([-100, 0, 0]) rotate([90, 0, 90]) linear_extrude(200)                                           // bottom chamfer: at -22 deg the front must stay 0.5 above the turret floor (z -26)
         polygon([[ax_y + 10, ax_z - 27.51 + 4.045], [ax_y + 30, ax_z - 27.51 + 12.135], [ax_y + 30, ax_z - 60], [ax_y + 10, ax_z - 60]]);
 }
@@ -102,6 +105,7 @@ module back6() color("#6b8fb5") difference() {
         }
     }
     translate([-34, ax_y + yr - 1, ax_z + zb - 1]) cube([50, yj - yr + 2, 10]);                                      // cable exit: 50 x 9 slot at the bottom of the plate
+    fwd(xb3, yr - 1, zb3, 2.8 + cal_hole, 6);  fwd(xb3, yr - 1, zb3, 5.4 + cal_hole, 2.5);                          // the bottom joint bolt
     for (sx = [-1, 1]) {                                                                                             // the two joint bolts, heads sunk in the rear face
         fwd(cam_dx + sx * xj, yr - 1, zj, 2.8 + cal_hole, 6);
         fwd(cam_dx + sx * xj, yr - 1, zj, 5.4 + cal_hole, 2.5);
