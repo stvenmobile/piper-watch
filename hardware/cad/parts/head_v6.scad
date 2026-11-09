@@ -28,10 +28,9 @@ st_t = 2.5;                                    // strap thickness
 
 module ey(y0, y1) translate([0, ax_y + y1, ax_z]) rotate([90, 0, 0]) linear_extrude(y1 - y0) children();      // 2D (x, z rel. the axle) -> y0..y1
 module zclip(a, b) intersection() { children(); translate([-200, a]) square([400, b - a]); }
-zr41 = z0 + (41 - (cam_dx + 44)) / ((hwt - 44) / (zt - z0));
-module out2d() offset(r = 3) offset(delta = -3) polygon([[-41, zb], [41, zb], [41, zr41], [cam_dx + hwt, zt], [cam_dx - hwt, zt], [cam_dx - 44, z0], [-41, zs]]);
-module outr2d() offset(r = 3) offset(delta = -3) polygon([[cam_dx - 44, zb], [41, zb], [41, zr41], [cam_dx + hwt, zt], [cam_dx - hwt, zt], [cam_dx - 44, z0]]);   // the walls' outline: no step under the board's left end
-module ring2d() difference() { outr2d(); offset(delta = -wt6) outr2d(); }
+hwl = 46;                                      // face half width up to where the flare starts: the face is symmetric about the lens/window centre (cam_dx)
+module out2d() offset(r = 3) offset(delta = -3) polygon([[cam_dx - hwl, zb], [cam_dx + hwl, zb], [cam_dx + hwl, z0], [cam_dx + hwt, zt], [cam_dx - hwt, zt], [cam_dx - hwl, z0]]);
+module ring2d() difference() { out2d(); offset(delta = -wt6) out2d(); }
 
 // bolt/boss positions
 xj = 47.5;  zj = 27;                           // joint bosses (x = cam_dx +- xj)
