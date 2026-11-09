@@ -8,7 +8,7 @@ Renders (`NN_render_*.png`) come from `parts/base_v4.scad` (`part = "head_view"`
 
 ### Step 1: camera on the camframe ✅
 
-Part: `base_camframe_v4.3mf`. The webcam PCB (Logitech 210-002028-003) is fitted to the camframe: lens in its square pocket, glass eyes in the D3 and D6 seats,
+Part: `base_camframe_v4.3mf` (superseded by `base_head_v5.3mf`, see step 2). The webcam PCB (Logitech 210-002028-003) is fitted to the camframe: lens in its square pocket, glass eyes in the D3 and D6 seats,
 mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edge slot, the mic side is hot-glued.
 
 ![Camera board, rear](01_camera_board_rear.jpg)
@@ -21,8 +21,8 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 
 ### Step 2: head: insert, OLED, camera ⏭
 
-**Parts (all in `out/`, already printed):** `base_head_v4.3mf` (the head: camera plate, two arms and axle stubs, one piece; there is no separate "plate" part) and `base_camframe_v4.3mf` (with the camera on it, step 1).
-`base_plate_v4.3mf` is only an old fit coupon (plate without arms): do not use it.
+**Part (in `out/`):** `base_head_v5.3mf` — the new one-piece head (camera frame, visor, flared sides, plate, arms and axle stubs). It replaces `base_head_v4.3mf` and `base_camframe_v4.3mf`; do not use those two or `base_plate_v4.3mf` (an old coupon).
+Print it front face down, with tree supports under the lower plate and arms. Not printed yet.
 **Hardware:** the camera on its camframe, the OLED (2.08", GME25664-65), 1 x M2.5 heat-set insert,
 4 x M2 short self-tapping screws, 1 x **M2.5 x 16** screw, 1 x M3 heat-set insert, soldering iron, a zip tie.
 **Nothing more to print for this step.**
@@ -38,8 +38,8 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 
 1. **Inserts.** M2.5 insert into the boss on the rear of the plate, pressed in from the boss's rear end. M3 insert into the crank bracket on the left arm, pressed in from its free face. Check each with a screw.
 2. **OLED.** Glass into the pocket from the rear (the front lip keeps it in), board flat on the plate, 4 x M2 into the corner pilot holes. Do not overtighten. Lead the wires down and zip-tie them at the tab on the head's rear, above the board's left end.
-3. **Camera.** Camera on the head's front face, lens cube into its pocket in the camframe, glass eyes in their seats. Put the **M2.5 x 16** screw through the frame tab and the board's edge slot into the head's insert, and tighten until the frame sits firm on the cube's bosses.
-   The frame's rear face stands 6.7 mm off the plate, so the 12 mm bolt in photo 02 would grip only about 2 mm of the insert.
+3. **Camera.** The camera slides up from below into the head, lens cube into the open lens slot, glass eyes pressed into their seats from the front. Put the **M2.5 x 16** screw through the frame, the board's edge slot, into the head's insert; it pins the board (about 0.3 mm of play front to back).
+   The frame's rear face stands 7.0 mm off the plate, so a 12 mm screw would barely reach the insert; use 16 or 18.
 4. **Check.** The camera does not rock, the OLED glass is flush in its window, the USB cable has a free run out of the frame bottom.
 
 Add your photos here: `06_head_oled_fitted.jpg`, `07_head_camera_fitted.jpg`.
