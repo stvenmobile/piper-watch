@@ -28,7 +28,7 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 **Nothing more to print for this step.**
 
 ![Head from the front](03_render_head_front.png)
-*03: front piece from the front: camera hole above the OLED window, the two eye holes (glass domes), visor on top.*
+*03: front piece from the front (now with full side walls and floor, closed up to the back piece): camera hole above the OLED window, the two eye holes (glass domes), visor on top.*
 
 ![Head from the rear](04_render_head_rear.png)
 *04: the assembled head from the rear: back piece with its two ears (bolts), pivot arms and axle stubs.*
@@ -41,11 +41,11 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 
 1. **Inserts.** M2.5 inserts into the two joint bosses (top corners of the front piece, pressed in from the rear end). M3 insert into the crank bracket on the back piece's left arm.
 2. **OLED.** Glass into the pocket from behind; the board's bottom edge goes under the rim (the lip along the bottom), then the board lies flat. Put the OLED strap over its top edge, **M2 x 5**, snug only.
-   There are 9.8 mm behind the board for the Dupont plugs; the wires leave through the open bottom.
+   There are 9.8 mm behind the board for the Dupont plugs; the wires leave through the cable slot in the back plate (50 x 9, bottom edge).
 3. **Camera.** Lens cube through the square hole from behind, glass eyes pressed into their seats from the front (spigots are behind the board's two LEDs). One camera strap at each end of the board (**M2 x 6**).
-   The USB cable leaves through the open bottom.
+   The USB cable leaves through the same slot.
 4. **Close.** Back piece on, its two ears onto the joint bosses, **2 x M2.5 x 10** from behind.
-5. **Check.** Camera does not rock, OLED is flat against its window, cable has a free run out of the bottom.
+5. **Check.** Camera does not rock, OLED is flat against its window, cable has a free run out of the slot.
 
 Add your photos here: `07_front_piece_printed.jpg`, `08_oled_fitted.jpg`, `09_camera_fitted.jpg`, `10_head_closed.jpg`.
 

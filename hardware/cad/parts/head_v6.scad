@@ -40,14 +40,27 @@ yb_cam = by_cam + 0.2;                         // camera strap bosses' free end 
 yb_ol = oy_pcb[0] + 0.2;                       // OLED strap boss' free end
 module fwd(x, y, z, d, h) translate([x, ax_y + y, ax_z + z]) rotate([-90, 0, 0]) cylinder(d = d, h = h, $fn = 40);      // cylinder from y forward
 
-module front6() color("#8a8d91") difference() {
+module camboss(sx) difference() {                                                            // camera strap boss: runs through the mic pocket down to its floor
+    fwd(cam_dx + sx * xcs, yb_cam, lens_z, 6, yc + 1.5 - yb_cam);
+    fwd(cam_dx + sx * xcs, yb_cam - 1, lens_z, 1.6, 7.5);                                    // M2 pilot (self-tapping)
+}
+// everything the cheeks and their covers can occupy at any tilt, in the head's frame: nothing of the shell may be there
+module cheek_k() for (s = [-1, 1]) {
+    translate([s > 0 ? ch_x[0] - 2.6 : -ch_x[1] - 2.6, ax_y - 12.6, z_ft - 0.5]) cube([ch_t4 + 5.2, 25.2, 3.1]);      // the fillets round the cheeks' feet (2 high)
+    hull() {
+    translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 0.5, ax_y - 10.5, z_ft - 0.5]) cube([ch_t4 + 1, 21, 7]);
+    translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 4, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 35, h = ch_t4 + 4.5, $fn = 60);      // cheek + cover (3.5)
+    }
+}
+module sweep_k() for (t = [-26 : 2 : 48]) translate([0, ax_y, ax_z]) rotate([-t, 0, 0]) translate([0, -ax_y, -ax_z]) cheek_k();
+module front6() { difference() { front6a(); sweep_k(); } for (sx = [-1, 1]) camboss(sx); }
+module front6a() color("#8a8d91") difference() {
     union() {
         ey(yo, yf) zclip(zb - 1, zs) out2d();                      // OLED zone: 4 thick
         ey(yc, yf) zclip(zs - 0.01, zt + 1) out2d();               // camera zone: 3 thick
-        ey(18, yf) zclip(z0, zt + 1) ring2d();                    // side walls and visor
-        ey(yj, 18.01) zclip(zrw, zt + 1) ring2d();                 // upper wings carry on to the back piece
+        ey(yj, yf) ring2d();                                       // side walls, visor and bottom: the closed shell, from the front wall to the back piece
+        ey(yj, yf) zclip(zb - 1, zb + 3.5) out2d();               // bottom wall 3.5 thick (the chamfer below slices its front part)
         for (sx = [-1, 1]) fwd(cam_dx + sx * xj, yj, zj, 7, yc - yj + 0.5);                       // joint bosses
-        for (sx = [-1, 1]) fwd(cam_dx + sx * xcs, yb_cam, lens_z, 6, yc - yb_cam + 0.5);            // camera strap bosses
         fwd(xos, yb_ol, zos, 4.6, yc - yb_ol + 0.5);                                                // OLED strap boss
         for (sx = [-1, 1]) translate([cam_dx + sx * eye_x, ax_y + yc + 0.01, ax_z + eye_z]) rotate([90, 0, 0]) cylinder(d = 5, h = spg, $fn = 32);   // eye spigots
         translate([-26, ax_y + yo - 2.6, ax_z + oz - 14.3 - 0.3]) cube([52, 2.61, 4.0]);                  // rim: floor (0.3 under the PCB's bottom edge, oz - 10.3) ...
@@ -66,7 +79,6 @@ module front6() color("#8a8d91") difference() {
     }
     for (sx = [-1, 1]) fwd(cam_dx + sx * xj, yj - 1, zj, insert_m25[0], insert_m25[1] + 2.5);               // M2.5 insert bores from the rear end
     for (sx = [-1, 1]) fwd(cam_dx + sx * xj, yj, zj, 2.6, 9);                                                // and the screw's path on
-    for (sx = [-1, 1]) fwd(cam_dx + sx * xcs, yb_cam - 1, lens_z, 1.6, 7.5);                                 // M2 pilots (self-tapping)
     fwd(xos, yb_ol - 1, zos, 1.6, 4.8);
     translate([-100, 0, 0]) rotate([90, 0, 90]) linear_extrude(200)                                           // bottom chamfer: at -22 deg the front must stay 0.5 above the turret floor (z -26)
         polygon([[ax_y + 10, ax_z - 27.51 + 4.045], [ax_y + 30, ax_z - 27.51 + 12.135], [ax_y + 30, ax_z - 60], [ax_y + 10, ax_z - 60]]);
@@ -75,7 +87,7 @@ module front6() color("#8a8d91") difference() {
 // ---- back piece --------------------------------------------------------------------------------------------------------------------
 module back6() color("#6b8fb5") difference() {
     union() {
-        ey(yr, yj) union() { translate([-41, zb]) square([82, zt - zb]); zclip(zrw, zt + 1) out2d(); }     // plate with the two ears
+        difference() { ey(yr, yj) out2d(); sweep_k(); }                                                      // plate: the whole face outline, so the head is closed (clear of the cheeks)
         for (s = [-1, 1]) hull() {                                                                                    // arms
             translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 16, h = 3, $fn = 40);
             translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y + yr, ax_z - 12]) cube([3, 3, 24]);
@@ -89,6 +101,7 @@ module back6() color("#6b8fb5") difference() {
         translate([pin_h[0] - 2.5 + 0.01, ax_y + cr_h * cos(hb0), ax_z + cr_h * sin(hb0)]) rotate([0, -90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1] + 0.2, $fn = 24);
         }
     }
+    translate([-34, ax_y + yr - 1, ax_z + zb - 1]) cube([50, yj - yr + 2, 10]);                                      // cable exit: 50 x 9 slot at the bottom of the plate
     for (sx = [-1, 1]) {                                                                                             // the two joint bolts, heads sunk in the rear face
         fwd(cam_dx + sx * xj, yr - 1, zj, 2.8 + cal_hole, 6);
         fwd(cam_dx + sx * xj, yr - 1, zj, 5.4 + cal_hole, 2.5);
