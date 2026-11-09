@@ -8,7 +8,7 @@ Renders (`NN_render_*.png`) come from `parts/base_v4.scad` (`part = "head_view"`
 
 ### Step 1: camera on the camframe ✅
 
-Part: `base_camframe_v4.3mf` (superseded by `base_head_v5.3mf`, see step 2). The webcam PCB (Logitech 210-002028-003) is fitted to the camframe: lens in its square pocket, glass eyes in the D3 and D6 seats,
+Part: `base_camframe_v4.3mf` (superseded by the two-piece head, see step 2). The webcam PCB (Logitech 210-002028-003) is fitted to the camframe: lens in its square pocket, glass eyes in the D3 and D6 seats,
 mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edge slot, the mic side is hot-glued.
 
 ![Camera board, rear](01_camera_board_rear.jpg)
@@ -19,30 +19,35 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 
 ## Next
 
-### Step 2: head: insert, OLED, camera ⏭
+### Step 2: head: front piece, back piece, OLED, camera ⏭
 
-**Part (in `out/`):** `base_head_v5.3mf` — the new one-piece head (camera frame, visor, flared sides, plate, arms and axle stubs). It replaces `base_head_v4.3mf` and `base_camframe_v4.3mf`; do not use those two or `base_plate_v4.3mf` (an old coupon).
-Print it front face down, with tree supports under the lower plate and arms. Not printed yet.
-**Hardware:** the camera on its camframe, the OLED (2.08", GME25664-65), 1 x M2.5 heat-set insert,
-4 x M2 short self-tapping screws, 1 x **M2.5 x 16** screw, 1 x M3 heat-set insert, soldering iron, a zip tie.
+**Parts (in `out/`):** `base_head_front_v6.3mf` (print front face down, no supports), `base_head_back_v6.3mf` (print front face down, tree supports under the axle stubs and the crank bracket),
+`base_head_straps_v6.3mf` (2 camera straps + 1 OLED strap, flat). They replace `base_head_v4`, `base_camframe_v4`, `base_head_v5` and `base_plate_v4`; do not print those. Not printed yet.
+**Hardware:** the camera with its glass eyes, the OLED (2.08", GME25664-65), 2 x M2.5 heat-set inserts (front piece), 1 x M3 heat-set insert (crank bracket on the back piece's left arm),
+2 x **M2.5 x 10** (joint), 2 x **M2 x 6** (camera straps), 1 x **M2 x 5** (OLED strap), all M2 self-tapping into the printed pilot holes.
 **Nothing more to print for this step.**
 
 ![Head from the front](03_render_head_front.png)
-*03: the finished head from the front: camera frame on the plate, the OLED window below it.*
+*03: front piece from the front: camera hole above the OLED window, the two eye holes (glass domes), visor on top.*
 
 ![Head from the rear](04_render_head_rear.png)
-*04: the head from the rear. The M2.5 boss in the middle, the zip-tie tab at the left, the OLED board across the bottom.*
+*04: the assembled head from the rear: back piece with its two ears (bolts), pivot arms and axle stubs.*
+
+![Open rear](06_render_head_open_rear.png)
+*06: back piece off: camera board held by a strap at each end, OLED below it, rim along its bottom edge, the two joint bosses in the top corners.*
 
 ![Exploded](05_render_head_exploded.png)
-*05: exploded, from the rear: OLED, head (`base_head_v4.3mf`), camera board, camframe.*
+*05: exploded, seen from the right: back piece, straps, camera board, OLED, front piece.*
 
-1. **Inserts.** M2.5 insert into the boss on the rear of the plate, pressed in from the boss's rear end. M3 insert into the crank bracket on the left arm, pressed in from its free face. Check each with a screw.
-2. **OLED.** Glass into the pocket from the rear (the front lip keeps it in), board flat on the plate, 4 x M2 into the corner pilot holes. Do not overtighten. Lead the wires down and zip-tie them at the tab on the head's rear, above the board's left end.
-3. **Camera.** The camera slides up from below into the head, lens cube into the open lens slot, glass eyes pressed into their seats from the front. Put the **M2.5 x 16** screw through the frame, the board's edge slot, into the head's insert; it pins the board (about 0.3 mm of play front to back).
-   The frame's rear face stands 7.0 mm off the plate, so a 12 mm screw would barely reach the insert; use 16 or 18.
-4. **Check.** The camera does not rock, the OLED glass is flush in its window, the USB cable has a free run out of the frame bottom.
+1. **Inserts.** M2.5 inserts into the two joint bosses (top corners of the front piece, pressed in from the rear end). M3 insert into the crank bracket on the back piece's left arm.
+2. **OLED.** Glass into the pocket from behind; the board's bottom edge goes under the rim (the lip along the bottom), then the board lies flat. Put the OLED strap over its top edge, **M2 x 5**, snug only.
+   There are 9.8 mm behind the board for the Dupont plugs; the wires leave through the open bottom.
+3. **Camera.** Lens cube through the square hole from behind, glass eyes pressed into their seats from the front (spigots are behind the board's two LEDs). One camera strap at each end of the board (**M2 x 6**).
+   The USB cable leaves through the open bottom.
+4. **Close.** Back piece on, its two ears onto the joint bosses, **2 x M2.5 x 10** from behind.
+5. **Check.** Camera does not rock, OLED is flat against its window, cable has a free run out of the bottom.
 
-Add your photos here: `06_head_oled_fitted.jpg`, `07_head_camera_fitted.jpg`.
+Add your photos here: `07_front_piece_printed.jpg`, `08_oled_fitted.jpg`, `09_camera_fitted.jpg`, `10_head_closed.jpg`.
 
 ## After that (not detailed yet)
 
