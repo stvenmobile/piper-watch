@@ -41,6 +41,16 @@ yb_cam = by_cam + 0.2;                         // camera strap bosses' free end 
 yb_ol = oy_pcb[0] + 0.2;                       // OLED strap boss' free end
 module fwd(x, y, z, d, h) translate([x, ax_y + y, ax_z + z]) rotate([-90, 0, 0]) cylinder(d = d, h = h, $fn = 40);      // cylinder from y forward
 
+fr_b = 2;                                                       // fillet radius where a joint boss meets its wall
+module jboss2d(cx, cz, zw) {                                    // boss section (x, z): circle d7 + the two tangent lines run perpendicular to the wall (inner face at zw) + concave fillets
+    d = zw > cz ? 1 : -1;  r = 3.5;
+    translate([cx, cz]) circle(r = r, $fn = 48);
+    translate([cx - r, d > 0 ? cz : zw - 0.5]) square([2 * r, abs(zw - cz) + 0.5]);
+    for (sx = [-1, 1]) difference() {
+        translate([sx > 0 ? cx + r - 0.01 : cx - r - fr_b + 0.01, d > 0 ? zw - fr_b : zw - 0.01]) square([fr_b, fr_b]);
+        translate([cx + sx * (r + fr_b), zw - d * fr_b]) circle(r = fr_b, $fn = 32);
+    }
+}
 module camboss(sx) difference() {                                                            // camera strap boss: runs through the mic pocket down to its floor
     fwd(cam_dx + sx * xcs, yb_cam, lens_z, 6, yc + 1.5 - yb_cam);
     fwd(cam_dx + sx * xcs, yb_cam - 1, lens_z, 1.6, 7.5);                                    // M2 pilot (self-tapping)
@@ -61,8 +71,8 @@ module front6a() color("#8a8d91") difference() {
         ey(yc, yf) zclip(zs - 0.01, zt + 1) out2d();               // camera zone: 3 thick
         ey(yj, yf) ring2d();                                       // side walls, visor and bottom: the closed shell, from the front wall to the back piece
         ey(yj, yf) zclip(zb - 1, zb + 3.5) out2d();               // bottom wall 3.5 thick (the chamfer below slices its front part)
-        for (sx = [-1, 1]) fwd(cam_dx + sx * xj, yj, zj, 7, yc - yj + 0.5);                       // joint bosses
-        fwd(xb3, yj, zb3, 7, 21 - yj);                                                              // bottom joint boss
+        for (sx = [-1, 1]) ey(yj, yc + 0.5) jboss2d(cam_dx + sx * xj, zj, zt - wt6);               // joint bosses (top corners): tangent lines up to the visor, filleted
+        ey(yj, 21) jboss2d(xb3, zb3, zb + 3.5);                                                     // bottom joint boss: down to the floor
         fwd(xos, yb_ol, zos, 4.6, yc - yb_ol + 0.5);                                                // OLED strap boss
         for (sx = [-1, 1]) translate([cam_dx + sx * eye_x, ax_y + yc + 0.01, ax_z + eye_z]) rotate([90, 0, 0]) cylinder(d = 5, h = spg, $fn = 32);   // eye spigots
     }
