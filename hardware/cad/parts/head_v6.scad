@@ -41,6 +41,21 @@ yb_cam = by_cam + 0.2;                         // camera strap bosses' free end 
 yb_ol = oy_pcb[0] + 0.2;                       // OLED strap boss' free end
 module fwd(x, y, z, d, h) translate([x, ax_y + y, ax_z + z]) rotate([-90, 0, 0]) cylinder(d = d, h = h, $fn = 40);      // cylinder from y forward
 
+// ---- indexing lip: stands inboard of the front piece's walls, runs rearward past the joint face and sits in a shallow pocket in the back plate ---------
+lip_t = 2;  lip_h = 1.6;  lip_c = 0.2;                         // thickness (inward from the wall's inner face), how far it goes behind the joint face (y 13), pocket clearance
+module lip_band(t, o = 0) difference() { offset(delta = -wt6 + o) out2d(); offset(delta = -wt6 - t) out2d(); }
+module lip_sel() union() {                                      // where it runs: about 40 mm along the visor, and the flared sides between the arm blocks and the joint bosses
+    translate([cam_dx - 20, 26]) square([40, 10]);
+    for (sx = [-1, 1]) translate([cam_dx + (sx > 0 ? 20 : -75), 13.5]) square([55, 9]);
+}
+module lip_prof(t) intersection() { lip_band(t); lip_sel(); }
+module lip3d() difference() {
+    union() {
+        ey(yj - lip_h, yj + 0.01) lip_prof(lip_t);
+        n = 8;  for (i = [0 : n - 1]) ey(yj + i * lip_t / n, yj + (i + 1) * lip_t / n + 0.01) lip_prof(lip_t * (1 - (i + 0.5) / n));   // 45 deg ramp: no supports
+    }
+    sweep_k();
+}
 fr_b = 2;                                                       // fillet radius where a joint boss meets its wall
 module jboss2d(cx, cz, zw) {                                    // boss section (x, z): circle d7 + the two tangent lines run perpendicular to the wall (inner face at zw) + concave fillets
     d = zw > cz ? 1 : -1;  r = 3.5;
@@ -64,7 +79,7 @@ module cheek_k() for (s = [-1, 1]) {
     }
 }
 module sweep_k() for (t = [-26 : 2 : 48]) translate([0, ax_y, ax_z]) rotate([-t, 0, 0]) translate([0, -ax_y, -ax_z]) cheek_k();
-module front6() { difference() { front6a(); sweep_k(); } for (sx = [-1, 1]) camboss(sx); }
+module front6() { difference() { front6a(); sweep_k(); } for (sx = [-1, 1]) camboss(sx); lip3d(); }
 module front6a() color("#8a8d91") difference() {
     union() {
         ey(yo, yf) zclip(zb - 1, zs) out2d();                      // OLED zone: 4 thick
@@ -99,7 +114,7 @@ module front6a() color("#8a8d91") difference() {
 // ---- back piece --------------------------------------------------------------------------------------------------------------------
 module back6() color("#6b8fb5") difference() {
     union() {
-        difference() { ey(yr, yj) out2d(); sweep_k(); }                                                      // plate: the whole face outline, so the head is closed (clear of the cheeks)
+        difference() { ey(yr, yj) out2d(); sweep_k(); ey(yj - lip_h - lip_c, yj + 0.01) intersection() { lip_band(lip_t + 2 * lip_c, lip_c); lip_sel(); } }                                                      // plate: the whole face outline, so the head is closed (clear of the cheeks)
         for (s = [-1, 1]) hull() {                                                                                    // arms
             translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 16, h = 3, $fn = 40);
             translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y + yr, ax_z - 12]) cube([3, 3, 24]);
