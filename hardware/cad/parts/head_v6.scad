@@ -120,6 +120,13 @@ module strap_cam(sx) color("#d9dde2") difference() {          // sx = +1 / -1: r
     fwd(xb, by_cam - st_t - 1, lens_z, 2.4 + cal_hole, st_t + 2);
     fwd(xb, by_cam - st_t - 1, lens_z, 4.4 + cal_hole, 1 + 1.2);
 }
+module strap_cam_long() color("#d9dde2") difference() {         // one strap across the whole board: a hole at each boss (cam_dx +- xcs), same width and thickness as the short ones
+    ey(by_cam - st_t, by_cam) offset(r = 1.2) offset(delta = -1.2) translate([cam_dx - xcs - 2.7, lens_z - 3]) square([2 * xcs + 5.4, 6]);
+    for (sx = [-1, 1]) {
+        fwd(cam_dx + sx * xcs, by_cam - st_t - 1, lens_z, 2.4 + cal_hole, st_t + 2);
+        fwd(cam_dx + sx * xcs, by_cam - st_t - 1, lens_z, 4.4 + cal_hole, 1 + 1.2);
+    }
+}
 module strap_oled() color("#d9dde2") difference() {
     ey(oy_pcb[0] - st_t, oy_pcb[0]) offset(r = 1.5) offset(delta = -1.5) translate([xos - 12, oz + 10.3 - 2.4]) square([24, zos + 2.3 - (oz + 10.3 - 2.4)]);
     fwd(xos, oy_pcb[0] - st_t - 1, zos, 2.4 + cal_hole, st_t + 2);
@@ -127,7 +134,7 @@ module strap_oled() color("#d9dde2") difference() {
 }
 module flat(yfront, xc, zc, px, py) translate([px - xc, py - (ax_z + zc), ax_y + yfront]) rotate([-90, 0, 0]) children();    // lay a strap on the bed, rear face up
 module straps_all() { straps_asm(); }
-module straps_asm() { for (sx = [-1, 1]) strap_cam(sx); strap_oled(); }
+module straps_asm() { strap_cam_long(); strap_oled(); }
 
 // ---- ghosts + views --------------------------------------------------------------------------------------------------------------------
 module tilted() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -ax_y, -ax_z]) children();
@@ -159,7 +166,7 @@ ctx = false;                                                    // true: draw th
 if (part == "v6_front") translate([0, 0, ax_y + yf]) rotate([-90, 0, 0]) front6();                  // front face on the bed
 if (part == "v6_back") translate([0, 0, ax_y + yj]) rotate([-90, 0, 0]) back6();                    // plate's front face on the bed, arms and stubs up
 if (part == "v6_straps") {
-    for (sx = [-1, 1]) flat(by_cam, cam_dx + sx * xcs, lens_z, sx * 20, 0) strap_cam(sx);
+    flat(by_cam, cam_dx, lens_z, 0, 0) strap_cam_long();
     flat(oy_pcb[0], xos, zos, 0, 20) strap_oled();
 }
 if (part == "v6_view") { head6(); if (ctx) { color("#6b8fb5") turret4(); covers4(); if (show_cowl) cowl4(); } }

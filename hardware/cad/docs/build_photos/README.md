@@ -22,9 +22,9 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 ### Step 2: head: front piece, back piece, OLED, camera ⏭
 
 **Parts (in `out/`):** `base_head_front_v6.3mf` (print front face down, no supports), `base_head_back_v6.3mf` (print front face down, tree supports under the axle stubs and the crank bracket),
-`base_head_straps_v6.3mf` (2 camera straps + 1 OLED strap, flat). They replace `base_head_v4`, `base_camframe_v4`, `base_head_v5` and `base_plate_v4`; do not print those. Not printed yet.
+`base_head_straps_v6.3mf` (1 long camera strap + 1 OLED half strap, flat). They replace `base_head_v4`, `base_camframe_v4`, `base_head_v5` and `base_plate_v4`; do not print those. Not printed yet.
 **Hardware:** the camera with its glass eyes, the OLED (2.08", GME25664-65), 3 x M2.5 heat-set inserts (front piece), 1 x M3 heat-set insert (crank bracket on the back piece's left arm),
-2 x **M2.5 x 10** + 1 x **M2.5 x 8** (joint, the short one at the bottom right), 2 x **M2 x 6** (camera straps), 1 x **M2 x 5** (OLED strap), all M2 self-tapping into the printed pilot holes.
+2 x **M2.5 x 10** + 1 x **M2.5 x 8** (joint, the short one at the bottom right), 2 x **M2 x 6** (camera strap, one at each end), 1 x **M2 x 5** (OLED strap), all M2 self-tapping into the printed pilot holes.
 **Nothing more to print for this step.**
 
 ![Head from the front](03_render_head_front.png)
@@ -42,7 +42,7 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 1. **Inserts.** M2.5 inserts into the three joint bosses (two top corners and one at the bottom right of the front piece, pressed in from the rear end). M3 insert into the crank bracket on the back piece's left arm.
 2. **OLED.** Glass into the pocket from behind; the board's bottom edge goes under the rim (the lip along the bottom), then the board lies flat. Put the OLED strap over its top edge, **M2 x 5**, snug only.
    There are 9.8 mm behind the board for the Dupont plugs; the wires leave through the cable slot in the back plate (50 x 9, bottom edge).
-3. **Camera.** Lens cube through the square hole from behind, glass eyes pressed into their seats from the front (spigots are behind the board's two LEDs). One camera strap at each end of the board (**M2 x 6**).
+3. **Camera.** Lens cube through the square hole from behind, glass eyes pressed into their seats from the front (spigots are behind the board's two LEDs). The long camera strap across the back of the board, one **M2 x 6** at each end.
    The USB cable leaves through the same slot.
 4. **Close.** Back piece on, onto the joint bosses, **2 x M2.5 x 10** at the top corners and **1 x M2.5 x 8** at the bottom, all from behind.
 5. **Check.** Camera does not rock, OLED is flat against its window, cable has a free run out of the slot.
