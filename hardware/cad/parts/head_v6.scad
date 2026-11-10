@@ -3,8 +3,8 @@
 //   FRONT   the whole front of the head (18 mm deep): front wall with 4 openings (camera square hole, OLED window, 2 eye holes), flared side
 //           walls, visor, 2 joint bosses (M2.5 insert) and 3 pilot bosses for the straps. Open at the back and at the bottom. Prints front face down, no supports.
 //   BACK    rear plate, the two pivot arms with axle stubs and the crank bracket. Bolted to the front with 2 x M2.5 through its two ears.
-//   STRAPS  2 x camera strap (one M2 each, at the board's ends) and 1 x OLED half strap (one M2, on the top edge). The OLED's bottom edge
-//           slides under a rim in the front piece.
+//   STRAPS  1 long camera strap (one M2 at each end) and 1 OLED half strap (one M2, on the top edge; now optional). The OLED itself is held
+//           by four M2 screws through its mounting holes into the front wall.
 // The OLED sits in the front wall (glass in a pocket behind a 2.2 lip); 9.8 mm are free behind its board for the Dupont plugs.
 // part = "v6_front" | "v6_back" | "v6_straps" | "v6_view"
 include <base_v4.scad>
@@ -65,8 +65,6 @@ module front6a() color("#8a8d91") difference() {
         fwd(xb3, yj, zb3, 7, 21 - yj);                                                              // bottom joint boss
         fwd(xos, yb_ol, zos, 4.6, yc - yb_ol + 0.5);                                                // OLED strap boss
         for (sx = [-1, 1]) translate([cam_dx + sx * eye_x, ax_y + yc + 0.01, ax_z + eye_z]) rotate([90, 0, 0]) cylinder(d = 5, h = spg, $fn = 32);   // eye spigots
-        translate([-26, ax_y + yo - 2.6, ax_z + oz - 14.3 - 0.3]) cube([52, 2.61, 4.0]);                  // rim: floor (0.3 under the PCB's bottom edge, oz - 10.3) ...
-        translate([-26, ax_y + yo - 2.6, ax_z + oz - 10.6]) cube([52, 1.2, 3.1]);                    // ... and the lip the OLED's bottom edge slides under
     }
     translate([cam_dx - cube_w / 2 - 0.2, ax_y + yc - 1, ax_z + lens_z - cube_w / 2 - 0.2]) cube([cube_w + 0.4, 5, cube_w + 0.4]);   // camera: square hole for the lens cube
     for (sx = [-1, 1]) {
@@ -77,7 +75,8 @@ module front6a() color("#8a8d91") difference() {
     translate([cam_dx + 12, ax_y + yc - 1, ax_z + lens_z - 0.8]) cube([5.9, 2.5, 9.5]);                  // tall white camera-cable connector
     translate([0, ax_y, ax_z + oz]) {                                                                        // OLED: window + glass pocket
         translate([ox - 26.6, yo - 1, -7.39]) cube([53.2, 6, 14.78]);                                        // window (viewing area 53.18 x 14.78)
-        translate([-33.75, yo - 1, -10.4]) cube([67.5, 2.8, 20.8]);                                         // pocket: glass 62.5, connector and solder joints; 2.2 lip left
+        translate([-33.95, yo - 1, -10.6]) cube([67.9, 2.8, 21.2]);                                         // pocket: glass 62.5, connector and solder joints; 2.2 lip left (0.2 more clearance all round)
+        for (sx = [-36, 36], sz = [-7.75, 7.75]) translate([sx, yo - 1, sz]) rotate([-90, 0, 0]) cylinder(d = 1.6, h = 4, $fn = 20);   // the board's four mounting holes: M2 pilots, 3 deep (self-tapping)
     }
     for (sx = [-1, 1]) fwd(cam_dx + sx * xj, yj - 1, zj, insert_m25[0], insert_m25[1] + 2.5);               // M2.5 insert bores from the rear end
     for (sx = [-1, 1]) fwd(cam_dx + sx * xj, yj, zj, 2.6, 9);                                                // and the screw's path on

@@ -24,7 +24,7 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 **Parts (in `out/`):** `base_head_front_v6.3mf` (print front face down, no supports), `base_head_back_v6.3mf` (print front face down, tree supports under the axle stubs and the crank bracket),
 `base_head_straps_v6.3mf` (1 long camera strap + 1 OLED half strap, flat). They replace `base_head_v4`, `base_camframe_v4`, `base_head_v5` and `base_plate_v4`; do not print those. Not printed yet.
 **Hardware:** the camera with its glass eyes, the OLED (2.08", GME25664-65), 3 x M2.5 heat-set inserts (front piece), 1 x M3 heat-set insert (crank bracket on the back piece's left arm),
-2 x **M2.5 x 10** + 1 x **M2.5 x 8** (joint, the short one at the bottom right), 2 x **M2 x 6** (camera strap, one at each end), 1 x **M2 x 5** (OLED strap), all M2 self-tapping into the printed pilot holes.
+2 x **M2.5 x 10** + 1 x **M2.5 x 8** (joint, the short one at the bottom right), 2 x **M2 x 6** (camera strap, one at each end), 4 x **M2 x 4** (OLED board) + 1 x **M2 x 5** (OLED half strap, optional extra), all M2 self-tapping into the printed pilot holes.
 **Nothing more to print for this step.**
 
 ![Head from the front](03_render_head_front.png)
@@ -34,13 +34,13 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 *04: the assembled head from the rear: back piece with its two ears (bolts), pivot arms and axle stubs.*
 
 ![Open rear](06_render_head_open_rear.png)
-*06: back piece off: camera board held by a strap at each end, OLED below it, rim along its bottom edge, the two joint bosses in the top corners.*
+*06: back piece off: camera board held by a strap at each end, OLED below it (four screws), the two joint bosses in the top corners.*
 
 ![Exploded](05_render_head_exploded.png)
 *05: exploded, seen from the right: back piece, straps, camera board, OLED, front piece.*
 
 1. **Inserts.** M2.5 inserts into the three joint bosses (two top corners and one at the bottom right of the front piece, pressed in from the rear end). M3 insert into the crank bracket on the back piece's left arm.
-2. **OLED.** Glass into the pocket from behind; the board's bottom edge goes under the rim (the lip along the bottom), then the board lies flat. Put the OLED strap over its top edge, **M2 x 5**, snug only.
+2. **OLED.** Glass into the pocket from behind, the board lies flat on the wall, and four **M2 x 4** go through its corner holes into the printed pilots (snug only, the pilots are 3 deep in a 4 mm wall). The half strap (**M2 x 5**) is an optional extra over the top edge.
    There are 9.8 mm behind the board for the Dupont plugs; the wires leave through the cable slot in the back plate (50 x 9, bottom edge).
 3. **Camera.** Lens cube through the square hole from behind, glass eyes pressed into their seats from the front (spigots are behind the board's two LEDs). The long camera strap across the back of the board, one **M2 x 6** at each end.
    The USB cable leaves through the same slot.
