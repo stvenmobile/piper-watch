@@ -96,6 +96,15 @@ module front6a() color("#8a8d91") difference() {
         polygon([[ax_y + 10, ax_z - 27.51 + 4.045], [ax_y + 30, ax_z - 27.51 + 12.135], [ax_y + 30, ax_z - 60], [ax_y + 10, ax_z - 60]]);
 }
 
+// ---- axle pins (replace the printed stubs): a D-shaped shank through bearing and arm, a D flange trapped between the bearing and the cheek cover ------------------
+sp_t = 0.8;  pin_flat = 3.0;  pin_fl = 11.2;  pin_fl_t = 0.9;     // spacer boss thickness, flat's distance from the axis (flat faces down), flange diameter and thickness
+module dshape(d, o = 0) intersection() { circle(d = d + 2 * o, $fn = 60); translate([-d, -d]) square([d + pin_flat + o, 2 * d]); }   // 2D (x, y): after rotate([0,90,0]) the flat is at z = -pin_flat
+module pin_bore(s) mirror([s > 0 ? 0 : 1, 0, 0]) translate([38, ax_y, ax_z]) rotate([0, 90, 0]) linear_extrude(4) dshape(stub_d, 0.1);   // D-shaped bore through the arm and its spacer (the pin's tip stops 0.5 short of the inside face)
+module pin6() color("#d9dde2") {                                 // the right pin (the left is the same part turned 180 degrees about z): x 38.5 .. 49.9
+    translate([38.5, ax_y, ax_z]) rotate([0, 90, 0]) { linear_extrude(49 - 38.5 + 0.01) dshape(stub_d); translate([0, 0, 49 - 38.5]) linear_extrude(pin_fl_t) dshape(pin_fl); }
+}
+module pins6() { pin6(); mirror([1, 0, 0]) pin6(); }
+
 // ---- back piece --------------------------------------------------------------------------------------------------------------------
 module back6() color("#6b8fb5") difference() {
     union() {
@@ -104,8 +113,7 @@ module back6() color("#6b8fb5") difference() {
             translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 16, h = 3, $fn = 40);
             translate([s > 0 ? arm_x[0] : -arm_x[1], ax_y + yr, ax_z - 12]) cube([3, 3, 24]);
         }
-        for (s = [-1, 1]) translate([s > 0 ? arm_x[1] : -ch_x[1] - 0.5, ax_y, ax_z]) rotate([0, 90, 0])                // axle stubs (into the 608s)
-            cylinder(d = stub_d, h = (s > 0 ? ch_x[1] - arm_x[1] : ch_x[1] - arm_x[1] + 0.5 + (ch_x[1] - ch_x[1])) + 0.01, $fn = 24);
+        for (s = [-1, 1]) translate([s * (arm_x[1] + sp_t / 2 - 0.01), ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 10, h = sp_t, center = true, $fn = 40);   // spacer bosses: 0.8 proud of each arm, they bear on the bearings' inner races
         difference() { hull() {                                                                                      // crank bracket on the left arm
             translate([-arm_x[1] - 0.01, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 12, h = 3.01, $fn = 32);
             translate([pin_h[0] - 2.5 - 6, ax_y + cr_h * cos(hb0), ax_z + cr_h * sin(hb0)]) rotate([0, 90, 0]) cylinder(d = 9, h = 6.01, $fn = 32);
@@ -113,6 +121,7 @@ module back6() color("#6b8fb5") difference() {
         translate([pin_h[0] - 2.5 + 0.01, ax_y + cr_h * cos(hb0), ax_z + cr_h * sin(hb0)]) rotate([0, -90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1] + 0.2, $fn = 24);
         }
     }
+    for (s = [-1, 1]) pin_bore(s);                                                                                  // D-shaped bores for the axle pins
     translate([-34, ax_y + yr - 1, ax_z + zb - 1]) cube([50, yj - yr + 2, 10]);                                      // cable exit: 50 x 9 slot at the bottom of the plate
     fwd(xb3, yr - 1, zb3, 2.8 + cal_hole, 6);  fwd(xb3, yr - 1, zb3, 5.4 + cal_hole, 2.5);                          // the bottom joint bolt
     for (sx = [-1, 1]) {                                                                                             // the two joint bolts, heads sunk in the rear face
@@ -147,7 +156,7 @@ module straps_asm() { strap_cam_long(); strap_oled(); }
 
 // ---- ghosts + views --------------------------------------------------------------------------------------------------------------------
 module tilted() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -ax_y, -ax_z]) children();
-show_b = true;  show_s = true;
+show_b = true;  show_s = true;  show_pins = true;
 xp_f = 0;  xp_b = 0;  xp_s = 0;  xp_c = 0;  xp_o = 0;           // explode: distances toward the rear (y)
 module ghosts6() {
     translate([0, -xp_c, 0]) {
@@ -170,10 +179,12 @@ module head6() tilted() {
     if (show_b) translate([0, -xp_b, 0]) back6();
     if (show_s) translate([0, -xp_s, 0]) straps_asm();
     ghosts6();
+    if (show_pins) pins6();
 }
 ctx = false;                                                    // true: draw the turret, cheek covers and cowl round the head
 if (part == "v6_front") translate([0, 0, ax_y + yf]) rotate([-90, 0, 0]) front6();                  // front face on the bed
 if (part == "v6_back") translate([0, 0, ax_y + yj]) rotate([-90, 0, 0]) back6();                    // plate's front face on the bed, arms and stubs up
+if (part == "v6_pins") for (k = [0, 1]) translate([0, k * 14, 0]) translate([-38.5, -ax_y, pin_flat - ax_z]) pin6();      // two identical pins, flat down, lying on the bed
 if (part == "v6_straps") {
     flat(by_cam, cam_dx, lens_z, 0, 0) strap_cam_long();
     flat(oy_pcb[0], xos, zos, 0, 20) strap_oled();

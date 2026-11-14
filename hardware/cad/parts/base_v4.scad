@@ -374,11 +374,7 @@ module cowl4() color("#d9dde2", cowl_alpha) difference() {
 }
 cv_d = 34;  cv_t = 3.5;  cv_pts = [for (a = [90, 210, 330]) [14 * cos(a), 14 * sin(a)]];       // cheek cover: d 34 (the cheek's own), 3.5 thick, 3 x M3 x 8 into inserts at r 14; spigot into the 12.4 lip bore
 module cover4() color("#d9dde2") difference() {                  // local z = 0 on the cheek's outer face, outwards +z (print face down: z = cv_t on the bed ... print as is, spigot up)
-    union() {
-        cylinder(d = cv_d, h = cv_t, $fn = 96);
-        translate([0, 0, -0.8]) cylinder(d = 11.6, h = 0.81, $fn = 48);
-    }
-    translate([0, 0, -1]) cylinder(d = 8.8, h = 1.9, $fn = 40);                                  // clear of the axle stub's end
+    cylinder(d = cv_d, h = cv_t, $fn = 96);                          // flat: it also holds the head's axle pin flanges (head_v6) in their bores
     for (c = cv_pts) translate([-c[1], c[0], -1]) {                // local (u, v) = (-dz, dy) for the right cover
         cylinder(d = 3.4 + cal_hole, h = cv_t + 2, $fn = 24);
         translate([0, 0, cv_t + 1 - 1.6]) cylinder(d = 6.2, h = 3, $fn = 32);
