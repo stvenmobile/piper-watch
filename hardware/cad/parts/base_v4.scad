@@ -436,6 +436,7 @@ if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_strap") strap4();
+if (part == "v4_panstrap") pan_strap();                 // the stand's pan-servo strap (2 x M3), as printed
 if (part == "v4_cover") translate([0, 0, cv_t]) rotate([180, 0, 0]) cover4();   // print two, face down (spigot up)
 if (part == "v4_camframe") translate([0, 0, ax_y + fr_y + fr_t]) rotate([-90, 0, 0]) camcover();       // front face down on the bed, spigots and pockets up
 if (part == "v4_head") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0]) head4();                       // front face down on the bed

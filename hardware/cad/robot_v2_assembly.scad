@@ -2,8 +2,8 @@
 // The head is imported from an STL of `head_v2.scad -D part="all"` (it shares names with the stand's modules):
 //   openscad -D 'part="all"' -o out/head_all.stl parts/head_v2.scad
 // -D tilt=.. (head angle, deg), pan=.. (deg), show_lid=false, head_stl="path"
-include <parts/base_v2.scad>
-include <parts/turret_v2.scad>
+include <parts/archive/base_v2.scad>
+include <parts/archive/turret_v2.scad>
 part = "none";
 tilt = 0;
 pan  = 0;

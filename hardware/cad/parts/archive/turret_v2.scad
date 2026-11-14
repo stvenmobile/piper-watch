@@ -12,7 +12,7 @@
 // cheeks, its boss on the inner race -> ears from outside (see head_v2.scad).
 //
 // part = "v2_turret" (default) | "v2_cheek" | "v2_assembly"      (laid out for the bed; names differ from the stand's)
-include <servo_test_stand.scad>
+include <../servo_test_stand.scad>
 
 part = "v2_turret";
 turret_cheeks = false;

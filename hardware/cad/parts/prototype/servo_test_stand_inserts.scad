@@ -1,7 +1,7 @@
 // Assembly diagrams for the servo test stand: each part with its heat-set inserts (brass) and a red arrow
 // showing which face each insert is pressed in FROM. Not a printable part.
 //   show = "base" | "hub" | "turret" | "disc" | "head"
-include <servo_test_stand.scad>
+include <../servo_test_stand.scad>
 part = "none";                       // (after the include: stops servo_test_stand.scad drawing its own part)
 show = "base";
 

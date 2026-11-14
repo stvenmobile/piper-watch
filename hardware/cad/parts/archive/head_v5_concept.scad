@@ -1,7 +1,7 @@
 // CONCEPT: one-piece head. The camframe is merged into the head: a front wall with the lens hole, flared side walls and a visor (top plate).
 // Everything behind the camera board (plate, arms, stubs, crank bracket) is head4() unchanged. Camera loads from BELOW: the lens hole, the
 // mic and connector pockets are open slots to the bottom edge, the eye spigots are U-shaped.   part = "v5_view"
-include <base_v4.scad>
+include <../base_v4.scad>
 show_camframe = false;
 cam_dx = ox;                                         // lens, eyes, board and shell centre on the OLED window's middle (the window is 3.9 off the PCB centre)
 slot_x = -15 + cam_dx;                               // the camera's edge-slot screw moves with the board

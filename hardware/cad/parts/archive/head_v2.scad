@@ -34,8 +34,8 @@
 //
 // part = "all" (assembled view) | "front" | "cap" | "ears" | "diffuser" | "holder" | "guide" | "strap" | "coupon"
 //        ("coupon": the face only - window, CYD posts, the mouth chamber and lens holder - to check them first)
-include <servo_test_stand.scad>
-use <prototype/head_pivot_coupon.scad>
+include <../servo_test_stand.scad>
+use <../prototype/head_pivot_coupon.scad>
 
 part = "all";
 section = false;                 // "all": cut in half at x = 0 to show the inside

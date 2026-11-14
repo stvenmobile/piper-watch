@@ -6,7 +6,11 @@ Renders (`NN_render_*.png`) come from `parts/base_v4.scad` (`part = "head_view"`
 
 ## Parts legend (what to print, and what NOT to)
 
-![Parts legend](13_parts_legend.png)
+![Parts legend, head](13_parts_legend.png)
+
+![Parts legend, base](14_parts_legend_base.png)
+
+All superseded parts are in `out/archive/` (printable files) and `parts/archive/` or `parts/prototype/` (sources), so everything left in `out/` is current.
 
 ## Done
 

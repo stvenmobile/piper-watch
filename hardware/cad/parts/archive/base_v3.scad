@@ -13,7 +13,7 @@
 // The drum (r 54) hangs from the turret floor to 3 mm over the lid; no lid screw lies inside its swept circle.
 // Frame: base centre X = Y = 0, Z = 0 at the underside of the floor; +Y = front, +X = the robot's right.
 // part = "base_view" | "base_tub" | "base_lid" | "base_plate"
-include <servo_test_stand.scad>
+include <../servo_test_stand.scad>
 
 part = "base_view";
 base_legs = false;
