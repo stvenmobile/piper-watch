@@ -69,3 +69,6 @@ Still to add: `10_head_closed.jpg`. Still open: a decorative lens shroud in a co
 
 **Step 6 (head into the cheeks), now resolved:** press a 608 into each cheek from the inner face, slide the head in from the front (the arms' spacer bosses sit 0.2 mm from the cheeks), then push one axle pin from the outside through each bearing into the D bore of the arm (flat side down, it only fits one way).
 The pin's flange sits in the 12 mm lip bore against the bearing; the cheek cover (now flat, spigot removed, **reprint** `base_cover_v4.3mf` x 2) closes the bore and holds the pin in. No new inserts: the covers use the cheeks' existing M3 inserts.
+
+![Cheek covers](12_render_cheek_covers.png)
+*12: the two cheek covers pulled off the turret's cheeks (head and axle pins in place). Each cover is a flat 34 mm disc, 3.5 thick, held by 3 x M3 x 8 into the three M3 inserts in the cheek's outer face (bolt circle r 14); it also closes the bearing bore and holds the axle pin in.*
