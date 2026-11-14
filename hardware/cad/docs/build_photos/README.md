@@ -17,12 +17,10 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 ![Camera on the camframe, front](02_camera_on_camframe_front.jpg)
 *02: camera on the camframe from the front. USB cable leaves at the bottom.*
 
-## Next
-
-### Step 2: head: front piece, back piece, OLED, camera ⏭
+### Step 2: head: front piece, back piece, OLED, camera ✅
 
 **Parts (in `out/`):** `base_head_front_v6.3mf` (print front face down, no supports), `base_head_back_v6.3mf` (print front face down, tree supports under the axle stubs and the crank bracket),
-`base_head_straps_v6.3mf` (1 long camera strap + 1 OLED half strap, flat). They replace `base_head_v4`, `base_camframe_v4`, `base_head_v5` and `base_plate_v4`; do not print those. Not printed yet.
+`base_head_straps_v6.3mf` (1 long camera strap + 1 OLED half strap, flat). They replace `base_head_v4`, `base_camframe_v4`, `base_head_v5` and `base_plate_v4`; do not print those. Printed and assembled (2026-11-14).
 **Hardware:** the camera with its glass eyes, the OLED (2.08", GME25664-65), 3 x M2.5 heat-set inserts (front piece), 1 x M3 heat-set insert (crank bracket on the back piece's left arm),
 2 x **M2.5 x 10** + 1 x **M2.5 x 8** (joint, the short one at the bottom right), 2 x **M2 x 6** (camera strap, one at each end), 4 x **M2 x 4** (OLED board) + 1 x **M2 x 5** (OLED half strap, optional extra), all M2 self-tapping into the printed pilot holes.
 **Nothing more to print for this step.**
@@ -47,7 +45,16 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 4. **Close.** Back piece on, onto the joint bosses, **2 x M2.5 x 10** at the top corners and **1 x M2.5 x 8** at the bottom, all from behind.
 5. **Check.** Camera does not rock, OLED is flat against its window, cable has a free run out of the slot.
 
-Add your photos here: `07_front_piece_printed.jpg`, `08_oled_fitted.jpg`, `09_camera_fitted.jpg`, `10_head_closed.jpg`.
+![Assembled head, front](07_head_front_assembled.jpg)
+*07: the assembled head from the front (black PETG): lens in its square hole, OLED window at the right, the two eye holes (left side, the top one still open).*
+
+![Assembled head, open rear](09_head_open_rear_assembled.jpg)
+*09: the head with the back piece off: OLED on its four screws with the Dupont header at the left, camera board under the long strap, the camera cable looping out at the bottom, M2.5 inserts in the corner and bottom joint bosses.*
+
+Still to add: `10_head_closed.jpg`. Still open: a decorative lens shroud in a contrasting colour (not designed yet).
+
+## Next
+
 
 ## After that (not detailed yet)
 
