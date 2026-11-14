@@ -103,7 +103,8 @@ module pin_bore(s) mirror([s > 0 ? 0 : 1, 0, 0]) translate([38, ax_y, ax_z]) rot
 module pin6() color("#d9dde2") {                                 // the right pin (the left is the same part turned 180 degrees about z): x 38.5 .. 49.9
     translate([38.5, ax_y, ax_z]) rotate([0, 90, 0]) { linear_extrude(49 - 38.5 + 0.01) dshape(stub_d); translate([0, 0, 49 - 38.5]) linear_extrude(pin_fl_t) dshape(pin_fl); }
 }
-module pins6() { pin6(); mirror([1, 0, 0]) pin6(); }
+xp_p = 0;                                                       // explode: the pins move outward (x) by this and rearward with the back piece
+module pins6() translate([0, -xp_b, 0]) { translate([xp_p, 0, 0]) pin6(); mirror([1, 0, 0]) translate([xp_p, 0, 0]) pin6(); }
 
 // ---- back piece --------------------------------------------------------------------------------------------------------------------
 module back6() color("#6b8fb5") difference() {

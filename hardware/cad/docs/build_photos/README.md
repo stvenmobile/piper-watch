@@ -35,7 +35,7 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 *06: back piece off: camera board held by a strap at each end, OLED below it (four screws), the two joint bosses in the top corners.*
 
 ![Exploded](05_render_head_exploded.png)
-*05: exploded, seen from the right: back piece, straps, camera board, OLED, front piece.*
+*05: exploded, seen from the right, front piece on the right. In order toward the rear: OLED (hidden behind the camera board here), camera board with lens, the straps, the back piece, and the two axle pins moved out to the sides.*
 
 1. **Inserts.** M2.5 inserts into the three joint bosses (two top corners and one at the bottom right of the front piece, pressed in from the rear end). M3 insert into the crank bracket on the back piece's left arm.
 2. **OLED.** Glass into the pocket from behind, the board lies flat on the wall, and four **M2 x 4** go through its corner holes into the printed pilots (snug only, the pilots are 3 deep in a 4 mm wall). The half strap (**M2 x 5**) is an optional extra over the top edge.
