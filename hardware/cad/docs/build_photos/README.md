@@ -4,6 +4,10 @@ One step at a time. Each step has the parts and hardware it needs, what to do, a
 Photos of the real build go in this folder, named `NN_what_it_shows.jpg`, and get added under the step they belong to.
 Renders (`NN_render_*.png`) come from `parts/base_v4.scad` (`part = "head_view"`).
 
+## Parts legend (what to print, and what NOT to)
+
+![Parts legend](13_parts_legend.png)
+
 ## Done
 
 ### Step 1: camera on the camframe ✅
