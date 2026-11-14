@@ -373,11 +373,10 @@ module cowl4() color("#d9dde2", cowl_alpha) difference() {
     }
 }
 cv_d = 34;  cv_t = 3.5;  cv_pts = [for (a = [90, 210, 330]) [14 * cos(a), 14 * sin(a)]];       // cheek cover: d 34 (the cheek's own), 3.5 thick, 3 x M3 x 8 into inserts at r 14; spigot into the 12.4 lip bore
-module cover4() color("#d9dde2") difference() {                  // local z = 0 on the cheek's outer face, outwards +z (print face down: z = cv_t on the bed ... print as is, spigot up)
+module cover4() color("#d9dde2") difference() {                  // local z = 0 on the cheek's outer face, outwards +z (printed outer face down, flat)
     cylinder(d = cv_d, h = cv_t, $fn = 96);                          // flat: it also holds the head's axle pin flanges (head_v6) in their bores
     for (c = cv_pts) translate([-c[1], c[0], -1]) {                // local (u, v) = (-dz, dy) for the right cover
-        cylinder(d = 3.4 + cal_hole, h = cv_t + 2, $fn = 24);
-        translate([0, 0, cv_t + 1 - 1.6]) cylinder(d = 6.2, h = 3, $fn = 32);
+        cylinder(d = 3.4 + cal_hole, h = cv_t + 2, $fn = 24);          // plain clearance hole: button-head M3 x 8 sits on the surface (no counterbore, the rim stays closed)
     }
 }
 module covers4() for (sx = [-1, 1]) translate([sx > 0 ? ch_x[1] : -ch_x[1], ax_y, ax_z]) rotate([0, sx > 0 ? 90 : -90, 0]) scale([1, 1, 1]) mirror([sx > 0 ? 0 : 1, 0, 0]) cover4();
