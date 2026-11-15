@@ -57,9 +57,17 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 *07: the assembled head from the front (black PETG): lens in its square hole, OLED window at the right, the two eye holes (left side, the top one still open).*
 
 ![Assembled head, open rear](09_head_open_rear_assembled.jpg)
-*09: the head with the back piece off: OLED on its four screws with the Dupont header at the left, camera board under the long strap, the camera cable looping out at the bottom, M2.5 inserts in the corner and bottom joint bosses.*
+*09: the head with the back piece off: OLED held by four self-tapping screws (2 mm x 6 mm) with printed washers under the heads, wires soldered and heat-shrunk to the OLED's SPI pads, cable-tied, camera board under the long strap, M2.5 inserts in the corner and bottom joint bosses.*
 
-Still to add: `10_head_closed.jpg`. Still open: a decorative lens shroud in a contrasting colour (not designed yet).
+![Head closed, rear](10_head_closed_rear.jpg)
+*10: the head closed from the rear: back piece on with three bolts, OLED and camera cables leaving through the slot at the left.*
+
+![Head, front, final](11_head_front_final.jpg)
+*11: the finished head from the front: white lens flange super-glued to the front face around the lens, OLED window below.*
+
+**OLED washers:** `out/oled_washers_x4.3mf`: 4 washers, 2.4 hole, 5.0 OD, 1.8 thick, under the OLED screw heads.
+
+**Lens flange (fitted):** `out/lens_flange.3mf` (source `parts/lens_flange.scad`): 20 mm ring, 11.2 mm hole (clears the four lugs on the lens), 1.8 mm thick, no notches. Print flat in blue or white, fixed with super glue (printed in white, fitted).
 
 ## Next
 
