@@ -108,3 +108,6 @@ Draft clash-checked against the head (tilt -22 to 45 deg) and the cowl: clear. S
 
 ![Servo adapter board](20_servo_adapter_board.jpg)
 *20: the Waveshare Bus Servo Adapter (A), 33 x 43 mm. Mounting holes: 2.5 mm on a 27.5 x 37 pattern (checked with `parts/prototype/adapter_hole_coupon.scad`). Left long edge: two servo connectors and the UART header; right long edge: USB-C, the DC screw terminal and the 9-12.6 V barrel jack.*
+
+![Servo adapter on its standoffs](21_render_adapter_standoffs.png)
+*21: the adapter on four 5 mm standoffs printed with the lid (`base_lid_v4.3mf`, 2026-11-15): long side across, power edge (USB-C, DC terminal, jack) to the back beside the cable slot, servo connectors to the front under the pan servo's strap (3 mm clear). Hardware: 4 x M2.5 heat-set insert (in the standoff tops), 4 x M2.5 x 6. Power goes in on the DC screw terminal; the barrel jack stays, unused.*

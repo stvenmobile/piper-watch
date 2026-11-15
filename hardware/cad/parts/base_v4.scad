@@ -12,7 +12,8 @@
 //          sleeve (base()), widened to a disc. Four M2.5 bolts go radially through the skirt into the wall's inserts. The pan servo
 //          hangs from the plate inside the wall; the pillow block, hub and turret are the stand's, unchanged.
 //   SURROUND  the rotating part of the turret: a short cylinder that hangs from the turret floor over the skirt's top.
-//   The servo ADAPTER lies on the lid under the pan servo (inside the cylinder); its USB-C and 12 V leads go down the lid slot.
+//   The servo ADAPTER (Waveshare Bus Servo Adapter A, 33 x 43) sits on 4 standoffs on the lid under the pan servo (inside the cylinder),
+//          long side across, power edge (USB-C, DC terminal, jack) to the back over the lid slot, servo connectors to the front.
 //
 // Frame: pan axis = (0,0) = the box centre; Z = 0 under the box floor; +Y = front (cylinder/head side), back wall at Y = -60.
 // part = "v4_view" | "v4_tub" | "v4_lid" (with the wall) | "v4_skirt"
@@ -36,6 +37,9 @@ orin_h = [86, 58];  so4 = 6;  fan4 = 20;
 orin_pts = [for (sx = [-1, 1], sy = [-1, 1]) [sx * orin_h[0] / 2, orin_y + sy * orin_h[1] / 2]];
 fuse4 = [-52, -56];  fuse_blk4 = [30, 20, 14];
 fuse_pts4 = [[fuse4[0] + 5, fuse4[1] + 10], [fuse4[0] + 25, fuse4[1] + 10]];
+ad_c = [0, -10];  ad_hole = [37, 27.5];      // servo adapter: board centre (43 across x 33), hole pattern (2.5 mm holes, checked on a coupon)
+ad_so = [7.5, 5];                             // its standoffs: dia, height above the lid (M2.5 inserts, M2.5 x 6 screws)
+ad_pts = [for (sx = [-1, 1], sy = [-1, 1]) [ad_c[0] + sx * ad_hole[0] / 2, ad_c[1] + sy * ad_hole[1] / 2]];
 slot4 = [[-18, 18], [-44, -30]];              // lid cable slot (x range, y range): over the plug zone, inside the cylinder
 jack_y4 = -47;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall
 btn_y4 = -31;   btn_z4 = 14;   btn_d4 = 12.5;      // power button (to J42 - verify the pins on the carrier), left wall
@@ -100,16 +104,22 @@ module lid4() difference() {
         translate([0, 0, ledge_z]) v4rr(b_in[0] - 0.5, b_in[1] - 0.5, brr - bwt - 0.25, lid_t4);
         translate([0, 0, wall_top]) cylinder(r = wall_ro, h = wall_h4, $fn = 160);                          // the wall ...
         for (a = [0, 90, 180, 270]) rotate(a) translate([wall_ri - 0.5, 0, wall_top]) cylinder(d = 9, h = bolt_z + 6 - wall_top, $fn = 32);   // ... + 4 columns
+        for (p = ad_pts) translate([p[0], p[1], wall_top - 0.01]) {                                        // servo adapter standoffs, filleted foot
+            cylinder(d = ad_so[0], h = ad_so[1] + 0.01, $fn = 32);
+            cylinder(d1 = ad_so[0] + 3, d2 = ad_so[0], h = 1.5, $fn = 32);
+        }
     }
     translate([0, 0, wall_top - 0.01]) difference() {                                                    // hollow inside the wall (columns stay)
         cylinder(r = wall_ri, h = wall_h4 + 1, $fn = 160);
         for (a = [0, 90, 180, 270]) rotate(a) translate([wall_ri - 0.5, 0, 0]) cylinder(d = 9, h = bolt_z + 6 - wall_top + 0.01, $fn = 32);
+        for (p = ad_pts) translate([p[0], p[1], 0]) { cylinder(d = ad_so[0], h = ad_so[1] + 0.02, $fn = 32); cylinder(d1 = ad_so[0] + 3, d2 = ad_so[0], h = 1.51, $fn = 32); }   // keep the adapter standoffs
     }
     for (p = lid_pts4) translate([p[0], p[1], ledge_z - 1]) cylinder(d = 2.7 + cal_hole, h = lid_t4 + 2, $fn = 24);
     for (p = card_pts4) translate([p[0], p[1], ledge_z - 1]) {                                          // countersunk (heads sit under the skirt's edge)
         cylinder(d = 2.7 + cal_hole, h = lid_t4 + 2, $fn = 24);
         translate([0, 0, lid_t4 - 1.5 + 1]) cylinder(d1 = 2.7, d2 = 5.2, h = 1.5 + 0.01, $fn = 24);
     }
+    for (p = ad_pts) translate([p[0], p[1], wall_top + ad_so[1] - insert_m25[1] - 0.5]) cylinder(d = insert_m25[0], h = insert_m25[1] + 1, $fn = 24);   // their insert bores
     translate([slot4[0][0], slot4[1][0], ledge_z - 1]) cube([slot4[0][1] - slot4[0][0], slot4[1][1] - slot4[1][0], lid_t4 + 2]);
     for (a = [0, 90, 180, 270]) rotate(a) translate([wall_ro - insert_m25[1] - 0.01, 0, bolt_z]) rotate([0, 90, 0])      // radial inserts, from the outside
         cylinder(d = insert_m25[0], h = insert_m25[1] + 1, $fn = 24);
@@ -458,7 +468,12 @@ module ghosts4() {
     color("#2e7d32") translate([-orin[0] / 2, orin_y - orin[1] / 2, bfl + so4]) cube(orin);
     color("#9aa0a6") translate([-35, orin_y - 25 + 2, bfl + so4 + orin[2]]) cube([70, 50, fan4]);
     color("#00897b") translate([fuse4[0], fuse4[1], bfl + so4]) cube(fuse_blk4);
-    color("#2a6a3a") translate([-16.5, -8, wall_top + 2]) cube([33, 42, 12]);                  // servo adapter, lying on the lid under the servo
+    translate([ad_c[0], ad_c[1], wall_top + ad_so[1]]) {                                     // servo adapter on its standoffs
+        color("#222") translate([-21.5, -16.5, 0]) cube([43, 33, 1.6]);                              // board
+        color("#111") translate([4, -20.5, 1.6]) cube([12, 14, 11]);                                 // barrel jack (overhangs the back edge)
+        color("#2e7d32") translate([-10, -18.5, 1.6]) cube([8, 9, 10]);                              // DC screw terminal
+        color("#eee") for (x = [-17, 4]) translate([x, 10, 1.6]) cube([13, 6, 6]);                    // the two servo connectors
+    }
 }
 module surround4() color("#d9dde2") difference() {                                         // rotating: hangs from the turret floor over the skirt's top
     union() {
