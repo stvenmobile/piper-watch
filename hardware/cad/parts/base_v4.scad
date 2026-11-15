@@ -187,7 +187,8 @@ module hub4() difference() {                    // the stand's hub, its four fla
     for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0, z_flange + flange_t - insert_m3[1]]) insert3();
 }
 // tilt servo hold-down: two posts beside the cradle's side walls (M3 insert in each top) and a flat strap across the servo's top, 2 x M3 x 8
-sb_x = [[-33, -22], [10, 21]];  sb_y = [-42, -34];  sb_t = 3;
+tsv_clr = 0.3;                                  // cradle pocket clearance (2026-11-15: the first turret had none and no room for the bottom block / idler disc)
+sb_x = [[-33, -22], [13, 24]];                   // right post 3 mm off the servo's bottom face: its raised block (2 mm) passes  sb_y = [-42, -34];  sb_t = 3;
 sb_top = z_ft + (tsv_z[1] - tsv_z[0]);          // servo top face
 // cowl screws: two M3 x 8 button-head screws go in from OUTSIDE, radially through the cowl wall (head in a counterbore) into M3 inserts pressed
 // (cowl off) into the outer faces of two posts on the turret floor. Posts stand 0.5 inside the cowl wall, behind the head, clear of the cradle, strap posts, XIAO pocket and crank.
@@ -231,7 +232,8 @@ module turret4() difference() {
         intersection() { translate([0, 0, z_ft - 1]) cylinder(r = 54.5, h = 40, $fn = 160);
         difference() {
             box([tsv[0] - 3, tsv[1] + 3], [tsv_y[0] - 3, tsv_y[1] + 3], [z_ft - 0.01, z_ft + 10]);
-            box([tsv[0], tsv[1]], [tsv_y[0], tsv_y[1]], [z_ft - 1, z_ft + 11]);
+            box([tsv[0] - tsv_clr, tsv[1] + tsv_clr], [tsv_y[0] - tsv_clr, tsv_y[1] + tsv_clr], [z_ft - 1, z_ft + 11]);   // the pocket, 0.3 clear all round
+            box([tsv[1] - 1, tsv[1] + 4], [tsv_y[0] + 3, xi_y[0] + 0.01], [z_ft - 1, z_ft + 11]);            // the servo's BOTTOM face side open: its raised block, the two sockets (plug in) and the idler disc
             box([tsv[0] - 4, tsv[0] + 1], [tsv_y[0] + 20, tsv_y[0] + 40], [z_ft + 3, z_ft + 11]);           // the horn side open
             box([tsv[0] - 4, tsv[0] + 1], [tsh[1] - 11, tsh[1] + 11], [z_ft + 1, z_ft + 11]);                  // and round the shaft: the crank hub (d 10, centre z_ft + 12.4) swings through
             box([tsv[1] - 1, tsv[1] + 4], [xi_y[0], 0], [z_ft - 1, z_ft + 11]);                              // and at the +y end of the right wall: the XIAO's USB plug and cable come through here
