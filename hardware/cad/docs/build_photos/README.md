@@ -81,10 +81,22 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 | 5 | Tilt servo in its cradle, strap, crank on the horn | **`base_strap_v4.3mf`** (1); `base_crank_v4.3mf` is printed  |
 | 6 | 608 bearings and the head into the cheeks | see the note below |
 | 7 | Tilt rod (M3 rod, 2 rose joints) | none |
-| 8 | XIAO, wiring, cheek covers (6 x button-head M3 x 8), cowl | **`base_cover_v4.3mf`** (print 2); reprint `base_cowl_v4.3mf` only if you printed it before commit c652f5e |
+| 8 | XIAO, wiring, cheek covers (6 x button-head **M3 x 12**), ears, cowl | **`base_cover_v5.3mf`** (print 2), **`base_ear_v5.3mf`** (print 2), **`base_plug_v5.3mf`** (print 1, holds 2); **`base_cowl_v4.3mf`** was updated 2026-11-15 (cheek-cutout tips removed, 3 mm inner fillet on the front wall): print this version, not an older one |
 
 **Step 6 (head into the cheeks), now resolved:** press a 608 into each cheek from the inner face, slide the head in from the front (the arms' spacer bosses sit 0.2 mm from the cheeks), then push one axle pin from the outside through each bearing into the D bore of the arm (flat side down, it only fits one way).
-The pin's flange sits in the 12 mm lip bore against the bearing; the cheek cover (now flat, spigot removed, **reprint** `base_cover_v4.3mf` x 2) closes the bore and holds the pin in. No new inserts: the covers use the cheeks' existing M3 inserts.
+The pin's flange sits in the 12 mm lip bore against the bearing; the cheek cover (flat, 8 mm thick, **new** `base_cover_v5.3mf` x 2, replaces `base_cover_v4`) closes the bore and holds the pin in. It uses the cheeks' existing M3 inserts, plus one new M3 heat-set insert in the middle of each cover for the ear.
 
 ![Cheek covers](12_render_cheek_covers.png)
-*12: the two cheek covers pulled off the turret's cheeks (head and axle pins in place). Each cover is a flat 34 mm disc, 3.5 thick, held by 3 x button-head M3 x 8 (heads sit on the surface, no counterbore) into the three M3 inserts in the cheek's outer face (bolt circle r 14); it also closes the bearing bore and holds the axle pin in.*
+*12: the two cheek covers, each with its ear, pulled off the turret's cheeks (head and axle pins in place). Each cover is a flat 34 mm disc, 8 mm thick, held by 3 x button-head M3 x 12 (heads sit on the surface, no counterbore) into the three M3 inserts in the cheek's outer face (bolt circle r 14); it also closes the bearing bore and holds the axle pin in.*
+
+### Ears (decorative, step 8)
+
+![Ears fitted](15_render_ears.png)
+*15: the ears fitted: a 12 mm square stalk from the centre of each cover ending in a 36 mm octagonal disc (print blue or white). The covers are fixed to the turret, so the ears do not nod with the head.*
+
+![Ear exploded](16_render_ear_exploded.png)
+*16: one ear unit exploded, bottom to top: cover (square pocket and M3 insert in its centre), ear (square stalk sits in the pocket, so the octagon cannot turn), M3 x 18 button-head screw through the centre of the ear into the insert, domed plug glued over the screw head.*
+
+**Parts:** `base_cover_v5.3mf` x 2 (print inner face down, pocket up), `base_ear_v5.3mf` x 2 (print octagon face down, stalk up, no supports), `base_plug_v5.3mf` (one file, 2 plugs, stem down, dome up).
+**Hardware:** 2 x M3 heat-set insert (one in each cover's centre, pressed in from the pocket floor), 2 x M3 x 18 button head (ears), 6 x M3 x 12 button head (covers). Assembly: insert the M3 in each cover, push the ear's stalk into the pocket, screw the ear on, glue the plug over the head, then fit the cover on the cheek with its three screws.
+Draft clash-checked against the head (tilt -22 to 45 deg) and the cowl: clear. Source: `base_v4.scad` (`cover4`, `ear4`, `plug4`; `part = "v4_cover" | "v4_ear" | "v4_plug"`).

@@ -357,9 +357,20 @@ module cw_solid(r, y_front, h, ch) intersection() {
     }
     translate([-100, -100, z_ft - 1]) cube([200, 100 + y_front, 200]);
 }
+cw_fil = 3;                                     // 45 deg fillet along the inside corner where the front wall meets the top plate (prints with the top on the bed: no overhang)
+module cw_fillet() intersection() {
+    translate([-60, 0, 0]) rotate([90, 0, 90]) linear_extrude(120)
+        polygon([[cw_y - cw_t + 0.01, z_ft + cw_h - cw_t + 0.01], [cw_y - cw_t - cw_fil, z_ft + cw_h - cw_t + 0.01], [cw_y - cw_t + 0.01, z_ft + cw_h - cw_t - cw_fil]]);
+    cw_solid(cw_r - 0.5, cw_y, cw_h, cw_ch);
+}
 module cowl4() color("#d9dde2", cowl_alpha) difference() {
-    cw_solid(cw_r, cw_y, cw_h, cw_ch);
-    cw_solid(cw_r - cw_t, cw_y - cw_t, cw_h - cw_t, cw_ch);                              // hollow, front wall left 2.5 thick
+    union() {
+        difference() {
+            cw_solid(cw_r, cw_y, cw_h, cw_ch);
+            cw_solid(cw_r - cw_t, cw_y - cw_t, cw_h - cw_t, cw_ch);                      // hollow, front wall left 2.5 thick
+        }
+        cw_fillet();
+    }
     translate([-42, cw_y - cw_t - 1, z_ft - 1]) cube([22, cw_t + 2, 35]);                  // window: head crank bracket + rod ends (x -42 .. -20)
     translate([-9, cw_y - cw_t - 1, z_ft - 1]) cube([18, cw_t + 2, 17]);                   // notch: the camera's cables to the hub hole
     for (a = [200, 270, 340]) rotate(a) translate([cw_r - 3, 0, z_ft + 14]) cube([8, 1.8, 10], center = true);   // vents (rear)
@@ -369,17 +380,50 @@ module cowl4() color("#d9dde2", cowl_alpha) difference() {
     }
     for (s = [-1, 1]) hull() {                                                                 // the cheeks' round rear (608 boss, d 34) pokes behind y = cw_y: notch the front wall round it, 0.5 clear
         translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 8, ax_y, ax_z]) rotate([0, 90, 0]) cylinder(d = 35, h = ch_t4 + 8.5, $fn = 60);   // also takes the cover, d 34
-        translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 0.5, ax_y - 10.5, z_ft - 1]) cube([ch_t4 + 1, 21, 7.5]);
+        translate([s > 0 ? ch_x[0] - 0.5 : -ch_x[1] - 0.5, ax_y - 17.5, z_ft - 1]) cube([ch_t4 + 1, 28, 7.5]);   // reaches y = 0.5 like the cylinder, so the hull is a straight prism (no tapered, unsupported stub of wall at the tips)
     }
 }
-cv_d = 34;  cv_t = 3.5;  cv_pts = [for (a = [90, 210, 330]) [14 * cos(a), 14 * sin(a)]];       // cheek cover: d 34 (the cheek's own), 3.5 thick, 3 x M3 x 8 into inserts at r 14; spigot into the 12.4 lip bore
-module cover4() color("#d9dde2") difference() {                  // local z = 0 on the cheek's outer face, outwards +z (printed outer face down, flat)
-    cylinder(d = cv_d, h = cv_t, $fn = 96);                          // flat: it also holds the head's axle pin flanges (head_v6) in their bores
-    for (c = cv_pts) translate([-c[1], c[0], -1]) {                // local (u, v) = (-dz, dy) for the right cover
-        cylinder(d = 3.4 + cal_hole, h = cv_t + 2, $fn = 24);          // plain clearance hole: button-head M3 x 8 sits on the surface (no counterbore, the rim stays closed)
-    }
+// ---- cheek cover + ear -------------------------------------------------------------------------------------------------------------
+// Cover: d 34 (the cheek's own), 8 thick, flat on the cheek's outer face (it also holds the head's axle pin flange in its bore); 3 x M3 x 12
+// (button heads on the surface) into the cheek inserts at r 14. A square pocket in its centre takes the ear's square stalk (keeps it square),
+// and an M3 heat-set insert below the pocket takes the ear's centre screw.
+// Ear: 12 x 12 stalk ending in an octagonal disc (36 across flats); centre screw M3 x 18 button head, counterbored into the disc, then covered
+// with a glued domed plug. Ear and plug are the same on both sides (print 2 of each).
+cv_d = 34;  cv_t = 8;  cv_pts = [for (a = [90, 210, 330]) [14 * cos(a), 14 * sin(a)]];
+ear_pk = 2.5;  ear_sq = 12;  ear_sq_clr = 0.15;  ear_l = 10;                  // pocket depth, stalk section, clearance per side, stalk length outside the cover
+ear_af = 36;  ear_t = 5;  ear_cb = [6.4, 3.2];  ear_ch = 1;                    // octagon across flats, thickness, counterbore (d, depth), outer edge chamfer
+plug_stem = 1.5;  plug_d = 10;  plug_lip = 0.4;  plug_dome = 1.1;             // plug: stem in the counterbore, 0.4 lip + 1.1 dome above the disc
+show_ears = true;
+module rsq4(s, r = 1) offset(r = r) square(s - 2 * r, center = true);
+module cover4() color("#d9dde2") difference() {                  // local z = 0 on the cheek's outer face, outwards +z (print inner face down, as drawn)
+    cylinder(d = cv_d, h = cv_t, $fn = 96);
+    for (c = cv_pts) translate([-c[1], c[0], -1])                  // local (u, v) = (-dz, dy) for the right cover
+        cylinder(d = 3.4 + cal_hole, h = cv_t + 2, $fn = 24);          // plain clearance hole: button-head M3 x 12 sits on the surface (the rim stays closed)
+    translate([0, 0, cv_t - ear_pk]) linear_extrude(ear_pk + 1) rsq4(ear_sq + 2 * ear_sq_clr);      // square pocket
+    translate([0, 0, cv_t - ear_pk - 4.6]) cylinder(d = insert_m3[0], h = 5, $fn = 24);             // centre M3 heat-set insert, pressed in from the pocket floor
 }
-module covers4() for (sx = [-1, 1]) translate([sx > 0 ? ch_x[1] : -ch_x[1], ax_y, ax_z]) rotate([0, sx > 0 ? 90 : -90, 0]) scale([1, 1, 1]) mirror([sx > 0 ? 0 : 1, 0, 0]) cover4();
+module oct4(af, h, ch) rotate(22.5) {                                                                // flat on top, chamfered outer edge
+    r = af / 2 / cos(22.5);  rc = (af / 2 - ch) / cos(22.5);
+    hull() { cylinder(r = r, h = h - ch, $fn = 8); cylinder(r = rc, h = h, $fn = 8); }
+}
+ear_len = ear_pk + ear_l + ear_t;                                                                    // local z = 0 at the stalk's inner end (pocket floor), outwards +z
+module ear4() color("#2f7fe0") difference() {
+    union() {
+        linear_extrude(ear_pk + ear_l + 1) rsq4(ear_sq);
+        translate([0, 0, ear_pk + ear_l]) oct4(ear_af, ear_t, ear_ch);
+    }
+    translate([0, 0, -1]) cylinder(d = 3.4 + cal_hole, h = ear_len + 2, $fn = 24);                  // centre screw
+    translate([0, 0, ear_len - ear_cb[1]]) cylinder(d = ear_cb[0], h = ear_cb[1] + 1, $fn = 32);    // head + plug counterbore
+}
+module plug4() color("#f4f4f4") {                                                                    // local z = 0 at the disc's outer face
+    translate([0, 0, -plug_stem]) cylinder(d = ear_cb[0] - 0.2, h = plug_stem + 0.01, $fn = 32);
+    cylinder(d = plug_d, h = plug_lip, $fn = 48);
+    R = ((plug_d / 2) * (plug_d / 2) + plug_dome * plug_dome) / (2 * plug_dome);
+    intersection() { translate([0, 0, plug_lip + plug_dome - R]) sphere(r = R, $fn = 64); translate([0, 0, plug_lip]) cylinder(d = plug_d, h = plug_dome + 0.01, $fn = 48); }
+}
+module ear_screw4() color("#888") translate([0, 0, ear_len - ear_cb[1]]) { cylinder(d = 5.7, h = 1.65, $fn = 24); translate([0, 0, -18]) cylinder(d = 3, h = 18, $fn = 16); }   // M3 x 18 button head
+module cover_unit4() { cover4(); if (show_ears) translate([0, 0, cv_t - ear_pk]) { ear4(); ear_screw4(); translate([0, 0, ear_len]) plug4(); } }
+module covers4() for (sx = [-1, 1]) translate([sx > 0 ? ch_x[1] : -ch_x[1], ax_y, ax_z]) rotate([0, sx > 0 ? 90 : -90, 0]) mirror([sx > 0 ? 0 : 1, 0, 0]) cover_unit4();
 
 module turret_stack4() {                        // everything above the lid, stand frame
     color("#6b8fb5") base();
@@ -436,7 +480,9 @@ if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_strap") strap4();
 if (part == "v4_panstrap") pan_strap();                 // the stand's pan-servo strap (2 x M3), as printed
-if (part == "v4_cover") translate([0, 0, cv_t]) rotate([180, 0, 0]) cover4();   // print two, face down (spigot up)
+if (part == "v4_cover") cover4();                                                                                   // print two, inner face down (the square pocket and insert bore face up)
+if (part == "v4_ear") translate([0, 0, ear_t]) rotate([180, 0, 0]) translate([0, 0, -(ear_len - ear_t)]) ear4();     // print two, octagon's outer face down, stalk up
+if (part == "v4_plug") for (k = [0, 1]) translate([k * 14, 0, plug_stem]) plug4();                                   // print two (one file), stem down, dome up, glued over the screw
 if (part == "v4_camframe") translate([0, 0, ax_y + fr_y + fr_t]) rotate([-90, 0, 0]) camcover();       // front face down on the bed, spigots and pockets up
 if (part == "v4_head") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0]) head4();                       // front face down on the bed
 if (part == "v4_plate") translate([0, 0, ax_y + pl_y[1]]) rotate([-90, 0, 0])                               // fit coupon: the camera/OLED plate only (no arms)
