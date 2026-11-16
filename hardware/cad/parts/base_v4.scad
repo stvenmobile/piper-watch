@@ -193,7 +193,7 @@ sb_top = z_ft + (tsv_z[1] - tsv_z[0]);          // servo top face
 // cowl screws: two M3 x 8 button-head screws go in from OUTSIDE, radially through the cowl wall (head in a counterbore) into M3 inserts pressed
 // (cowl off) into the outer faces of two posts on the turret floor. Posts stand 0.5 inside the cowl wall, behind the head, clear of the cradle, strap posts, XIAO pocket and crank.
 cs_ang = [215, 325];  cs_z = 7;  cs_in = 54.7;  cs_r0 = 46;  cs_w = 16;  cs_h = 14;   // posts: outer face an ARC 0.3 inside the cowl (r 55), 16 wide x 8.7 deep
-module cs_web2d() hull() { rotate(cs_ang[0]) cs_post2d(); translate([sb_x[0][0], sb_y[0]]) square([sb_x[0][1] - sb_x[0][0], sb_y[1] - sb_y[0]]); }   // left post filled across to the servo's left strap post
+module cs_web2d() hull() { rotate(cs_ang[0]) cs_post2d(); translate([sb_x[0][0], sb_y[0]]) square([sb_x[0][1] - sb_x[0][0], sb_y[1] - sb_y[0]]); intersection() { circle(r = cs_in, $fn = 240); translate([sb_x[0][0], -60]) square([sb_x[0][1] - sb_x[0][0], 60 + sb_y[0]]); } }   // + the corner behind the strap post (no triangular pocket)   // left post filled across to the servo's left strap post
 cs_band_r0 = 51.5;  cs_band_h = 8;              // arc band against the cowl behind the servo cradle: inner radius, height (stays under the cowl's rear vent at z_ft + 9)
 cs_band_a = [cs_ang[0], 360 + atan2(-sqrt(cs_in * cs_in - (tsv[1] + 3) * (tsv[1] + 3)), tsv[1] + 3)];   // from the left post round to the cradle's right outer edge (~284 deg)
 module cs_band2d() intersection() {
