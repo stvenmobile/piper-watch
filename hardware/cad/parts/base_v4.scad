@@ -103,7 +103,7 @@ module lid4() difference() {
     union() {
         translate([0, 0, ledge_z]) v4rr(b_in[0] - 0.5, b_in[1] - 0.5, brr - bwt - 0.25, lid_t4);
         translate([0, 0, wall_top]) cylinder(r = wall_ro, h = wall_h4, $fn = 160);                          // the wall ...
-        for (a = [0, 90, 180, 270]) rotate(a) translate([wall_ri - 0.5, 0, wall_top]) cylinder(d = 9, h = bolt_z + 6 - wall_top, $fn = 32);   // ... + 4 columns
+        intersection() { for (a = [0, 90, 180, 270]) rotate(a) translate([wall_ri - 0.5, 0, wall_top]) cylinder(d = 9, h = bolt_z + 6 - wall_top, $fn = 32); cylinder(r = wall_ro, h = 200, $fn = 160); }   // ... + 4 columns (kept inside the wall's outer face)
         for (p = ad_pts) translate([p[0], p[1], wall_top - 0.01]) {                                        // servo adapter standoffs, filleted foot
             cylinder(d = ad_so[0], h = ad_so[1] + 0.01, $fn = 32);
             cylinder(d1 = ad_so[0] + 3, d2 = ad_so[0], h = 1.5, $fn = 32);
@@ -140,7 +140,26 @@ module skirt_extra4() difference() {
         translate([0, 0, sk_ro - sk_ri + 1 - 1.4]) cylinder(d = 5, h = 2, $fn = 24);
     }
 }
-module skirt4s() { base(); skirt_extra4(); }
+sk_fil = 4;                                     // skirt: fillet where the pan servo's sleeve meets the plate's underside
+module skirt4s() difference() {                // the stand's base() + the skirt, with the 4 strap-insert bosses run up into the plate and a fillet round the sleeve
+    sx = [-srv[1] / 2 - clr, srv[1] / 2 + clr];  sy = [-srv_sh - clr, srv[0] - srv_sh + clr];   // sleeve inside (as in base())
+    union() {
+        base(); skirt_extra4();
+        for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, z_case_bot]) cylinder(d = ins_boss, h = -plate_t - z_case_bot + 0.01, $fn = 32);   // full-height bosses
+        for (k = [0 : 7]) {                                                                         // 45-ish fillet (8 steps of a quarter round) on the sleeve's outside
+            t = sk_fil / 8;  z = k * t;  d = sk_fil - sqrt(sk_fil * sk_fil - (sk_fil - z - t / 2) * (sk_fil - z - t / 2));
+            translate([0, 0, -plate_t - z - t]) linear_extrude(t + 0.01) offset(delta = d) {
+                translate([sx[0] - sleeve_t, sy[0] - sleeve_t]) square([sx[1] - sx[0] + 2 * sleeve_t, sy[1] - sy[0] + sleeve_t]);
+                for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y]) circle(d = ins_boss, $fn = 32);
+            }
+        }
+    }
+    box(sx, [sy[0], sy[1] + 5 + sk_fil], [z_case_bot - 1, -plate_t + 0.02]);                     // the servo's pocket, open at +Y (fillet kept out of it)
+    translate([0, 0, -plate_t - 1]) cylinder(d = hub_od + 2, h = plate_t + 2, $fn = 64);       // hub passes through
+    translate([0, 0, z_horn - 1]) cylinder(d = hub_od + 1, h = -z_horn, $fn = 64);
+    for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, z_case_bot - 0.01]) insert3();   // strap inserts
+    for (a = [0, 90, 180, 270]) rotate(a) translate([sk_ri - 1, -4, sk_z0 - z_pt - 1]) cube([wall_ro + 1.2 - (sk_ri - 1), 8, bolt_z + 7 - sk_z0 + 1]);   // shallow grooves (r 49.7) for the lid's insert columns: the first lids' columns stand 1 mm proud of the wall
+}
 
 // ==== TURRET v4 + HEAD v4 (stand frame: pan axis = origin, z = 0 at the plate top) =========================================
 // The head is a VERTICAL camera plate carried 20 mm in front of the tilt axle by two arms; the axle is only 32 mm above the floor.
