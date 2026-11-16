@@ -194,6 +194,12 @@ sb_top = z_ft + (tsv_z[1] - tsv_z[0]);          // servo top face
 // (cowl off) into the outer faces of two posts on the turret floor. Posts stand 0.5 inside the cowl wall, behind the head, clear of the cradle, strap posts, XIAO pocket and crank.
 cs_ang = [215, 325];  cs_z = 7;  cs_in = 54.7;  cs_r0 = 46;  cs_w = 16;  cs_h = 14;   // posts: outer face an ARC 0.3 inside the cowl (r 55), 16 wide x 8.7 deep
 module cs_web2d() hull() { rotate(cs_ang[0]) cs_post2d(); translate([sb_x[0][0], sb_y[0]]) square([sb_x[0][1] - sb_x[0][0], sb_y[1] - sb_y[0]]); }   // left post filled across to the servo's left strap post
+cs_band_r0 = 51.5;  cs_band_h = 8;              // arc band against the cowl behind the servo cradle: inner radius, height (stays under the cowl's rear vent at z_ft + 9)
+cs_band_a = [cs_ang[0], 360 + atan2(-sqrt(cs_in * cs_in - (tsv[1] + 3) * (tsv[1] + 3)), tsv[1] + 3)];   // from the left post round to the cradle's right outer edge (~284 deg)
+module cs_band2d() intersection() {
+    difference() { circle(r = cs_in, $fn = 240); circle(r = cs_band_r0, $fn = 240); }
+    polygon(concat([[0, 0]], [for (a = [cs_band_a[0] : 2 : cs_band_a[1]]) 80 * [cos(a), sin(a)]], [80 * [cos(cs_band_a[1]), sin(cs_band_a[1])]]));
+}
 module cs_post2d() intersection() { difference() { circle(r = cs_in, $fn = 240); circle(r = cs_r0, $fn = 160); } translate([0, -cs_w / 2]) square([cs_in + 1, cs_w]); }
 // fillets where the turret's raised features meet the floor: concave quarter-round, radius fl_r, built from thin stepped layers on the outer footprints
 // (never inside the servo cradle or XIAO pocket, never across the cable openings / hub hole / flange screws, never into the cowl wall or the cowl's cheek notch)
@@ -204,6 +210,7 @@ module feet2d() {
     for (b = sb_x) translate([b[0], sb_y[0]]) square([b[1] - b[0], sb_y[1] - sb_y[0]]);                       // strap posts
     for (a = cs_ang) rotate(a) cs_post2d();                                                                    // cowl screw posts
     cs_web2d();
+    cs_band2d();
     for (c = [ch_x, [-ch_x[1], -ch_x[0]]]) translate([c[0], ax_y - 10]) square([c[1] - c[0], 20]);              // cheeks
 }
 module fillet_ring2d(d) difference() {
@@ -245,6 +252,7 @@ module turret4() difference() {
         fillets4();
         for (a = cs_ang) rotate(a) translate([0, 0, z_ft - 0.01]) linear_extrude(cs_h + 0.01) cs_post2d();   // cowl screw posts
         difference() { translate([0, 0, z_ft - 0.01]) linear_extrude(cs_h + 0.01) cs_web2d(); box([tsv[0] - tsv_clr, tsv[1] + tsv_clr], [tsv_y[0] - tsv_clr, tsv_y[1] + tsv_clr], [z_ft - 1, z_ft + 30]); }   // the gap between them filled
+        difference() { translate([0, 0, z_ft - 0.01]) linear_extrude(cs_band_h + 0.01) cs_band2d(); box([tsv[0] - tsv_clr, tsv[1] + tsv_clr], [tsv_y[0] - tsv_clr, tsv_y[1] + tsv_clr], [z_ft - 1, z_ft + 30]); }   // and the arc band behind the cradle
         for (b = sb_x) box(b, sb_y, [z_ft - 0.01, sb_top]);                                                  // hold-down posts (insert in the top)
         difference() {                                                                                       // pocket for the XIAO ESP32-S3 (hot-glued in; no holes), the USB-C end open toward -x
             box([xi_x[0] - 2, xi_x[1] + 2], [xi_y[0] - 2, xi_y[1] + 2], [z_ft - 0.01, z_ft + 5]);
