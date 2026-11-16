@@ -191,6 +191,7 @@ stub_d = 7.85;                                  // axle stubs into the 608 bores
 hub_a = 35;                                     // flange screws at 35/125/215/305 deg
 flange_d = 82;  flange_r = 36;                  // wider flange (the stand's is 66 / r 29): the four screws sit >= 4.5 from the cradle walls, strap posts and XIAO pocket
 
+win4 = [16, 12];                                // hub cable window (wide x tall): the stand's 12 x 11 passes the camera cable but not a USB-C plug beside it (2026-11-16)
 module hub4() difference() {                    // the stand's hub, its four flange inserts turned to hub_a + k*90 to clear the tilt servo
     union() {
         translate([0, 0, z_horn]) cylinder(d = hub_od, h = z_flange - z_horn + 0.01, $fn = 96);
@@ -202,7 +203,7 @@ module hub4() difference() {                    // the stand's hub, its four fla
         hole3(hub_end + 2);
         translate([0, 0, hub_end + 1]) cylinder(d = 6.2, h = 10, $fn = 24);
     }
-    translate([0, 0, z_horn + hub_end + win[1] / 2 + 1]) rotate([0, 90, 0]) linear_extrude(hub_od) square([win[1], win[0]], center = true);
+    translate([0, 0, z_horn + hub_end + win4[1] / 2 + 1]) rotate([0, 90, 0]) linear_extrude(hub_od) square([win4[1], win4[0]], center = true);
     for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0, z_flange + flange_t - insert_m3[1]]) insert3();
 }
 // tilt servo hold-down: two posts beside the cradle's side walls (M3 insert in each top) and a flat strap across the servo's top, 2 x M3 x 8
