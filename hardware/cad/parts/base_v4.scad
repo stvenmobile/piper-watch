@@ -191,7 +191,7 @@ stub_d = 7.85;                                  // axle stubs into the 608 bores
 hub_a = 35;                                     // flange screws at 35/125/215/305 deg
 flange_d = 82;  flange_r = 36;                  // wider flange (the stand's is 66 / r 29): the four screws sit >= 4.5 from the cradle walls, strap posts and XIAO pocket
 
-win4 = [16, 12];                                // hub cable window (wide x tall): the stand's 12 x 11 passes the camera cable but not a USB-C plug beside it (2026-11-16)
+win4 = [20, 17];                                // hub cable window (wide x tall): 2026-11-16 12 x 11 -> 16 x 12 (USB-C beside the camera cable); 2026-11-17 -> 20 x 17 to fish plugs (top 3 mm sits inside the plate)
 module hub4() difference() {                    // the stand's hub, its four flange inserts turned to hub_a + k*90 to clear the tilt servo
     union() {
         translate([0, 0, z_horn]) cylinder(d = hub_od, h = z_flange - z_horn + 0.01, $fn = 96);
