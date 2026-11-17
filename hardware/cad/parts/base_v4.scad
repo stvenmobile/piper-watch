@@ -44,6 +44,7 @@ slot4 = [[-18, 18], [-44, -30]];              // lid cable slot (x range, y rang
 jack_y4 = -47;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall
 btn_x4 = -32;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): BACK wall, above the port window, 15 mm behind/left of the carrier's 12-pin button header; its body runs forward over the HDMI port
 ant_x4 = [18, 40];  ant_z4 = 34;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, right of the port window's USB stacks, 22 apart; clear of the Ethernet/USB-C (board tops z 25-28, ending at y -31)
+usb_slot4 = [-4, 30, 28, 14];          // USB cable slot (centre x, centre z, width, height), rounded ends: BACK wall, 5 mm over the port window, between the button and the antennas; the 3 USB-A plugs (camera, XIAO, servo adapter) pass out through it one at a time and plug into the Orin through the window
 
 // ---- wall / skirt ---------------------------------------------------------------------------------------------------
 wall_ro = 48.5;  wall_t4 = 3;  wall_ri = wall_ro - wall_t4;  wall_h4 = 32;
@@ -93,6 +94,7 @@ module tub4() difference() {
     // left wall: 12 V jack, inlet slots over the heatsink; right wall: inlet slots
     translate([-bw / 2 - 1, jack_y4, jack_z4]) rotate([0, 90, 0]) cylinder(d = jack_d4, h = bwt + 2, $fn = 40);
     translate([btn_x4, -bd / 2 - 1, btn_z4]) rotate([-90, 0, 0]) cylinder(d = btn_d4, h = bwt + 2, $fn = 64);
+    translate([0, -bd / 2 - 1, 0]) rotate([-90, 0, 0]) linear_extrude(bwt + 2) hull() for (sx = [-1, 1]) translate([usb_slot4[0] + sx * (usb_slot4[2] - usb_slot4[3]) / 2, -usb_slot4[1]]) circle(d = usb_slot4[3], $fn = 48);   // USB cable slot
     for (x = ant_x4) translate([x, -bd / 2 - 1, ant_z4]) rotate([-90, 0, 0]) cylinder(d = ant_d4 + cal_hole, h = bwt + 2, $fn = 32);   // antennas
     for (i = [0 : 5]) {
         translate([-bw / 2 - 1, -10 + i * 7, 12]) cube([bwt + 2, 2.6, 18]);
