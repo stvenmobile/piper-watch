@@ -13,7 +13,7 @@ stepper any more.
 ## Overview
 
 ```text
- 12 V supply ── DC jack (tub back wall) ── SPLIT BLOCK (plug zone, behind the Orin)
+ 12 V supply ── DC jack (tub left wall) ── SPLIT BLOCK (left of the Orin)    
                                             ├─ + / − ──────────────────────────────► Orin carrier DC in (9–19 V)
                                             └─ + ── inline FUSE (5×20, 4 A) ──┐
                                                − ─────────────────────────────┴──► servo adapter DC screw terminal
@@ -46,7 +46,7 @@ stepper any more.
 
 | From | To | Wire | Notes |
 | --- | --- | --- | --- |
-| DC jack + / − | split block + / − | 16–18 AWG | the block sits in the plug zone (the tub's insert bosses at the back left) |
+| DC jack + / − | split block + / − | 16–18 AWG | the block sits in the 16 mm gap between the Orin and the left wall, forward of the jack: a pair of lever nuts or a small 2-way terminal block, taped or tied down (the old fuse-block bosses are gone; they were where the carrier's DC plug goes) |
 | Split block + / − | Orin carrier DC jack | 18 AWG, DC plug pigtail | always on: the power button controls the Jetson, not this feed |
 | Split block + | inline fuse holder (**4 A fast-blow**, 5 × 20 mm) | 16 AWG (the holder's own leads) | lies along the plug zone's back wall; change the fuse with the lid off |
 | Fuse holder | servo adapter DC terminal **+** | 16 AWG | up through the lid slot |

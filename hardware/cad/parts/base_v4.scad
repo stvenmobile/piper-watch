@@ -25,18 +25,17 @@ tilt = 0;
 cut_v4 = false;                               // slice the view open on x > 0
 
 // ---- box --------------------------------------------------------------------------------------------------------------
-bw = 118;  bd = 120;  bwt = 3;  bfl = 4;  brr = 14;
-b_in = [bw - 2 * bwt, bd - 2 * bwt];          // 112 x 114
+bw = 138;  bd = 120;  bwt = 3;  bfl = 4;  brr = 14;
+b_in = [bw - 2 * bwt, bd - 2 * bwt];          // 132 x 114 (widened 20 mm, 2026-11-17: 16 mm beside each side of the Orin for the 12 V jack and the split block)
 ledge_w = 6;  lid_t4 = 6;  ledge_z = 54;      // 60 mm box: lid underside 54 leaves ~22 mm over the Orin's fan (to confirm)
 wall_top = ledge_z + lid_t4;                  // 60
-vx = b_in[0] / 2;  vy = b_in[1] / 2;          // inner half sizes 56 x 57
+vx = b_in[0] / 2;  vy = b_in[1] / 2;          // inner half sizes 66 x 57
 
 // ---- Orin carrier, plug zone ------------------------------------------------------------------------------------------
 orin = [100, 80, 1.6];  orin_y = 11;          // centre y: back edge at -29, front edge at 51 (6 mm to the front wall)
 orin_h = [86, 58];  so4 = 6;  fan4 = 20;
 orin_pts = [for (sx = [-1, 1], sy = [-1, 1]) [sx * orin_h[0] / 2, orin_y + sy * orin_h[1] / 2]];
-fuse4 = [-52, -56];  fuse_blk4 = [30, 20, 14];
-fuse_pts4 = [[fuse4[0] + 5, fuse4[1] + 10], [fuse4[0] + 25, fuse4[1] + 10]];
+fuse_pts4 = [];                                // the old fuse-block bosses are gone (inline fuse now; their spot was where the carrier's DC plug goes)
 ad_c = [0, -10];  ad_hole = [37, 27.5];      // servo adapter: board centre (43 across x 33), hole pattern (2.5 mm holes, checked on a coupon)
 ad_so = [7.5, 5];                             // its standoffs: dia, height above the lid (M2.5 inserts, M2.5 x 6 screws)
 ad_pts = [for (sx = [-1, 1], sy = [-1, 1]) [ad_c[0] + sx * ad_hole[0] / 2, ad_c[1] + sy * ad_hole[1] / 2]];
@@ -53,8 +52,8 @@ sk_z0 = wall_top + 2;                          // skirt's lower edge (hovers 2 m
 bolt_z = wall_top + 17;                        // the four radial bolts: 15 above the skirt's lower edge, 15 below the wall's top
 u_gap = 16;                                    // lid top -> servo's strap (room for the plugs + the adapter)
 z_pt = wall_top + u_gap + strap_t - z_case_bot;      // plate top (stand z = 0 here)
-lid_pts4 = [for (sx = [-1, 1], sy = [-1, 1]) [sx * 51, sy * 52]];                   // corner screws (lid)
-card_pts4 = [[52, 0], [-52, 0], [0, 52], [0, -52]];                                   // cardinal screws (lid), under the skirt's edge: countersunk
+lid_pts4 = [for (sx = [-1, 1], sy = [-1, 1]) [sx * (bw / 2 - 8), sy * (bd / 2 - 8)]];   // corner screws (lid)
+card_pts4 = [[bw / 2 - 7, 0], [-bw / 2 + 7, 0], [0, 52], [0, -52]];                   // cardinal screws (lid): countersunk; front/back under the skirt's edge, the side ones on the side walls
 
 module v4rr(w, d, r, h) linear_extrude(h) offset(r = r) square([w - 2 * r, d - 2 * r], center = true);
 module strip4(p) {                             // wall strips beside a boss: one per wall it is near
@@ -513,7 +512,6 @@ module cutv(on = true) difference() { union() children(); if (on && cut_v4) tran
 module ghosts4() {
     color("#2e7d32") translate([-orin[0] / 2, orin_y - orin[1] / 2, bfl + so4]) cube(orin);
     color("#9aa0a6") translate([-35, orin_y - 25 + 2, bfl + so4 + orin[2]]) cube([70, 50, fan4]);
-    color("#00897b") translate([fuse4[0], fuse4[1], bfl + so4]) cube(fuse_blk4);
     translate([ad_c[0], ad_c[1], wall_top + ad_so[1]]) {                                     // servo adapter on its standoffs
         color("#222") translate([-21.5, -16.5, 0]) cube([43, 33, 1.6]);                              // board
         color("#111") translate([4, -20.5, 1.6]) cube([12, 14, 11]);                                 // barrel jack (overhangs the back edge)
