@@ -42,7 +42,7 @@ ad_so = [7.5, 5];                             // its standoffs: dia, height abov
 ad_pts = [for (sx = [-1, 1], sy = [-1, 1]) [ad_c[0] + sx * ad_hole[0] / 2, ad_c[1] + sy * ad_hole[1] / 2]];
 slot4 = [[-18, 18], [-44, -30]];              // lid cable slot (x range, y range): over the plug zone, inside the cylinder
 jack_y4 = -47;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall
-btn_y4 = -31;   btn_z4 = 14;   btn_d4 = 12.5;      // power button (to J42 - verify the pins on the carrier), left wall
+btn_x4 = -32;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): BACK wall, above the port window, 15 mm behind/left of the carrier's 12-pin button header; its body runs forward over the HDMI port
 
 // ---- wall / skirt ---------------------------------------------------------------------------------------------------
 wall_ro = 48.5;  wall_t4 = 3;  wall_ri = wall_ro - wall_t4;  wall_h4 = 32;
@@ -89,9 +89,9 @@ module tub4() difference() {
     for (p = fuse_pts4) translate([p[0], p[1], bfl + so4 - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
     // back wall: service window over the Orin's ports (trapezoid, 45 deg top corners)
     translate([0, -vy + 1, 0]) rotate([90, 0, 0]) linear_extrude(6) polygon([[-47, 8], [47, 8], [37, 18], [-37, 18]]);
-    // left wall: 12 V jack, power button, inlet slots over the heatsink; right wall: inlet slots
+    // left wall: 12 V jack, inlet slots over the heatsink; right wall: inlet slots
     translate([-bw / 2 - 1, jack_y4, jack_z4]) rotate([0, 90, 0]) cylinder(d = jack_d4, h = bwt + 2, $fn = 40);
-    translate([-bw / 2 - 1, btn_y4, btn_z4]) rotate([0, 90, 0]) cylinder(d = btn_d4, h = bwt + 2, $fn = 40);
+    translate([btn_x4, -bd / 2 - 1, btn_z4]) rotate([-90, 0, 0]) cylinder(d = btn_d4, h = bwt + 2, $fn = 64);
     for (i = [0 : 5]) {
         translate([-bw / 2 - 1, -10 + i * 7, 12]) cube([bwt + 2, 2.6, 18]);
         translate([bw / 2 - bwt - 1, -10 + i * 7, 12]) cube([bwt + 2, 2.6, 18]);

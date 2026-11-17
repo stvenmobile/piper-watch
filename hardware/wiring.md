@@ -75,6 +75,15 @@ The carrier's **12-pin button header** (read the designator on the board's silks
 | 9 | UART TXD | 10 | UART RXD |
 | 11 | LED + | 12 | LED − |
 
+- **The button:** the Geekworm T100 case's 19 mm momentary switch with an LED ring, in a 19.2 mm hole
+  in the tub's **back wall**, above the port window on the 12 V jack's side, 34 mm up. Its body
+  runs forward over the carrier's HDMI port; it must stay **under 38 mm** behind the wall
+  (connector included), or it hits the Dupont plug on the button header.
+- Its **power leads** (the "ON" pair, 9") go to **pins 1 and 2** of the 12-pin button header (on the
+  carrier, just inside the back edge, between its DC jack and HDMI port; polarity doesn't matter).
+  Its **LED leads** (7") go to the 40-pin header along the carrier's right edge: **3.3 V (pin 1)**
+  and **GND (pin 6)**, exactly as on the Jetson Nano. The 3.3 V rail is only up while the
+  Jetson runs, so the ring shows that it's on.
 - Use a **momentary** (push-to-make) button across **pins 1 and 2**, not a latching rocker.
   The Jetson's power-button input expects a press: a short press powers it on (if it's off) or
   asks the OS to shut down cleanly. A rocker held closed on this pin looks like a long press,
@@ -83,8 +92,6 @@ The carrier's **12-pin button header** (read the designator on the board's silks
   the button, jumper **pins 7 and 8** (AUTO ON - DIS, "disable auto power-on"). Confirm this on the
   J401 schematic before relying on it.
 - **Recovery (flashing):** jumper pin 3 to pin 4 while powering up, then remove the jumper.
-- **Optional illuminated button:** pins 11/12 drive a power LED. Check the LED's voltage and
-  current on the schematic before wiring a button's built-in LED to them.
 - **If you want a hard rocker anyway:** put it in the 12 V feed **before** the split block, where it
   cuts everything. Only flip it off after `sudo shutdown now` has finished, or you risk corrupting
   the NVMe.
