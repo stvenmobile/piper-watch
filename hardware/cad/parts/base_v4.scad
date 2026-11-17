@@ -41,9 +41,9 @@ ad_c = [0, -10];  ad_hole = [37, 27.5];      // servo adapter: board centre (43 
 ad_so = [7.5, 5];                             // its standoffs: dia, height above the lid (M2.5 inserts, M2.5 x 6 screws)
 ad_pts = [for (sx = [-1, 1], sy = [-1, 1]) [ad_c[0] + sx * ad_hole[0] / 2, ad_c[1] + sy * ad_hole[1] / 2]];
 slot4 = [[-18, 18], [-44, -30]];              // lid cable slot (x range, y range): over the plug zone, inside the cylinder
-jack_y4 = -47;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall
+jack_y4 = -41;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall: on the flat (the corner's curve starts at y -46; at -47 the hole ran into it and came out with a flat edge)
 btn_x4 = -32;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): BACK wall, above the port window, 15 mm behind/left of the carrier's 12-pin button header; its body runs forward over the HDMI port
-ant_x4 = [-16, 38];  ant_z4 = 48;  ant_d4 = 6.5;  ant_sf4 = 10.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, high (z 48, where the ledge fillet starts), 54 apart; a flat spot face (d ant_sf4) cut into the fillet inside so the inner nut seats; the right one stays clear of the corner boss web (x 44+) and the wall's rounded corner (x 45+) outside
+ant_x4 = [-16, 38];  ant_z4 = 43;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, 54 apart, low enough that the inner nut (9 mm) clears the ledge fillet (z 48+); the right one stays clear of the corner boss web and the wall's rounded corner outside
 usb_slot4 = [-4, 27, 28, 12];          // USB cable slot (centre x, centre z, width, height), rounded ends: BACK wall, z 21-33 (3 mm over the port window), between the button and the antennas; the 3 USB-A plugs (camera, XIAO, servo adapter) pass out through it one at a time and plug into the Orin through the window
 
 // ---- wall / skirt ---------------------------------------------------------------------------------------------------
@@ -95,10 +95,7 @@ module tub4() difference() {
     translate([-bw / 2 - 1, jack_y4, jack_z4]) rotate([0, 90, 0]) cylinder(d = jack_d4, h = bwt + 2, $fn = 40);
     translate([btn_x4, -bd / 2 - 1, btn_z4]) rotate([-90, 0, 0]) cylinder(d = btn_d4, h = bwt + 2, $fn = 64);
     translate([0, -bd / 2 - 1, 0]) rotate([-90, 0, 0]) linear_extrude(bwt + 2) hull() for (sx = [-1, 1]) translate([usb_slot4[0] + sx * (usb_slot4[2] - usb_slot4[3]) / 2, -usb_slot4[1]]) circle(d = usb_slot4[3], $fn = 48);   // USB cable slot
-    for (x = ant_x4) translate([x, -bd / 2 - 1, ant_z4]) rotate([-90, 0, 0]) {   // antennas: hole + inner spot face through the ledge fillet
-        cylinder(d = ant_d4 + cal_hole, h = bwt + 10, $fn = 32);
-        translate([0, 0, bwt + 1]) cylinder(d = ant_sf4, h = 8, $fn = 48);
-    }
+    for (x = ant_x4) translate([x, -bd / 2 - 1, ant_z4]) rotate([-90, 0, 0]) cylinder(d = ant_d4 + cal_hole, h = bwt + 2, $fn = 32);   // antennas
     for (i = [0 : 5]) {
         translate([-bw / 2 - 1, -10 + i * 7, 12]) cube([bwt + 2, 2.6, 18]);
         translate([bw / 2 - bwt - 1, -10 + i * 7, 12]) cube([bwt + 2, 2.6, 18]);
