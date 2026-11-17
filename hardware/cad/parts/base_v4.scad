@@ -56,6 +56,8 @@ lid_pts4 = [for (sx = [-1, 1], sy = [-1, 1]) [sx * (bw / 2 - 8), sy * (bd / 2 - 
 card_pts4 = [[bw / 2 - 7, 0], [-bw / 2 + 7, 0], [0, 52], [0, -52]];                   // cardinal screws (lid): countersunk; front/back under the skirt's edge, the side ones on the side walls
 
 module v4rr(w, d, r, h) linear_extrude(h) offset(r = r) square([w - 2 * r, d - 2 * r], center = true);
+ef_ch = 1;                                     // 45 deg chamfer on the bed-side outer edge of the tub and the lid (no elephant's foot)
+module v4rr_ch(w, d, r, h, c = ef_ch) hull() { v4rr(w - 2 * c, d - 2 * c, r - c, 0.01); translate([0, 0, c]) v4rr(w, d, r, h - c); }
 module strip4(p) {                             // wall strips beside a boss: one per wall it is near
     if (abs(p[0]) > 40) translate([sign(p[0]) * (vx + 1.5), p[1]]) square([3, 18], center = true);
     if (abs(p[1]) > 40) translate([p[0], sign(p[1]) * (vy + 1.5)]) square([18, 3], center = true);
@@ -80,7 +82,7 @@ module cavity4() {
 }
 module tub4() difference() {
     union() {
-        difference() { v4rr(bw, bd, brr, wall_top); cavity4(); }
+        difference() { v4rr_ch(bw, bd, brr, wall_top); cavity4(); }
         bosses4();
         for (p = orin_pts) translate([p[0], p[1], bfl - 0.01]) cylinder(d = 8, h = so4 + 0.01, $fn = 40);
         for (p = fuse_pts4) translate([p[0], p[1], bfl - 0.01]) cylinder(d = 7, h = so4 + 0.01, $fn = 40);
@@ -104,7 +106,7 @@ module tub4() difference() {
 // ==== LID + WALL (one piece) ==========================================================================================
 module lid4() difference() {
     union() {
-        translate([0, 0, ledge_z]) v4rr(b_in[0] - 0.5, b_in[1] - 0.5, brr - bwt - 0.25, lid_t4);
+        translate([0, 0, ledge_z]) v4rr_ch(b_in[0] - 0.5, b_in[1] - 0.5, brr - bwt - 0.25, lid_t4);   // printed plate-down: the chamfer is on its bed edge (also leads it into the pocket)
         translate([0, 0, wall_top]) cylinder(r = wall_ro, h = wall_h4, $fn = 160);                          // the wall ...
         intersection() { for (a = [0, 90, 180, 270]) rotate(a) translate([wall_ri - 0.5, 0, wall_top]) cylinder(d = 9, h = bolt_z + 6 - wall_top, $fn = 32); cylinder(r = wall_ro, h = 200, $fn = 160); }   // ... + 4 columns (kept inside the wall's outer face)
         for (p = ad_pts) translate([p[0], p[1], wall_top - 0.01]) {                                        // servo adapter standoffs, filleted foot
