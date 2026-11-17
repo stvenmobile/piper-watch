@@ -136,11 +136,11 @@ both its power and its serial link to the Orin (it shows up as `303A:1001`).
   JST plug unplugged at the C920 board; the XIAO's USB-C end goes to the XIAO.
 - **Lid slot:** everything going down to the Orin, the hub cables and the servo adapter's USB, drops
   through the lid's slot into the plug zone; the USB-A ends then leave through the back wall's USB slot.
-- **Wi-Fi antennas:** two 6.5 mm holes in the back wall, 34 mm up, right of the port window
-  (centres 18 and 40 mm right of the wall's centre line, 22 mm apart). The SMA bulkheads go in from
+- **Wi-Fi antennas:** two 6.5 mm holes in the back wall, 40 mm up, above the USB slot
+  (centres 16 mm left and 14 mm right of the wall's centre line, 30 mm apart). The SMA bulkheads go in from
   inside with their nut outside; their pigtails run to the Wi-Fi card's U.FL sockets along the plug zone.
 - **USB slot (back wall):** the three USB-A ends (camera, XIAO, servo adapter) come down the lid
-  slot, pass out of the tub through the 28 x 12 mm slot in line with the antenna holes, loop down outside
+  slot, pass out of the tub through the 28 x 12 mm slot just above the port window, loop down outside
   and plug into the Orin's USB-A jacks through the window. Feed the plugs through the slot one at a
   time. This avoids bending plugs in the 28 mm plug zone (the jacks sit 28 mm inside the back wall),
   so straight plugs work; their tails stick out of the window a little.
