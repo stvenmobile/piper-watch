@@ -191,7 +191,7 @@ stub_d = 7.85;                                  // axle stubs into the 608 bores
 hub_a = 35;                                     // flange screws at 35/125/215/305 deg
 flange_d = 82;  flange_r = 36;                  // wider flange (the stand's is 66 / r 29): the four screws sit >= 4.5 from the cradle walls, strap posts and XIAO pocket
 
-win4 = [20, 18];  win_ch = 3;                    // hub cable window (wide x tall), sill at the bore floor; 45 deg chamfers on its top (inside) and sill (outside) edges so a plug fed DOWN the bore turns out of it (2026-11-17; was 12 x 11, then 16 x 12; top 3 mm sits inside the plate)
+win4 = [20, 16];  win_z0 = 4;  win_ch = 2;      // hub cable window (wide x tall), its sill 4 mm over the bore floor (material by the horn), top 1 mm under the plate top (clear of the bearing); 45 deg chamfers: top inside, sill inside, so a plug fed DOWN the bore turns out (2026-11-17)
 module hub4() difference() {                    // the stand's hub, its four flange inserts turned to hub_a + k*90 to clear the tilt servo
     union() {
         translate([0, 0, z_horn]) cylinder(d = hub_od, h = z_flange - z_horn + 0.01, $fn = 96);
@@ -203,12 +203,12 @@ module hub4() difference() {                    // the stand's hub, its four fla
         hole3(hub_end + 2);
         translate([0, 0, hub_end + 1]) cylinder(d = 6.2, h = 10, $fn = 24);
     }
-    translate([0, 0, z_horn + hub_end + win4[1] / 2]) rotate([0, 90, 0]) linear_extrude(hub_od) square([win4[1], win4[0]], center = true);
+    translate([0, 0, z_horn + hub_end + win_z0 + win4[1] / 2]) rotate([0, 90, 0]) linear_extrude(hub_od) square([win4[1], win4[0]], center = true);
     intersection() {                            // the window's chamfers, following the tube's curve
         rotate_extrude($fn = 96) {
-            wt = z_horn + hub_end + win4[1];  wb = z_horn + hub_end;  ri = hub_id / 2;  ro = hub_od / 2;
+            wb = z_horn + hub_end + win_z0;  wt = wb + win4[1];  ri = hub_id / 2;  ro = hub_od / 2;
             polygon([[ri - 0.5, wt - 0.01], [ri - 0.5, wt + win_ch + 0.5], [ro + 0.5, wt - (ro + 0.5 - ri) + win_ch]]);   // top: inner edge cut back 45 deg
-            polygon([[ro - 2 - 0.1, wb + 0.1], [ro + 0.5, wb + 0.1], [ro + 0.5, wb - 2.5]]);                                    // sill: outer edge cut down 45 deg (2 mm, 1 mm of the end plate left)
+            polygon([[ri - 0.5, wb - 2.5], [ri + 2 + 0.1, wb + 0.1], [ri - 0.5, wb + 0.1]]);                                    // sill: inner edge cut 45 deg, so the plug's nose climbs out of the 4 mm well
         }
         translate([0, -win4[0] / 2, z_horn - 1]) cube([hub_od, win4[0], 60]);
     }
