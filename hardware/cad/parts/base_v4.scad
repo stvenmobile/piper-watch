@@ -44,7 +44,7 @@ slot4 = [[-18, 18], [-44, -30]];              // lid cable slot (x range, y rang
 jack_y4 = -47;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall
 btn_x4 = -32;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): BACK wall, above the port window, 15 mm behind/left of the carrier's 12-pin button header; its body runs forward over the HDMI port
 ant_x4 = [18, 40];  ant_z4 = 34;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, right of the port window's USB stacks, 22 apart; clear of the Ethernet/USB-C (board tops z 25-28, ending at y -31)
-usb_slot4 = [-4, 30, 28, 14];          // USB cable slot (centre x, centre z, width, height), rounded ends: BACK wall, 5 mm over the port window, between the button and the antennas; the 3 USB-A plugs (camera, XIAO, servo adapter) pass out through it one at a time and plug into the Orin through the window
+usb_slot4 = [-4, 34, 28, 12];          // USB cable slot (centre x, centre z, width, height), rounded ends: BACK wall, on the antennas' and button's centre line (z 28-40), between the button and the antennas; the 3 USB-A plugs (camera, XIAO, servo adapter) pass out through it one at a time and plug into the Orin through the window
 
 // ---- wall / skirt ---------------------------------------------------------------------------------------------------
 wall_ro = 48.5;  wall_t4 = 3;  wall_ri = wall_ro - wall_t4;  wall_h4 = 32;
