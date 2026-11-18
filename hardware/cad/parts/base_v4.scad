@@ -36,6 +36,7 @@ orin = [100, 80, 1.6];  orin_x = 10;  orin_y = 11;          // centre y: back ed
 orin_h = [86, 58];  so4 = 6;  fan4 = 20;
 orin_pts = [for (sx = [-1, 1], sy = [-1, 1]) [orin_x + sx * orin_h[0] / 2, orin_y + sy * orin_h[1] / 2]];
 tb4 = [-57, -14];  tb_blk4 = [20, 19, 13];    // 12 V split terminal block (2 poles cut from a uxcell X3-2012 strip, tubes along Y, screws up): one boss + M3 insert under its centre hole, in the power channel; 11 mm in front of the jack for the wire ends
+pad4 = [26, 2, 16];                            // rubber feet pockets under the floor: dia (1 inch pads), depth, centre inset from the outer edges (2.5 mm rim)
 fuse_pts4 = [tb4];                             // (bosses + M3 inserts, Orin standoff height)
 ad_c = [0, -10];  ad_hole = [37, 27.5];      // servo adapter: board centre (43 across x 33), hole pattern (2.5 mm holes, checked on a coupon)
 ad_so = [7.5, 5];                             // its standoffs: dia, height above the lid (M2.5 inserts, M2.5 x 6 screws)
@@ -92,6 +93,7 @@ module tub4() difference() {
     for (p = orin_pts) translate([p[0], p[1], bfl + so4 - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
     for (p = fuse_pts4) translate([p[0], p[1], bfl + so4 - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
     // back wall: service window over the Orin's ports (trapezoid, 45 deg top corners)
+    for (sx = [-1, 1], sy = [-1, 1]) translate([sx * (bw / 2 - pad4[2]), sy * (bd / 2 - pad4[2]), -1]) cylinder(d = pad4[0], h = pad4[1] + 1, $fn = 96);   // rubber feet pockets
     translate([orin_x, -vy + 1, 0]) rotate([90, 0, 0]) linear_extrude(6) polygon([[-47, 8], [47, 8], [37, 18], [-37, 18]]);
     // left wall: 12 V jack, inlet slots over the heatsink; right wall: inlet slots
     translate([-bw / 2 - 1, jack_y4, jack_z4]) rotate([0, 90, 0]) cylinder(d = jack_d4, h = bwt + 2, $fn = 40);
