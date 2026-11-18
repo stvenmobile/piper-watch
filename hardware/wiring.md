@@ -46,7 +46,7 @@ stepper any more.
 
 | From | To | Wire | Notes |
 | --- | --- | --- | --- |
-| DC jack + / − | split block + / − | 16–18 AWG | the block (2 poles cut from a uxcell X3-2012 strip) sits in the **power channel**, the 32 mm gap between the Orin and the left wall, just in front of the jack: screws up, wire tubes running front to back, one M3 screw through its centre mounting hole into a heat-set insert in the floor boss. Its screws can be tightened from above with the lid off |
+| DC jack + / − | split block + / − | 16–18 AWG | the block (2 poles cut from a uxcell X3-2012 strip) sits in the **power channel**, the 32 mm gap between the Orin and the left wall, in front of the jack and the power button: screws up, wire tubes running front to back, one M3 screw through its centre mounting hole into a heat-set insert in the floor boss. Its screws can be tightened from above with the lid off |
 | Split block + / − | Orin carrier DC jack | 18 AWG, DC plug pigtail | always on: the power button controls the Jetson, not this feed |
 | Split block + | inline fuse holder (**4 A fast-blow**, 5 × 20 mm) | 16 AWG (the holder's own leads) | lies along the plug zone's back wall; change the fuse with the lid off |
 | Fuse holder | servo adapter DC terminal **+** | 16 AWG | up through the lid slot |
@@ -76,9 +76,9 @@ The carrier's **12-pin button header** (read the designator on the board's silks
 | 11 | LED + | 12 | LED − |
 
 - **The button:** the Geekworm T100 case's 19 mm momentary switch with an LED ring, in a 19.2 mm hole
-  in the tub's **back wall**, above the port window on the 12 V jack's side, 34 mm up. Its body
-  runs forward over the carrier's HDMI port; it must stay **under 38 mm** behind the wall
-  (connector included), or it hits the Dupont plug on the button header.
+  in the tub's **left wall**, 34 mm up, 31 mm in front of the inside of the back wall (over the jack, behind
+  the terminal block). Its body runs across the power channel; it must stay **under 38 mm** behind
+  the wall (connector included), or it reaches over the carrier's DC jack.
 - Its **power leads** (the "ON" pair, 9") go to **pins 1 and 2** of the 12-pin button header (on the
   carrier, just inside the back edge, between its DC jack and HDMI port; polarity doesn't matter).
   Its **LED leads** (7") go to the 40-pin header along the carrier's right edge: **3.3 V (pin 1)**
@@ -135,12 +135,13 @@ both its power and its serial link to the Orin (it shows up as `303A:1001`).
   the window faces the open front of the pan servo's sleeve. The camera's cable goes with its
   JST plug unplugged at the C920 board; the XIAO's USB-C end goes to the XIAO.
 - **Lid slot:** everything going down to the Orin, the hub cables and the servo adapter's USB, drops
-  through the lid's slot into the plug zone; the USB-A ends then leave through the back wall's USB slot.
+  through the lid's slot into the plug zone; the USB-A ends then leave through the back wall's port window.
 - **Wi-Fi antennas:** two 6.5 mm holes in the back wall, 43 mm up
-  (centres 6 mm and 48 mm right of the wall's centre line, 42 mm apart; the left one sits over the USB slot's centre), just under the lid
+  (centres 6 mm and 48 mm right of the wall's centre line, 42 mm apart), just under the lid
   ledge's slope so the inner nuts sit flat on the wall; their pigtails run to the Wi-Fi card's U.FL sockets along the plug zone.
-- **USB slot (back wall):** the three USB-A ends (camera, XIAO, servo adapter) come down the lid
-  slot, pass out of the tub through the 28 x 12 mm slot just above the port window, loop down outside
-  and plug into the Orin's USB-A jacks through the window. Feed the plugs through the slot one at a
-  time. This avoids bending plugs in the 28 mm plug zone (the jacks sit 28 mm inside the back wall),
-  so straight plugs work; their tails stick out of the window a little.
+- **Port window (back wall):** one opening, 10–31 mm up, over every port at full height (HDMI, both
+  USB-A stacks, Ethernet, USB-C). The four USB-A ends (camera, XIAO, servo adapter, speakerphone) come
+  down the lid slot, leave the tub through the window, loop down and plug straight in from outside.
+  This avoids bending plugs in the 26 mm plug zone, so straight plugs work.
+- **Orin power:** a **right-angle** barrel plug in the carrier's DC jack (the window doesn't expose it; a
+  straight plug is too long for the plug zone), its lead turned left into the power channel.

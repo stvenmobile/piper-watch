@@ -35,7 +35,7 @@ vx = b_in[0] / 2;  vy = b_in[1] / 2;          // inner half sizes 66 x 57
 orin = [100, 80, 1.6];  orin_x = 10;  orin_y = 11;          // centre y: back edge at -29, front edge at 51 (6 mm to the front wall)
 orin_h = [86, 58];  so4 = 6;  fan4 = 20;
 orin_pts = [for (sx = [-1, 1], sy = [-1, 1]) [orin_x + sx * orin_h[0] / 2, orin_y + sy * orin_h[1] / 2]];
-tb4 = [-57, -14];  tb_blk4 = [20, 19, 13];    // 12 V split terminal block (2 poles cut from a uxcell X3-2012 strip, tubes along Y, screws up): one boss + M3 insert under its centre hole, in the power channel; 11 mm in front of the jack for the wire ends
+tb4 = [-57, -6];  tb_blk4 = [20, 19, 13];     // 12 V split terminal block (2 poles cut from a uxcell X3-2012 strip, tubes along Y, screws up): one boss + M3 insert under its centre hole, in the power channel, in front of the power button's body
 pad4 = [26, 2, 16];                            // rubber feet pockets under the floor: dia (1 inch pads), depth, centre inset from the outer edges (2.5 mm rim)
 fuse_pts4 = [tb4];                             // (bosses + M3 inserts, Orin standoff height)
 ad_c = [0, -10];  ad_hole = [37, 27.5];      // servo adapter: board centre (43 across x 33), hole pattern (2.5 mm holes, checked on a coupon)
@@ -43,9 +43,9 @@ ad_so = [7.5, 5];                             // its standoffs: dia, height abov
 ad_pts = [for (sx = [-1, 1], sy = [-1, 1]) [ad_c[0] + sx * ad_hole[0] / 2, ad_c[1] + sy * ad_hole[1] / 2]];
 slot4 = [[-18, 18], [-44, -30]];              // lid cable slot (x range, y range): over the plug zone, inside the cylinder
 jack_y4 = -41;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall: on the flat (the corner's curve starts at y -46; at -47 the hole ran into it and came out with a flat edge)
-btn_x4 = -22;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): BACK wall, above the port window, 15 mm behind/left of the carrier's 12-pin button header; its body runs forward over the HDMI port
-ant_x4 = [6, 48];  ant_z4 = 43;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, the left one over the USB slot's centre, 42 apart, low enough that the inner nut (9 mm) clears the ledge fillet (z 48+); the right one stays clear of the corner boss web and the wall's rounded corner outside
-usb_slot4 = [6, 27, 28, 12];          // USB cable slot (centre x, centre z, width, height), rounded ends: BACK wall, z 21-33 (3 mm over the port window), between the button and the antennas; the 3 USB-A plugs (camera, XIAO, servo adapter) pass out through it one at a time and plug into the Orin through the window
+btn_y4 = -26;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): LEFT wall, in the power channel, above the jack's height and behind the terminal block; body < 38 mm (it then ends 1.8 mm over the carrier's DC jack)
+ant_x4 = [6, 48];  ant_z4 = 43;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, 42 apart, low enough that the inner nut (9 mm) clears the ledge fillet (z 48+); the right one stays clear of the corner boss web and the wall's rounded corner outside
+port4 = [-28, 59.5, 10, 31, 4];               // back-wall port window (x from, x to, z bottom, z top, top-corner chamfer): every port at full height (HDMI, both USB-A stacks, Ethernet, USB-C); straight plugs go in from outside and the head's USB cables leave through it. Not the DC jack (right-angle plug inside)
 
 // ---- wall / skirt ---------------------------------------------------------------------------------------------------
 wall_ro = 48.5;  wall_t4 = 3;  wall_ri = wall_ro - wall_t4;  wall_h4 = 32;
@@ -92,13 +92,12 @@ module tub4() difference() {
     for (p = concat(lid_pts4, card_pts4)) translate([p[0], p[1], ledge_z - insert_m25[1]]) cylinder(d = insert_m25[0], h = insert_m25[1] + 1, $fn = 24);
     for (p = orin_pts) translate([p[0], p[1], bfl + so4 - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
     for (p = fuse_pts4) translate([p[0], p[1], bfl + so4 - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
-    // back wall: service window over the Orin's ports (trapezoid, 45 deg top corners)
+    // back wall: port window (45 deg top corners)
     for (sx = [-1, 1], sy = [-1, 1]) translate([sx * (bw / 2 - pad4[2]), sy * (bd / 2 - pad4[2]), -1]) cylinder(d = pad4[0], h = pad4[1] + 1, $fn = 96);   // rubber feet pockets
-    translate([orin_x, -vy + 1, 0]) rotate([90, 0, 0]) linear_extrude(6) polygon([[-47, 8], [47, 8], [37, 18], [-37, 18]]);
+    translate([0, -vy + 1, 0]) rotate([90, 0, 0]) linear_extrude(6) polygon([[port4[0], port4[2]], [port4[1], port4[2]], [port4[1], port4[3] - port4[4]], [port4[1] - port4[4], port4[3]], [port4[0] + port4[4], port4[3]], [port4[0], port4[3] - port4[4]]]);
     // left wall: 12 V jack, inlet slots over the heatsink; right wall: inlet slots
     translate([-bw / 2 - 1, jack_y4, jack_z4]) rotate([0, 90, 0]) cylinder(d = jack_d4, h = bwt + 2, $fn = 40);
-    translate([btn_x4, -bd / 2 - 1, btn_z4]) rotate([-90, 0, 0]) cylinder(d = btn_d4, h = bwt + 2, $fn = 64);
-    translate([0, -bd / 2 - 1, 0]) rotate([-90, 0, 0]) linear_extrude(bwt + 2) hull() for (sx = [-1, 1]) translate([usb_slot4[0] + sx * (usb_slot4[2] - usb_slot4[3]) / 2, -usb_slot4[1]]) circle(d = usb_slot4[3], $fn = 48);   // USB cable slot
+    translate([-bw / 2 - 1, btn_y4, btn_z4]) rotate([0, 90, 0]) cylinder(d = btn_d4, h = bwt + 2, $fn = 64);
     for (x = ant_x4) translate([x, -bd / 2 - 1, ant_z4]) rotate([-90, 0, 0]) cylinder(d = ant_d4 + cal_hole, h = bwt + 2, $fn = 32);   // antennas
     for (i = [0 : 5]) {
         translate([-bw / 2 - 1, -10 + i * 7, 12]) cube([bwt + 2, 2.6, 18]);
