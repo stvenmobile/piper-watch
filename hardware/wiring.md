@@ -13,7 +13,7 @@ stepper any more.
 ## Overview
 
 ```text
- 12 V supply ── DC jack (tub left wall) ── SPLIT BLOCK (left of the Orin)    
+ 12 V supply ── DC jack (tub back wall) ── SPLIT BLOCK (left of the Orin)    
                                             ├─ + / − ──────────────────────────────► Orin carrier DC in (9–19 V)
                                             └─ + ── inline FUSE (5×20, 4 A) ──┐
                                                − ─────────────────────────────┴──► servo adapter DC screw terminal
@@ -46,7 +46,7 @@ stepper any more.
 
 | From | To | Wire | Notes |
 | --- | --- | --- | --- |
-| DC jack + / − | split block + / − | 16–18 AWG | the block (2 poles cut from a uxcell X3-2012 strip) sits in the **power channel**, the 32 mm gap between the Orin and the left wall, in front of the jack and the power button: screws up, wire tubes running front to back, one M3 screw through its centre mounting hole into a heat-set insert in the floor boss. Its screws can be tightened from above with the lid off |
+| DC jack + / − | split block + / − | 16–18 AWG | the block (2 poles cut from a uxcell X3-2012 strip) sits in the **power channel**, the 32 mm gap between the Orin and the left wall, in front of the power button: screws up, wire tubes running front to back, one M3 screw through its centre mounting hole into a heat-set insert in the floor boss. Its screws can be tightened from above with the lid off |
 | Split block + / − | Orin carrier DC jack | 18 AWG, DC plug pigtail | always on: the power button controls the Jetson, not this feed |
 | Split block + | inline fuse holder (**4 A fast-blow**, 5 × 20 mm) | 16 AWG (the holder's own leads) | lies along the plug zone's back wall; change the fuse with the lid off |
 | Fuse holder | servo adapter DC terminal **+** | 16 AWG | up through the lid slot |
@@ -76,8 +76,8 @@ The carrier's **12-pin button header** (read the designator on the board's silks
 | 11 | LED + | 12 | LED − |
 
 - **The button:** the Geekworm T100 case's 19 mm momentary switch with an LED ring, in a 19.2 mm hole
-  in the tub's **left wall**, 34 mm up, 31 mm in front of the inside of the back wall (over the jack, behind
-  the terminal block). Its body runs across the power channel; it must stay **under 38 mm** behind
+  in the tub's **left wall**, 34 mm up, 31 mm in front of the inside of the back wall (behind the terminal
+  block). Its body runs across the power channel; it must stay **under 38 mm** behind
   the wall (connector included), or it reaches over the carrier's DC jack.
 - Its **power leads** (the "ON" pair, 9") go to **pins 1 and 2** of the 12-pin button header (on the
   carrier, just inside the back edge, between its DC jack and HDMI port; polarity doesn't matter).
@@ -144,4 +144,7 @@ both its power and its serial link to the Orin (it shows up as `303A:1001`).
   down the lid slot, leave the tub through the window, loop down and plug straight in from outside.
   This avoids bending plugs in the 26 mm plug zone, so straight plugs work.
 - **Orin power:** a **right-angle** barrel plug in the carrier's DC jack (the window doesn't expose it; a
-  straight plug is too long for the plug zone), its lead turned left into the power channel.
+  straight plug is too long for the plug zone), its lead pointing **up**, then over into the power channel.
+- **12 V jack:** on the back wall, left of the port window, 20 mm up. Inside, its body sits 4 mm left of the
+  carrier's DC jack, so don't point that right-angle plug's lead left; its wires run forward along the
+  power channel (under the button) to the terminal block.

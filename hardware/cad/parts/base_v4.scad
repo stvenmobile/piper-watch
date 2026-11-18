@@ -42,8 +42,8 @@ ad_c = [0, -10];  ad_hole = [37, 27.5];      // servo adapter: board centre (43 
 ad_so = [7.5, 5];                             // its standoffs: dia, height above the lid (M2.5 inserts, M2.5 x 6 screws)
 ad_pts = [for (sx = [-1, 1], sy = [-1, 1]) [ad_c[0] + sx * ad_hole[0] / 2, ad_c[1] + sy * ad_hole[1] / 2]];
 slot4 = [[-18, 18], [-44, -30]];              // lid cable slot (x range, y range): over the plug zone, inside the cylinder
-jack_y4 = -41;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall: on the flat (the corner's curve starts at y -46; at -47 the hole ran into it and came out with a flat edge)
-btn_y4 = -26;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): LEFT wall, in the power channel, above the jack's height and behind the terminal block; body < 38 mm (it then ends 1.8 mm over the carrier's DC jack)
+jack_x4 = -50;  jack_z4 = 20;  jack_d4 = 11.5;     // 12 V barrel jack: BACK wall, left of the port window, level with its middle; inside, its body (x -56..-44) stays 4 mm left of the carrier's DC jack (x -40..-29), whose right-angle plug should point its lead UP
+btn_y4 = -26;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): LEFT wall, in the power channel, behind the terminal block; body < 38 mm (it then ends 1.8 mm over the carrier's DC jack)
 ant_x4 = [6, 48];  ant_z4 = 43;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, 42 apart, low enough that the inner nut (9 mm) clears the ledge fillet (z 48+); the right one stays clear of the corner boss web and the wall's rounded corner outside
 port4 = [-28, 59.5, 10, 31, 4];               // back-wall port window (x from, x to, z bottom, z top, top-corner chamfer): every port at full height (HDMI, both USB-A stacks, Ethernet, USB-C); straight plugs go in from outside and the head's USB cables leave through it. Not the DC jack (right-angle plug inside)
 
@@ -95,8 +95,8 @@ module tub4() difference() {
     // back wall: port window (45 deg top corners)
     for (sx = [-1, 1], sy = [-1, 1]) translate([sx * (bw / 2 - pad4[2]), sy * (bd / 2 - pad4[2]), -1]) cylinder(d = pad4[0], h = pad4[1] + 1, $fn = 96);   // rubber feet pockets
     translate([0, -vy + 1, 0]) rotate([90, 0, 0]) linear_extrude(6) polygon([[port4[0], port4[2]], [port4[1], port4[2]], [port4[1], port4[3] - port4[4]], [port4[1] - port4[4], port4[3]], [port4[0] + port4[4], port4[3]], [port4[0], port4[3] - port4[4]]]);
-    // left wall: 12 V jack, inlet slots over the heatsink; right wall: inlet slots
-    translate([-bw / 2 - 1, jack_y4, jack_z4]) rotate([0, 90, 0]) cylinder(d = jack_d4, h = bwt + 2, $fn = 40);
+    // left wall: power button, inlet slots over the heatsink; right wall: inlet slots
+    translate([jack_x4, -bd / 2 - 1, jack_z4]) rotate([-90, 0, 0]) cylinder(d = jack_d4, h = bwt + 2, $fn = 40);
     translate([-bw / 2 - 1, btn_y4, btn_z4]) rotate([0, 90, 0]) cylinder(d = btn_d4, h = bwt + 2, $fn = 64);
     for (x = ant_x4) translate([x, -bd / 2 - 1, ant_z4]) rotate([-90, 0, 0]) cylinder(d = ant_d4 + cal_hole, h = bwt + 2, $fn = 32);   // antennas
     for (i = [0 : 5]) {
