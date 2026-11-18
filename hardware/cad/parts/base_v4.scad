@@ -42,7 +42,7 @@ ad_pts = [for (sx = [-1, 1], sy = [-1, 1]) [ad_c[0] + sx * ad_hole[0] / 2, ad_c[
 slot4 = [[-18, 18], [-44, -30]];              // lid cable slot (x range, y range): over the plug zone, inside the cylinder
 jack_y4 = -41;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall: on the flat (the corner's curve starts at y -46; at -47 the hole ran into it and came out with a flat edge)
 btn_x4 = -32;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): BACK wall, above the port window, 15 mm behind/left of the carrier's 12-pin button header; its body runs forward over the HDMI port
-ant_x4 = [-16, 38];  ant_z4 = 43;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, 54 apart, low enough that the inner nut (9 mm) clears the ledge fillet (z 48+); the right one stays clear of the corner boss web and the wall's rounded corner outside
+ant_x4 = [-4, 38];  ant_z4 = 43;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, the left one over the USB slot's centre, 42 apart, low enough that the inner nut (9 mm) clears the ledge fillet (z 48+); the right one stays clear of the corner boss web and the wall's rounded corner outside
 usb_slot4 = [-4, 27, 28, 12];          // USB cable slot (centre x, centre z, width, height), rounded ends: BACK wall, z 21-33 (3 mm over the port window), between the button and the antennas; the 3 USB-A plugs (camera, XIAO, servo adapter) pass out through it one at a time and plug into the Orin through the window
 
 // ---- wall / skirt ---------------------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ bolt_z = wall_top + 17;                        // the four radial bolts: 15 abov
 u_gap = 16;                                    // lid top -> servo's strap (room for the plugs + the adapter)
 z_pt = wall_top + u_gap + strap_t - z_case_bot;      // plate top (stand z = 0 here)
 lid_pts4 = [for (sx = [-1, 1], sy = [-1, 1]) [sx * (bw / 2 - 8), sy * (bd / 2 - 8)]];   // corner screws (lid)
-card_pts4 = [[bw / 2 - 7, 0], [-bw / 2 + 7, 0], [0, 52], [0, -52]];                   // cardinal screws (lid): countersunk; front/back under the skirt's edge, the side ones on the side walls
+card_pts4 = [[bw / 2 - 7, 0], [-bw / 2 + 7, 0], [0, 52], [20, -52]];                  // cardinal screws (lid): countersunk; front/back under the skirt's edge, the side ones on the side walls; the back one moved to x 20 so its boss web clears the left antenna's inner nut
 
 module v4rr(w, d, r, h) linear_extrude(h) offset(r = r) square([w - 2 * r, d - 2 * r], center = true);
 ef_ch = 1;                                     // 45 deg chamfer on the bed-side outer edge of the tub and the lid (no elephant's foot)

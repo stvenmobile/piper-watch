@@ -137,7 +137,7 @@ both its power and its serial link to the Orin (it shows up as `303A:1001`).
 - **Lid slot:** everything going down to the Orin, the hub cables and the servo adapter's USB, drops
   through the lid's slot into the plug zone; the USB-A ends then leave through the back wall's USB slot.
 - **Wi-Fi antennas:** two 6.5 mm holes in the back wall, 43 mm up
-  (centres 16 mm left and 38 mm right of the wall's centre line, 54 mm apart), just under the lid
+  (centres 4 mm left and 38 mm right of the wall's centre line, 42 mm apart; the left one sits over the USB slot's centre), just under the lid
   ledge's slope so the inner nuts sit flat on the wall; their pigtails run to the Wi-Fi card's U.FL sockets along the plug zone.
 - **USB slot (back wall):** the three USB-A ends (camera, XIAO, servo adapter) come down the lid
   slot, pass out of the tub through the 28 x 12 mm slot just above the port window, loop down outside
