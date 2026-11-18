@@ -25,25 +25,26 @@ tilt = 0;
 cut_v4 = false;                               // slice the view open on x > 0
 
 // ---- box --------------------------------------------------------------------------------------------------------------
-bw = 138;  bd = 120;  bwt = 3;  bfl = 4;  brr = 14;
-b_in = [bw - 2 * bwt, bd - 2 * bwt];          // 132 x 114 (widened 20 mm, 2026-11-17: 16 mm beside each side of the Orin for the 12 V jack and the split block)
+bw = 150;  bd = 120;  bwt = 3;  bfl = 4;  brr = 14;
+b_in = [bw - 2 * bwt, bd - 2 * bwt];          // 144 x 114 (2026-11-17: widened to 150 and the Orin shifted 10 right: a 32 mm power channel on its left, 12 mm on its right)
 ledge_w = 6;  lid_t4 = 6;  ledge_z = 54;      // 60 mm box: lid underside 54 leaves ~22 mm over the Orin's fan (to confirm)
 wall_top = ledge_z + lid_t4;                  // 60
 vx = b_in[0] / 2;  vy = b_in[1] / 2;          // inner half sizes 66 x 57
 
 // ---- Orin carrier, plug zone ------------------------------------------------------------------------------------------
-orin = [100, 80, 1.6];  orin_y = 11;          // centre y: back edge at -29, front edge at 51 (6 mm to the front wall)
+orin = [100, 80, 1.6];  orin_x = 10;  orin_y = 11;          // centre y: back edge at -29, front edge at 51 (6 mm to the front wall)
 orin_h = [86, 58];  so4 = 6;  fan4 = 20;
-orin_pts = [for (sx = [-1, 1], sy = [-1, 1]) [sx * orin_h[0] / 2, orin_y + sy * orin_h[1] / 2]];
-fuse_pts4 = [];                                // the old fuse-block bosses are gone (inline fuse now; their spot was where the carrier's DC plug goes)
+orin_pts = [for (sx = [-1, 1], sy = [-1, 1]) [orin_x + sx * orin_h[0] / 2, orin_y + sy * orin_h[1] / 2]];
+tb4 = [-57, -14];  tb_blk4 = [20, 19, 13];    // 12 V split terminal block (2 poles cut from a uxcell X3-2012 strip, tubes along Y, screws up): one boss + M3 insert under its centre hole, in the power channel; 11 mm in front of the jack for the wire ends
+fuse_pts4 = [tb4];                             // (bosses + M3 inserts, Orin standoff height)
 ad_c = [0, -10];  ad_hole = [37, 27.5];      // servo adapter: board centre (43 across x 33), hole pattern (2.5 mm holes, checked on a coupon)
 ad_so = [7.5, 5];                             // its standoffs: dia, height above the lid (M2.5 inserts, M2.5 x 6 screws)
 ad_pts = [for (sx = [-1, 1], sy = [-1, 1]) [ad_c[0] + sx * ad_hole[0] / 2, ad_c[1] + sy * ad_hole[1] / 2]];
 slot4 = [[-18, 18], [-44, -30]];              // lid cable slot (x range, y range): over the plug zone, inside the cylinder
 jack_y4 = -41;  jack_z4 = 18;  jack_d4 = 11.5;     // 12 V barrel jack, left wall: on the flat (the corner's curve starts at y -46; at -47 the hole ran into it and came out with a flat edge)
-btn_x4 = -32;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): BACK wall, above the port window, 15 mm behind/left of the carrier's 12-pin button header; its body runs forward over the HDMI port
-ant_x4 = [-4, 38];  ant_z4 = 43;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, the left one over the USB slot's centre, 42 apart, low enough that the inner nut (9 mm) clears the ledge fillet (z 48+); the right one stays clear of the corner boss web and the wall's rounded corner outside
-usb_slot4 = [-4, 27, 28, 12];          // USB cable slot (centre x, centre z, width, height), rounded ends: BACK wall, z 21-33 (3 mm over the port window), between the button and the antennas; the 3 USB-A plugs (camera, XIAO, servo adapter) pass out through it one at a time and plug into the Orin through the window
+btn_x4 = -22;   btn_z4 = 34;   btn_d4 = 19.2;      // power button (Geekworm T100 19 mm momentary, LED ring): BACK wall, above the port window, 15 mm behind/left of the carrier's 12-pin button header; its body runs forward over the HDMI port
+ant_x4 = [6, 48];  ant_z4 = 43;  ant_d4 = 6.5;   // Wi-Fi antenna bulkheads (SMA, 6.1 mm thread): BACK wall, the left one over the USB slot's centre, 42 apart, low enough that the inner nut (9 mm) clears the ledge fillet (z 48+); the right one stays clear of the corner boss web and the wall's rounded corner outside
+usb_slot4 = [6, 27, 28, 12];          // USB cable slot (centre x, centre z, width, height), rounded ends: BACK wall, z 21-33 (3 mm over the port window), between the button and the antennas; the 3 USB-A plugs (camera, XIAO, servo adapter) pass out through it one at a time and plug into the Orin through the window
 
 // ---- wall / skirt ---------------------------------------------------------------------------------------------------
 wall_ro = 48.5;  wall_t4 = 3;  wall_ri = wall_ro - wall_t4;  wall_h4 = 32;
@@ -53,7 +54,7 @@ bolt_z = wall_top + 17;                        // the four radial bolts: 15 abov
 u_gap = 16;                                    // lid top -> servo's strap (room for the plugs + the adapter)
 z_pt = wall_top + u_gap + strap_t - z_case_bot;      // plate top (stand z = 0 here)
 lid_pts4 = [for (sx = [-1, 1], sy = [-1, 1]) [sx * (bw / 2 - 8), sy * (bd / 2 - 8)]];   // corner screws (lid)
-card_pts4 = [[bw / 2 - 7, 0], [-bw / 2 + 7, 0], [0, 52], [20, -52]];                  // cardinal screws (lid): countersunk; front/back under the skirt's edge, the side ones on the side walls; the back one moved to x 20 so its boss web clears the left antenna's inner nut
+card_pts4 = [[bw / 2 - 7, 0], [-bw / 2 + 7, 0], [0, 52], [30, -52]];                  // cardinal screws (lid): countersunk; front/back under the skirt's edge, the side ones on the side walls; the back one moved to x 30 so its boss web clears the left antenna's inner nut
 
 module v4rr(w, d, r, h) linear_extrude(h) offset(r = r) square([w - 2 * r, d - 2 * r], center = true);
 ef_ch = 1;                                     // 45 deg chamfer on the bed-side outer edge of the tub and the lid (no elephant's foot)
@@ -85,13 +86,13 @@ module tub4() difference() {
         difference() { v4rr_ch(bw, bd, brr, wall_top); cavity4(); }
         bosses4();
         for (p = orin_pts) translate([p[0], p[1], bfl - 0.01]) cylinder(d = 8, h = so4 + 0.01, $fn = 40);
-        for (p = fuse_pts4) translate([p[0], p[1], bfl - 0.01]) cylinder(d = 7, h = so4 + 0.01, $fn = 40);
+        for (p = fuse_pts4) translate([p[0], p[1], bfl - 0.01]) cylinder(d = 8, h = so4 + 0.01, $fn = 40);
     }
     for (p = concat(lid_pts4, card_pts4)) translate([p[0], p[1], ledge_z - insert_m25[1]]) cylinder(d = insert_m25[0], h = insert_m25[1] + 1, $fn = 24);
     for (p = orin_pts) translate([p[0], p[1], bfl + so4 - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
     for (p = fuse_pts4) translate([p[0], p[1], bfl + so4 - insert_m3[1]]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
     // back wall: service window over the Orin's ports (trapezoid, 45 deg top corners)
-    translate([0, -vy + 1, 0]) rotate([90, 0, 0]) linear_extrude(6) polygon([[-47, 8], [47, 8], [37, 18], [-37, 18]]);
+    translate([orin_x, -vy + 1, 0]) rotate([90, 0, 0]) linear_extrude(6) polygon([[-47, 8], [47, 8], [37, 18], [-37, 18]]);
     // left wall: 12 V jack, inlet slots over the heatsink; right wall: inlet slots
     translate([-bw / 2 - 1, jack_y4, jack_z4]) rotate([0, 90, 0]) cylinder(d = jack_d4, h = bwt + 2, $fn = 40);
     translate([btn_x4, -bd / 2 - 1, btn_z4]) rotate([-90, 0, 0]) cylinder(d = btn_d4, h = bwt + 2, $fn = 64);
@@ -512,8 +513,9 @@ module turret_stack4() {                        // everything above the lid, sta
 // ==== ghosts + view ====================================================================================================
 module cutv(on = true) difference() { union() children(); if (on && cut_v4) translate([0, -300, -400]) cube([300, 600, 900]); }
 module ghosts4() {
-    color("#2e7d32") translate([-orin[0] / 2, orin_y - orin[1] / 2, bfl + so4]) cube(orin);
-    color("#9aa0a6") translate([-35, orin_y - 25 + 2, bfl + so4 + orin[2]]) cube([70, 50, fan4]);
+    color("#2e7d32") translate([orin_x - orin[0] / 2, orin_y - orin[1] / 2, bfl + so4]) cube(orin);
+    color("#9aa0a6") translate([orin_x - 35, orin_y - 25 + 2, bfl + so4 + orin[2]]) cube([70, 50, fan4]);
+    color("#e0e0e0", 0.7) translate([tb4[0] - tb_blk4[0] / 2, tb4[1] - tb_blk4[1] / 2, bfl + so4]) cube(tb_blk4);   // terminal block
     translate([ad_c[0], ad_c[1], wall_top + ad_so[1]]) {                                     // servo adapter on its standoffs
         color("#222") translate([-21.5, -16.5, 0]) cube([43, 33, 1.6]);                              // board
         color("#111") translate([4, -20.5, 1.6]) cube([12, 14, 11]);                                 // barrel jack (overhangs the back edge)

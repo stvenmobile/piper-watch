@@ -46,7 +46,7 @@ stepper any more.
 
 | From | To | Wire | Notes |
 | --- | --- | --- | --- |
-| DC jack + / − | split block + / − | 16–18 AWG | the block sits in the 16 mm gap between the Orin and the left wall, forward of the jack: a pair of lever nuts or a small 2-way terminal block, taped or tied down (the old fuse-block bosses are gone; they were where the carrier's DC plug goes) |
+| DC jack + / − | split block + / − | 16–18 AWG | the block (2 poles cut from a uxcell X3-2012 strip) sits in the **power channel**, the 32 mm gap between the Orin and the left wall, just in front of the jack: screws up, wire tubes running front to back, one M3 screw through its centre mounting hole into a heat-set insert in the floor boss. Its screws can be tightened from above with the lid off |
 | Split block + / − | Orin carrier DC jack | 18 AWG, DC plug pigtail | always on: the power button controls the Jetson, not this feed |
 | Split block + | inline fuse holder (**4 A fast-blow**, 5 × 20 mm) | 16 AWG (the holder's own leads) | lies along the plug zone's back wall; change the fuse with the lid off |
 | Fuse holder | servo adapter DC terminal **+** | 16 AWG | up through the lid slot |
@@ -137,7 +137,7 @@ both its power and its serial link to the Orin (it shows up as `303A:1001`).
 - **Lid slot:** everything going down to the Orin, the hub cables and the servo adapter's USB, drops
   through the lid's slot into the plug zone; the USB-A ends then leave through the back wall's USB slot.
 - **Wi-Fi antennas:** two 6.5 mm holes in the back wall, 43 mm up
-  (centres 4 mm left and 38 mm right of the wall's centre line, 42 mm apart; the left one sits over the USB slot's centre), just under the lid
+  (centres 6 mm and 48 mm right of the wall's centre line, 42 mm apart; the left one sits over the USB slot's centre), just under the lid
   ledge's slope so the inner nuts sit flat on the wall; their pigtails run to the Wi-Fi card's U.FL sockets along the plug zone.
 - **USB slot (back wall):** the three USB-A ends (camera, XIAO, servo adapter) come down the lid
   slot, pass out of the tub through the 28 x 12 mm slot just above the port window, loop down outside
