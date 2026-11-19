@@ -39,6 +39,7 @@
     <button data-s="lanes">A · Lanes</button>
     <button data-s="envelope">B · Envelope</button>
     <button data-s="spectrum">Current firmware (spectrum)</button>
+    <button data-s="analyzer">Analyzer mode</button>
   </div>
 
   <div class="row">
@@ -130,6 +131,28 @@
     </fieldset>
   </div>
 
+  <div class="row">
+    <fieldset id="f-az">
+      <legend>Analyzer mode (replaces the mouth)</legend>
+      <label>Source <select id="azSrc" style="width:100%"><option value="speech">Speech</option><option value="music">Music</option></select><output></output></label>
+      <label>Look <select id="azLook" style="width:100%"><option value="bars">Bars from the bottom</option><option value="segments">LED segments</option><option value="mirror">Mirrored about centre</option></select><output></output></label>
+      <label>Bands <input type="range" id="azBands" min="8" max="64" value="32"><output></output></label>
+      <label>Width % <input type="range" id="azWidth" min="40" max="100" value="94"><output></output></label>
+      <label>Gap px <input type="range" id="azGap" min="0" max="4" value="2"><output></output></label>
+      <label>Fall speed <input type="range" id="azFall" min="1" max="20" value="5"><output></output></label>
+      <label>Treble boost % <input type="range" id="azTilt" min="0" max="100" value="40"><output></output></label>
+    </fieldset>
+    <fieldset>
+      <legend>Analyzer extras</legend>
+      <label class="check"><input type="checkbox" id="azPeaks" checked> Peak caps</label>
+      <label>Peak hold ms <input type="range" id="azHold" min="0" max="1500" value="400"><output></output></label>
+      <label>Peak fall <input type="range" id="azPkFall" min="1" max="10" value="2"><output></output></label>
+      <label>Segment px <input type="range" id="azSeg" min="2" max="6" value="2"><output></output></label>
+      <label>Music tempo bpm <input type="range" id="azBpm" min="60" max="180" value="112"><output></output></label>
+      <label>Gain % <input type="range" id="azGain" min="30" max="250" value="110"><output></output></label>
+    </fieldset>
+  </div>
+
   <pre id="settings"></pre>
   <p class="sub"><button id="reset" style="background:var(--panel);color:var(--text);border:1px solid #3a3f45;border-radius:5px;padding:5px 10px;cursor:pointer">Reset all sliders to defaults</button></p>
 </main>
@@ -140,22 +163,22 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const img = ctx.createImageData(W, H);
 const $ = id => document.getElementById(id);
 const P = {};                                   // live parameter values
-let style = 'lanes', expr = 'normal';
-try { style = localStorage.getItem('mouth-style') || 'lanes'; } catch (e) {}
+let style = 'envelope', expr = 'normal';
+try { style = localStorage.getItem('mouth-style') || 'envelope'; } catch (e) {}
 
 // ---- controls ----------------------------------------------------------------------------------------------------------
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem('mouth-params') || '{}'); } catch (e) {}
-document.querySelectorAll('input').forEach(el => {
+document.querySelectorAll('input, select').forEach(el => {
   const out = el.parentElement.querySelector('output');
   if (el.id in saved && el.id !== 'speech') { if (el.type === 'checkbox') el.checked = saved[el.id]; else el.value = saved[el.id]; }
   const upd = () => {
-    P[el.id] = el.type === 'checkbox' ? el.checked : +el.value;
+    P[el.id] = el.type === 'checkbox' ? el.checked : el.tagName === 'SELECT' ? el.value : +el.value;
     try { localStorage.setItem('mouth-params', JSON.stringify(P)); } catch (e) {}
     if (out) out.textContent = el.value;
     showSettings();
   };
-  el.addEventListener('input', upd); upd();
+  el.addEventListener('input', upd); el.addEventListener('change', upd); upd();
 });
 document.querySelectorAll('#styles button').forEach(b => b.onclick = () => setStyle(b.dataset.s));
 function setStyle(s) {
@@ -164,6 +187,7 @@ function setStyle(s) {
   document.querySelectorAll('#styles button').forEach(b => b.classList.toggle('on', b.dataset.s === s));
   $('f-lanes').style.opacity = s === 'lanes' ? 1 : 0.45;
   $('f-env').style.opacity = s === 'envelope' ? 1 : 0.45;
+  $('f-az').style.opacity = s === 'analyzer' ? 1 : 0.6;
   showSettings();
 }
 function showSettings() {
@@ -426,6 +450,94 @@ function drawO(n, pitch, barW) {
   }
 }
 
+// ==== ANALYZER MODE ======================================================================================================
+// A separate display that replaces the human mouth: a classic spectrum analyser. Band 0 = lowest frequency, on the left.
+// It owns the whole screen; analyzerFrame() fills buf and the mouth code is skipped. The source is simulated for now
+// (speech formants, or a little music generator); on the robot the Orin would send real band levels instead.
+const AZ = { v: [], pk: [], pkAt: [], beatAt: 0, beat: 0, chord: [0.2, 0.35, 0.5], chordT: [0.2, 0.35, 0.5], noise: [] };
+
+function azSpeech(n, loud) {
+  for (let k = 0; k < 3; k++) sp.f[k] += (sp.ft[k] - sp.f[k]) * 0.18;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const x = i / (n - 1);
+    const s = sp.hiss ? 0.2 * gauss(x, 0.05, 0.12) + 0.9 * gauss(x, 0.8, 0.22)
+                      : 0.35 * (1 - x) + gauss(x, sp.f[0], 0.08) + 0.7 * gauss(x, sp.f[1], 0.1) + 0.4 * gauss(x, sp.f[2], 0.1);
+    out.push(loud * s);
+  }
+  return out;
+}
+
+// Music: kick drum on every beat (lows), snare on 2 and 4 (low-mids + a noise splash), hi-hats on the off-beats (highs),
+// and a sustained "chord" of three soft peaks that changes every bar.
+function azMusic(n, now) {
+  const beatMs = 60000 / P.azBpm;
+  if (now - AZ.beatAt >= beatMs) {
+    AZ.beatAt += beatMs;
+    if (now - AZ.beatAt > beatMs) AZ.beatAt = now;
+    AZ.beat = (AZ.beat + 1) % 4;
+    if (AZ.beat === 0) AZ.chordT = [0.12 + 0.12 * rnd(), 0.28 + 0.15 * rnd(), 0.45 + 0.15 * rnd()];
+  }
+  for (let k = 0; k < 3; k++) AZ.chord[k] += (AZ.chordT[k] - AZ.chord[k]) * 0.1;
+  const t = now - AZ.beatAt, half = beatMs / 2;
+  const kick = Math.exp(-t / 110);
+  const snare = (AZ.beat % 2 === 1) ? Math.exp(-t / 140) : 0;
+  const hat = t >= half ? Math.exp(-(t - half) / 45) : 0;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const x = i / (n - 1);
+    out.push(0.95 * kick * gauss(x, 0.04, 0.09)
+           + 0.75 * snare * (gauss(x, 0.25, 0.12) + 0.5 * gauss(x, 0.7, 0.3))
+           + 0.6 * hat * gauss(x, 0.88, 0.12)
+           + 0.45 * (gauss(x, AZ.chord[0], 0.05) + gauss(x, AZ.chord[1], 0.05) + 0.8 * gauss(x, AZ.chord[2], 0.05))
+           + 0.12);
+  }
+  return out;
+}
+
+function analyzerFrame(now, loudRaw) {
+  const n = P.azBands, AW = Math.round(W * P.azWidth / 100);
+  const pitch = Math.max(1, Math.floor(AW / n)), bw = Math.max(1, pitch - P.azGap), x0 = Math.floor((W - n * pitch) / 2);
+  const src = P.azSrc === 'music' ? azMusic(n, now) : azSpeech(n, loudRaw);
+  while (AZ.v.length < n) { AZ.v.push(0); AZ.pk.push(0); AZ.pkAt.push(0); AZ.noise.push(1); }
+  const fall = P.azFall / 100, g = P.azGain / 100;
+  for (let i = 0; i < n; i++) {
+    const x = i / (n - 1);
+    AZ.noise[i] += ((0.6 + 0.7 * rnd()) - AZ.noise[i]) * 0.5;               // band-to-band shimmer
+    const target = clamp(src[i] * AZ.noise[i] * g * (1 + P.azTilt / 100 * x), 0, 1);
+    AZ.v[i] = target > AZ.v[i] ? AZ.v[i] + (target - AZ.v[i]) * 0.75 : Math.max(target, AZ.v[i] - fall);
+    if (AZ.v[i] >= AZ.pk[i]) { AZ.pk[i] = AZ.v[i]; AZ.pkAt[i] = now; }
+    else if (now - AZ.pkAt[i] > P.azHold) AZ.pk[i] = Math.max(0, AZ.pk[i] - P.azPkFall / 200);
+  }
+  const look = P.azLook, seg = P.azSeg;
+  for (let i = 0; i < n; i++) {
+    const x = x0 + i * pitch;
+    if (look === 'mirror') {
+      const h = Math.round(AZ.v[i] * (MID - 3));
+      for (let xx = x; xx < x + bw; xx++) for (let y = MID - h; y <= MID + h; y++) px(xx, y);
+      if (P.azPeaks && AZ.pk[i] > 0.03) {
+        const ph = Math.round(AZ.pk[i] * (MID - 3)) + 2;
+        for (let xx = x; xx < x + bw; xx++) { px(xx, MID - ph); px(xx, MID + ph); }
+      }
+    } else {
+      const top = H - 4;                                                    // leave room for the peak caps
+      let h = Math.round(AZ.v[i] * top);
+      if (look === 'segments') h = Math.floor(h / (seg + 1)) * (seg + 1);   // whole LED blocks only
+      for (let xx = x; xx < x + bw; xx++) {
+        px(xx, H - 1);                                                      // a baseline dot so silent bands still show
+        for (let k = 0; k < h; k++) {
+          if (look === 'segments' && k % (seg + 1) === seg) continue;       // the dark line between blocks
+          px(xx, H - 1 - k);
+        }
+      }
+      if (P.azPeaks && AZ.pk[i] > 0.03) {
+        const py = H - 1 - Math.round(AZ.pk[i] * top) - 2;
+        for (let xx = x; xx < x + bw; xx++) px(xx, py);
+      }
+    }
+  }
+}
+
 let loudS = 0;
 function frame() {
   const now = performance.now();
@@ -450,7 +562,9 @@ function frame() {
   else v = spectrumFrame(now, loudRaw, n);
 
   buf.fill(0);
-  if (expr === 'surprise') {
+  if (style === 'analyzer') {
+    analyzerFrame(now, loudRaw);
+  } else if (expr === 'surprise') {
     drawO(n, pitch, barW);
   } else if (style === 'envelope' && P.solid) {
     const xs = Math.floor((W - MW) / 2);
@@ -461,7 +575,7 @@ function frame() {
   } else {
     for (let i = 0; i < n; i++) vbar(x0 + i * pitch, barW, Math.round(Math.min(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5) / n);
   }
-  if (expr === 'sleep') drawZzz(now, MW);
+  if (expr === 'sleep' && style !== 'analyzer') drawZzz(now, MW);
   for (let i = 0; i < W * H; i++) {
     const o = i * 4, on = buf[i];
     img.data[o] = on ? 235 : 0; img.data[o + 1] = on ? 240 : 0; img.data[o + 2] = on ? 255 : 0; img.data[o + 3] = 255;
