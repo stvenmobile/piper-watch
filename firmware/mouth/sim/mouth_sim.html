@@ -97,6 +97,8 @@
       <label>U roundness <input type="range" id="uRound" min="10" max="60" value="20"><output></output></label>
       <label>Bottom lip centre px <input type="range" id="botMax" min="1" max="16" value="10"><output></output></label>
       <label>Bottom fullness <input type="range" id="botFull" min="10" max="60" value="28"><output></output></label>
+      <label>Bottom centre round px <input type="range" id="botRound" min="0" max="5" value="2"><output></output></label>
+      <label>Round width % <input type="range" id="botRoundW" min="10" max="60" value="30"><output></output></label>
       <label>Lips while speaking % <input type="range" id="lipKeep" min="0" max="100" value="100"><output></output></label>
     </fieldset>
 
@@ -323,9 +325,13 @@ function restTop(pos) {
   const t = clamp((0.5 - d) / (0.5 - uw - tt), 0, 1);
   return body + P.towerUp * Math.pow(t, P.topCurve / 10);
 }
+// Bottom lip: full body (Bottom fullness) that tops out botRound px below the maximum, plus a narrow dome in the middle
+// that adds the last botRound px - so only the centre bars reach the full thickness and the middle reads as rounded.
 function restBot(pos) {
   const u = Math.abs(pos - 0.5) * 2;
-  return 1 + (P.botMax - 1) * (1 - Math.pow(u, P.botFull / 10));
+  const r = Math.min(P.botRound, P.botMax - 1), w = P.botRoundW / 100;
+  const body = 1 + (P.botMax - 1 - r) * (1 - Math.pow(u, P.botFull / 10));
+  return body + r * Math.pow(Math.max(0, 1 - u / w), 1.3);
 }
 
 // The mouth's centre line bends with the mood: corners up for a smile, down for a frown. Everything else (lips, gap,
