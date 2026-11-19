@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mouth Simulator</title>
+<style>
+  :root { --bg: #15171a; --panel: #1f2226; --text: #d8dde3; --muted: #8b939c; --accent: #6fb3ff; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  p.sub { margin: 0 0 14px; color: var(--muted); }
+  .screen { background: #000; border: 10px solid #2a2d31; border-radius: 6px; display: inline-block; max-width: 100%; box-sizing: border-box; }
+  canvas { display: block; width: 1024px; max-width: 100%; image-rendering: pixelated; }
+  .row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+  fieldset { background: var(--panel); border: 1px solid #2f3338; border-radius: 6px; padding: 10px 12px; flex: 1 1 300px; }
+  legend { color: var(--accent); padding: 0 4px; }
+  label { display: grid; grid-template-columns: 130px 1fr 44px; align-items: center; gap: 8px; margin: 5px 0; color: var(--muted); }
+  label.check { grid-template-columns: auto 1fr; }
+  input[type=range] { width: 100%; }
+  output { color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
+  .styles { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .styles button { background: var(--panel); color: var(--text); border: 1px solid #3a3f45; border-radius: 5px; padding: 6px 12px; cursor: pointer; }
+  .styles button.on { border-color: var(--accent); color: var(--accent); }
+  .meter { height: 6px; background: #2a2d31; border-radius: 3px; margin-top: 10px; max-width: 1024px; }
+  .meter div { height: 100%; width: 0; background: var(--accent); border-radius: 3px; }
+  pre { background: var(--panel); padding: 8px 10px; border-radius: 6px; color: var(--muted); white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Piper mouth simulator</h1>
+  <p class="sub">256 × 64 OLED, drawn pixel for pixel. Speech is simulated (syllables, words, pauses). The blue bar under the screen is the loudness.</p>
+
+  <div class="screen"><canvas id="c" width="256" height="64"></canvas></div>
+  <div class="meter"><div id="m"></div></div>
+
+  <div class="styles" id="styles">
+    <button data-s="lanes">A · Lanes</button>
+    <button data-s="envelope">B · Envelope</button>
+    <button data-s="spectrum">Current firmware (spectrum)</button>
+  </div>
+
+  <div class="row">
+    <fieldset>
+      <legend>Common</legend>
+      <label>Mouth width % <input type="range" id="width" min="40" max="100" value="80"><output></output></label>
+      <label>Lanes <input type="range" id="lanes" min="16" max="84" value="40"><output></output></label>
+      <label>Gap px <input type="range" id="gap" min="0" max="4" value="2"><output></output></label>
+      <label>Loudness follow % <input type="range" id="follow" min="5" max="100" value="25"><output></output></label>
+      <label>Height % <input type="range" id="height" min="30" max="150" value="100"><output></output></label>
+      <label class="check"><input type="checkbox" id="talk"> Talk non-stop (no sentence pauses)</label>
+      <label class="check"><input type="checkbox" id="speech" checked> Speech on (off = mouth closed)</label>
+    </fieldset>
+
+    <fieldset id="f-lanes">
+      <legend>A · Lanes</legend>
+      <label>Ramp speed <input type="range" id="ramp" min="1" max="30" value="8"><output></output></label>
+      <label>Ramp time ms <input type="range" id="rampMs" min="80" max="1200" value="350"><output></output></label>
+      <label>Jump chance % <input type="range" id="jump" min="0" max="40" value="8"><output></output></label>
+      <label>Neighbour pull % <input type="range" id="couple" min="0" max="90" value="30"><output></output></label>
+      <label>Centre bias % <input type="range" id="bias" min="0" max="100" value="40"><output></output></label>
+    </fieldset>
+
+    <fieldset id="f-env">
+      <legend>B · Envelope</legend>
+      <label>Bumps <input type="range" id="bumps" min="1" max="6" value="3"><output></output></label>
+      <label>Morph speed <input type="range" id="morph" min="1" max="30" value="7"><output></output></label>
+      <label>Reshape ms <input type="range" id="reshape" min="100" max="1500" value="450"><output></output></label>
+      <label>Bump width % <input type="range" id="bw" min="5" max="60" value="22"><output></output></label>
+      <label>Main drift % <input type="range" id="drift" min="0" max="30" value="7"><output></output></label>
+      <label>Big shift chance % <input type="range" id="excur" min="0" max="50" value="12"><output></output></label>
+      <label>Big shift size % <input type="range" id="excurSize" min="5" max="45" value="22"><output></output></label>
+      <label>Side bumps size % <input type="range" id="side" min="0" max="100" value="45"><output></output></label>
+      <label>Texture % <input type="range" id="tex" min="0" max="60" value="15"><output></output></label>
+      <label class="check"><input type="checkbox" id="mirror"> Mirror left / right</label>
+      <label class="check"><input type="checkbox" id="solid"> Solid fill (no lanes)</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Teeth (centre gap)</legend>
+      <label>Centre gap px <input type="range" id="cgap" min="0" max="24" value="6"><output></output></label>
+      <label>Gap follows lane % <input type="range" id="cgapLane" min="0" max="150" value="60"><output></output></label>
+      <label>Tooth min px <input type="range" id="toothMin" min="0" max="8" value="2"><output></output></label>
+      <label>Corners close % <input type="range" id="corner" min="1" max="50" value="25"><output></output></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Still mouth (lips)</legend>
+      <label class="check"><input type="checkbox" id="lips" checked> Lips on (replaces tooth min)</label>
+      <label>Top lip peak px <input type="range" id="topPeak" min="2" max="18" value="8"><output></output></label>
+      <label>Tower top width % <input type="range" id="towerTop" min="0" max="10" value="2"><output></output></label>
+      <label>Side curve <input type="range" id="topCurve" min="3" max="25" value="8"><output></output></label>
+      <label>U width % <input type="range" id="uW" min="1" max="12" value="5"><output></output></label>
+      <label>U depth % <input type="range" id="uDepth" min="0" max="100" value="75"><output></output></label>
+      <label>U roundness <input type="range" id="uRound" min="10" max="60" value="20"><output></output></label>
+      <label>Bottom lip centre px <input type="range" id="botMax" min="1" max="16" value="6"><output></output></label>
+      <label>Bottom fullness <input type="range" id="botFull" min="10" max="60" value="20"><output></output></label>
+      <label>Lips while speaking % <input type="range" id="lipKeep" min="0" max="100" value="100"><output></output></label>
+    </fieldset>
+  </div>
+
+  <pre id="settings"></pre>
+  <p class="sub"><button id="reset" style="background:var(--panel);color:var(--text);border:1px solid #3a3f45;border-radius:5px;padding:5px 10px;cursor:pointer">Reset all sliders to defaults</button></p>
+</main>
+
+<script>
+const W = 256, H = 64, MID = 32;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const img = ctx.createImageData(W, H);
+const $ = id => document.getElementById(id);
+const P = {};                                   // live parameter values
+let style = 'lanes';
+try { style = localStorage.getItem('mouth-style') || 'lanes'; } catch (e) {}
+
+// ---- controls ----------------------------------------------------------------------------------------------------------
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem('mouth-params') || '{}'); } catch (e) {}
+document.querySelectorAll('input').forEach(el => {
+  const out = el.parentElement.querySelector('output');
+  if (el.id in saved && el.id !== 'speech') { if (el.type === 'checkbox') el.checked = saved[el.id]; else el.value = saved[el.id]; }
+  const upd = () => {
+    P[el.id] = el.type === 'checkbox' ? el.checked : +el.value;
+    try { localStorage.setItem('mouth-params', JSON.stringify(P)); } catch (e) {}
+    if (out) out.textContent = el.value;
+    showSettings();
+  };
+  el.addEventListener('input', upd); upd();
+});
+document.querySelectorAll('#styles button').forEach(b => b.onclick = () => setStyle(b.dataset.s));
+function setStyle(s) {
+  style = s;
+  try { localStorage.setItem('mouth-style', s); } catch (e) {}
+  document.querySelectorAll('#styles button').forEach(b => b.classList.toggle('on', b.dataset.s === s));
+  $('f-lanes').style.opacity = s === 'lanes' ? 1 : 0.45;
+  $('f-env').style.opacity = s === 'envelope' ? 1 : 0.45;
+  showSettings();
+}
+function showSettings() {
+  $('settings').textContent = 'style ' + style + '   ' + Object.entries(P).map(([k, v]) => k + '=' + (v === true ? 1 : v === false ? 0 : v)).join('  ');
+}
+
+const rnd = () => Math.random();
+const gauss = (x, c, w) => { const d = (x - c) / w; return Math.exp(-d * d); };
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+// ---- simulated speech (same as the firmware) ---------------------------------------------------------------------------
+const sp = { segStart: 0, segLen: 0, pk: 0, voiced: false, hiss: false, syl: 0, word: 0, f: [0.1, 0.35, 0.6], ft: [0.1, 0.35, 0.6] };
+function spNext(now) {
+  sp.segStart = now;
+  if (sp.voiced) {
+    sp.voiced = false;
+    if (sp.syl > 0) sp.segLen = 25 + rnd() * 45;
+    else if (sp.word > 0) sp.segLen = 120 + rnd() * 260;
+    else sp.segLen = P.talk ? 250 + rnd() * 300 : (rnd() < 0.25 ? 2500 + rnd() * 2500 : 700 + rnd() * 800);
+    return;
+  }
+  if (sp.syl === 0) { if (sp.word === 0) sp.word = 3 + Math.floor(rnd() * 6); sp.word--; sp.syl = 1 + Math.floor(rnd() * 4); }
+  sp.syl--; sp.voiced = true;
+  sp.segLen = 120 + rnd() * 140;
+  sp.pk = rnd() < 0.15 ? 1 : 0.45 + 0.55 * rnd();
+  sp.hiss = rnd() < 0.2;
+  sp.ft = [0.04 + 0.16 * rnd(), 0.25 + 0.3 * rnd(), 0.55 + 0.3 * rnd()];
+}
+function spLevel(now) {
+  if (now - sp.segStart >= sp.segLen) spNext(now);
+  if (!sp.voiced || !P.speech) return 0;
+  const t = (now - sp.segStart) / sp.segLen;
+  return sp.pk * Math.sin(t * Math.PI) * (0.85 + 0.15 * Math.sin(t * 31));
+}
+
+// ---- A: lanes ----------------------------------------------------------------------------------------------------------
+// Every lane has its own little life: it ramps steadily towards a target, and when it gets there (or its time is up)
+// picks a new one - usually a ramp, sometimes an instant jump. Neighbours pull on each other a bit, so groups of lanes
+// can swell together while others go their own way. Lanes near the middle get a bigger share (centre bias).
+const lane = [];
+function laneInit(n) {
+  lane.length = 0;
+  for (let i = 0; i < n; i++) lane.push({ v: 0, t: 0, rate: 0.05, until: 0 });
+}
+function lanesFrame(now, loud, n) {
+  if (lane.length !== n) laneInit(n);
+  for (let i = 0; i < n; i++) {
+    const L = lane[i];
+    const x = n > 1 ? i / (n - 1) : 0.5;                       // 0..1 across
+    const share = 1 - P.bias / 100 * (1 - gauss(x, 0.5, 0.35));
+    if (now >= L.until || Math.abs(L.v - L.t) < 0.01) {
+      L.t = clamp((0.25 + 0.85 * rnd()) * share, 0, 1);
+      L.rate = (0.4 + 0.8 * rnd()) * P.ramp / 100;
+      L.until = now + P.rampMs * (0.5 + rnd());
+      if (rnd() < P.jump / 100) L.v = L.t * (0.6 + 0.6 * rnd());   // a sudden change
+    }
+    L.v += clamp(L.t - L.v, -L.rate, L.rate);
+  }
+  const k = P.couple / 100 * 0.5, v = lane.map(L => L.v);
+  for (let i = 0; i < n; i++) {
+    const nb = ((v[i - 1] ?? v[i]) + (v[i + 1] ?? v[i])) / 2;
+    lane[i].v = v[i] + (nb - v[i]) * k;
+  }
+  return lane.map(L => clamp(L.v * loud, 0, 1));
+}
+
+// ---- B: envelope -------------------------------------------------------------------------------------------------------
+// The outline of the mouth is a few soft bumps added together. Each bump slides to a new place, width and size every
+// few hundred ms and eases towards it, so the emphasis wanders: the middle, then the far left, then near right...
+// The lanes just fill the outline, with a little per-lane texture so it is not too smooth.
+const bump = [];
+// Bump 0 is the main opening: it lives near the centre, drifting a little left or right, and now and then makes a
+// bigger shift to one side before coming back. The other bumps are smaller, also kept roughly central, and shape the
+// rest of the outline.
+function bumpNew(b, now, idx) {
+  const pm = () => rnd() * 2 - 1;
+  if (idx === 0) {
+    b.ct = 0.5 + pm() * P.drift / 100;
+    if (rnd() < P.excur / 100) b.ct = 0.5 + Math.sign(pm()) * P.excurSize / 100 * (0.7 + 0.6 * rnd());
+    b.at = 0.8 + 0.2 * rnd();
+    b.wt = P.bw / 100 * (0.8 + 0.5 * rnd());
+  } else {
+    b.ct = 0.5 + pm() * 0.38;
+    b.at = P.side / 100 * (0.4 + 0.6 * rnd());
+    b.wt = P.bw / 100 * (0.6 + 0.8 * rnd());
+  }
+  b.until = now + P.reshape * (0.5 + rnd());
+}
+const tex = [];
+function envFrame(now, loud, n) {
+  while (bump.length < P.bumps) { const b = { c: 0.5, w: 0.2, a: 0 }; bumpNew(b, now, bump.length); bump.push(b); }
+  bump.length = P.bumps;
+  const m = P.morph / 100;
+  for (const [idx, b] of bump.entries()) {
+    if (now >= b.until) bumpNew(b, now, idx);
+    b.c += (b.ct - b.c) * m; b.w += (b.wt - b.w) * m; b.a += (b.at - b.a) * m;
+  }
+  const env = x => {
+    let s = 0.12;
+    for (const b of bump) s += b.a * gauss(x, b.c, b.w) + (P.mirror ? b.a * gauss(x, 1 - b.c, b.w) : 0);
+    return Math.min(1, s / (P.mirror ? 1.3 : 1));
+  };
+  while (tex.length < n) tex.push(1);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const x = n > 1 ? i / (n - 1) : 0.5;
+    tex[i] += ((1 - P.tex / 100 + P.tex / 100 * rnd()) - tex[i]) * 0.4;
+    out.push(clamp(env(x) * tex[i] * loud, 0, 1));
+  }
+  out.env = env;
+  return out;
+}
+
+// ---- current firmware: spectrum ----------------------------------------------------------------------------------------
+const disp = [];
+function spectrumFrame(now, loudRaw, n) {
+  for (let k = 0; k < 3; k++) sp.f[k] += (sp.ft[k] - sp.f[k]) * 0.18;
+  while (disp.length < n) disp.push(0);
+  const c = (n - 1) / 2, out = [];
+  for (let i = 0; i < n; i++) {
+    const x = c > 0 ? Math.abs(i - c) / c : 0;
+    let s = sp.hiss ? 0.25 * gauss(x, 0.05, 0.15) + 0.9 * gauss(x, 0.85, 0.25)
+                    : 0.3 * (1 - x) + gauss(x, sp.f[0], 0.07) + 0.75 * gauss(x, sp.f[1], 0.09) + 0.45 * gauss(x, sp.f[2], 0.1);
+    const t = clamp(loudRaw * s * (0.55 + 0.65 * rnd()), 0, 1);
+    disp[i] = t > disp[i] ? disp[i] + (t - disp[i]) * 0.7 : Math.max(t, disp[i] - 0.06);
+    out.push(disp[i]);
+  }
+  return out;
+}
+
+// ---- drawing -----------------------------------------------------------------------------------------------------------
+const buf = new Uint8Array(W * H);
+const px = (x, y) => { if (x >= 0 && x < W && y >= 0 && y < H) buf[y * W + x] = 1; };
+// A lane: with no centre gap, one bar symmetric about the centre line. With a gap, two "teeth" - one above, one below -
+// each growing away from the gap. toothMin keeps short stubs showing when the mouth is quiet.
+// The gap is per lane: a base gap plus a share of that lane's own height, so a lane that grows opens wider and one that
+// shrinks closes up. h is the lane's total half-height (gap half + tooth); it is split between the two. Towards both
+// ends the gap tapers to nothing (pos = 0..1 across the screen), so the corners of the mouth close on the centre line.
+let gapHalf = 0;
+function taper(pos) {
+  const t = clamp(Math.min(pos, 1 - pos) / (P.corner / 100), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+// ---- the still mouth (lips) ----
+// pos 0..1 across the mouth, u = 0 at the centre .. 1 at the corners.
+// Top lip: thickens towards the middle, with two small "towers" either side of a notch at the exact centre.
+// Bottom lip: thin at the corners, fullest at the centre, symmetric.
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+// Top lip profile, from the corner inwards: a smooth curve rising from 1 px at the corner to the tower peak (Side curve:
+// 10 = straight line, lower = bulging out, higher = staying thin then rising late), a flat tower top, then a U dipping
+// down to the exact centre (U roundness: 20 = parabola, higher = flatter bottom with steeper walls).
+function restTop(pos) {
+  const d = Math.abs(pos - 0.5);
+  const uw = P.uW / 100, tt = P.towerTop / 100, H = P.topPeak;
+  if (d <= uw) return H * (1 - P.uDepth / 100 * (1 - Math.pow(d / uw, P.uRound / 10)));
+  if (d <= uw + tt) return H;
+  const t = clamp((0.5 - d) / (0.5 - uw - tt), 0, 1);               // 0 at the corner .. 1 at the tower
+  return 1 + (H - 1) * Math.pow(t, P.topCurve / 10);
+}
+function restBot(pos) {
+  const u = Math.abs(pos - 0.5) * 2;
+  return 1 + (P.botMax - 1) * (1 - Math.pow(u, P.botFull / 10));
+}
+
+function vbar(x, w, h, pos) {
+  const t = taper(pos);
+  const e = P.cgapLane / 100 * h / (1 + P.cgapLane / 100);
+  const g = Math.round(t * (gapHalf + e));
+  let top, bot;
+  if (P.lips) {
+    const keep = 1 - (1 - P.lipKeep / 100) * Math.min(1, loudS * 3);   // lips can thin out while talking
+    const sp = Math.max(0, h - Math.round(t * e));
+    top = Math.round(sp + restTop(pos) * keep);
+    bot = Math.round(sp + restBot(pos) * keep);
+  } else {
+    top = bot = g <= 0 ? h : Math.max(h - Math.round(t * e), Math.round(t * P.toothMin));
+  }
+  top = Math.min(top, MID - 1 - g); bot = Math.min(bot, MID - 1 - g);
+  if (g <= 0) {                                                       // closed: one bar through the centre line
+    for (let xx = x; xx < x + w; xx++) for (let y = MID - top; y <= MID + bot; y++) px(xx, y);
+    return;
+  }
+  for (let xx = x; xx < x + w; xx++) {
+    for (let k = 0; k < top; k++) px(xx, MID - g - 1 - k);
+    for (let k = 0; k < bot; k++) px(xx, MID + g + k);
+  }
+}
+
+let loudS = 0;
+function frame() {
+  const now = performance.now();
+  const loudRaw = spLevel(now);
+  loudS += (loudRaw - loudS) * P.follow / 100;
+  $('m').style.width = (loudS * 100).toFixed(0) + '%';
+
+  const MW = Math.round(W * P.width / 100);                   // the mouth's width in pixels, centred
+  const n = P.lanes, pitch = Math.max(1, Math.floor(MW / n)), barW = Math.max(1, pitch - P.gap), x0 = Math.floor((W - n * pitch) / 2);
+  gapHalf = Math.round(P.cgap / 2);
+  const amp = (MID - 2 - gapHalf) * P.height / 100;
+  let v;
+  if (style === 'lanes') v = lanesFrame(now, loudS, n);
+  else if (style === 'envelope') v = envFrame(now, loudS, n);
+  else v = spectrumFrame(now, loudRaw, n);
+
+  buf.fill(0);
+  if (style === 'envelope' && P.solid) {
+    const xs = Math.floor((W - MW) / 2);
+    for (let x = 0; x < MW; x++) {
+      const h = Math.round(Math.min(MID - 1 - gapHalf, v.env(x / (MW - 1)) * loudS * amp));
+      vbar(xs + x, 1, h, x / (MW - 1));
+    }
+  } else {
+    for (let i = 0; i < n; i++) vbar(x0 + i * pitch, barW, Math.round(Math.min(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5) / n);
+  }
+  for (let i = 0; i < W * H; i++) {
+    const o = i * 4, on = buf[i];
+    img.data[o] = on ? 235 : 0; img.data[o + 1] = on ? 240 : 0; img.data[o + 2] = on ? 255 : 0; img.data[o + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+$('reset').onclick = () => { try { localStorage.removeItem('mouth-params'); } catch (e) {} location.reload(); };
+setStyle(style);
+setInterval(frame, 25);                          // 40 fps, like the firmware
+</script>
+</body>
+</html>
