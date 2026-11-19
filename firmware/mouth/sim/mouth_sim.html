@@ -44,9 +44,9 @@
   <div class="row">
     <fieldset>
       <legend>Common</legend>
-      <label>Mouth width % <input type="range" id="width" min="40" max="100" value="80"><output></output></label>
-      <label>Lanes <input type="range" id="lanes" min="16" max="84" value="40"><output></output></label>
-      <label>Gap px <input type="range" id="gap" min="0" max="4" value="2"><output></output></label>
+      <label>Mouth width % <input type="range" id="width" min="30" max="100" value="48"><output></output></label>
+      <label>Lanes <input type="range" id="lanes" min="16" max="128" value="40"><output></output></label>
+      <label>Gap px <input type="range" id="gap" min="0" max="4" value="1"><output></output></label>
       <label>Loudness follow % <input type="range" id="follow" min="5" max="100" value="25"><output></output></label>
       <label>Height % <input type="range" id="height" min="30" max="150" value="100"><output></output></label>
       <label class="check"><input type="checkbox" id="talk"> Talk non-stop (no sentence pauses)</label>
@@ -88,15 +88,43 @@
     <fieldset>
       <legend>Still mouth (lips)</legend>
       <label class="check"><input type="checkbox" id="lips" checked> Lips on (replaces tooth min)</label>
-      <label>Top lip peak px <input type="range" id="topPeak" min="2" max="18" value="8"><output></output></label>
+      <label>Top body = bottom % <input type="range" id="topBody" min="0" max="120" value="100"><output></output></label>
+      <label>Towers above body px <input type="range" id="towerUp" min="0" max="12" value="3"><output></output></label>
       <label>Tower top width % <input type="range" id="towerTop" min="0" max="10" value="2"><output></output></label>
       <label>Side curve <input type="range" id="topCurve" min="3" max="25" value="8"><output></output></label>
       <label>U width % <input type="range" id="uW" min="1" max="12" value="5"><output></output></label>
       <label>U depth % <input type="range" id="uDepth" min="0" max="100" value="75"><output></output></label>
       <label>U roundness <input type="range" id="uRound" min="10" max="60" value="20"><output></output></label>
-      <label>Bottom lip centre px <input type="range" id="botMax" min="1" max="16" value="6"><output></output></label>
-      <label>Bottom fullness <input type="range" id="botFull" min="10" max="60" value="20"><output></output></label>
+      <label>Bottom lip centre px <input type="range" id="botMax" min="1" max="16" value="10"><output></output></label>
+      <label>Bottom fullness <input type="range" id="botFull" min="10" max="60" value="28"><output></output></label>
       <label>Lips while speaking % <input type="range" id="lipKeep" min="0" max="100" value="100"><output></output></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Mood (smile / frown)</legend>
+      <div class="styles" id="exprs" style="margin:2px 0 8px">
+        <button data-e="normal">Normal</button><button data-e="sleep">Sleep</button><button data-e="surprise">Surprise</button>
+      </div>
+      <label>Mood <input type="range" id="mood" min="-100" max="100" value="0"><output></output></label>
+      <label>Bend px <input type="range" id="bendPx" min="0" max="20" value="9"><output></output></label>
+      <label>Bend curve <input type="range" id="bendCurve" min="10" max="40" value="22"><output></output></label>
+      <label>Smile thins lips % <input type="range" id="stretch" min="0" max="60" value="25"><output></output></label>
+      <label>Mood change speed <input type="range" id="moodSpeed" min="1" max="40" value="8"><output></output></label>
+      <label class="check"><input type="checkbox" id="moodCycle"> Cycle: neutral → smile → neutral → frown (3 s each)</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Sleep &amp; surprise</legend>
+      <label>Z size px <input type="range" id="zSize" min="5" max="16" value="11"><output></output></label>
+      <label>Z rise time ms <input type="range" id="zTime" min="1000" max="6000" value="3200"><output></output></label>
+      <label>Breathing % <input type="range" id="breath" min="0" max="30" value="8"><output></output></label>
+      <label>O width px <input type="range" id="oW" min="12" max="60" value="24"><output></output></label>
+      <label>O height px <input type="range" id="oH" min="12" max="31" value="26"><output></output></label>
+      <label>O lip px <input type="range" id="oLip" min="2" max="14" value="7"><output></output></label>
+      <label>O towers px <input type="range" id="oTower" min="0" max="8" value="3"><output></output></label>
+      <label>O tower bars <input type="range" id="oTowerBars" min="1" max="4" value="2"><output></output></label>
+      <label>O centre dip px <input type="range" id="oDip" min="0" max="6" value="2"><output></output></label>
+      <label>O pop speed <input type="range" id="oPop" min="5" max="60" value="22"><output></output></label>
     </fieldset>
   </div>
 
@@ -110,7 +138,7 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const img = ctx.createImageData(W, H);
 const $ = id => document.getElementById(id);
 const P = {};                                   // live parameter values
-let style = 'lanes';
+let style = 'lanes', expr = 'normal';
 try { style = localStorage.getItem('mouth-style') || 'lanes'; } catch (e) {}
 
 // ---- controls ----------------------------------------------------------------------------------------------------------
@@ -137,7 +165,7 @@ function setStyle(s) {
   showSettings();
 }
 function showSettings() {
-  $('settings').textContent = 'style ' + style + '   ' + Object.entries(P).map(([k, v]) => k + '=' + (v === true ? 1 : v === false ? 0 : v)).join('  ');
+  $('settings').textContent = 'style ' + style + '  expr ' + expr + '   ' + Object.entries(P).map(([k, v]) => k + '=' + (v === true ? 1 : v === false ? 0 : v)).join('  ');
 }
 
 const rnd = () => Math.random();
@@ -282,23 +310,33 @@ function taper(pos) {
 // Top lip: thickens towards the middle, with two small "towers" either side of a notch at the exact centre.
 // Bottom lip: thin at the corners, fullest at the centre, symmetric.
 const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
-// Top lip profile, from the corner inwards: a smooth curve rising from 1 px at the corner to the tower peak (Side curve:
-// 10 = straight line, lower = bulging out, higher = staying thin then rising late), a flat tower top, then a U dipping
-// down to the exact centre (U roundness: 20 = parabola, higher = flatter bottom with steeper walls).
+// Top lip = a body that mirrors the bottom lip's shape (Top body = bottom %), plus the towers rising above it near the
+// centre: they swell smoothly out of the body from the corners (Side curve: 10 = straight, lower = earlier/fuller,
+// higher = later/sharper), have a flat top (Tower top width), then a U dips down to the exact centre.
 function restTop(pos) {
   const d = Math.abs(pos - 0.5);
-  const uw = P.uW / 100, tt = P.towerTop / 100, H = P.topPeak;
-  if (d <= uw) return H * (1 - P.uDepth / 100 * (1 - Math.pow(d / uw, P.uRound / 10)));
-  if (d <= uw + tt) return H;
-  const t = clamp((0.5 - d) / (0.5 - uw - tt), 0, 1);               // 0 at the corner .. 1 at the tower
-  return 1 + (H - 1) * Math.pow(t, P.topCurve / 10);
+  const uw = P.uW / 100, tt = P.towerTop / 100;
+  const body = Math.max(1, P.topBody / 100 * restBot(pos));
+  const peak = body + P.towerUp;
+  if (d <= uw) return peak * (1 - P.uDepth / 100 * (1 - Math.pow(d / uw, P.uRound / 10)));
+  if (d <= uw + tt) return peak;
+  const t = clamp((0.5 - d) / (0.5 - uw - tt), 0, 1);
+  return body + P.towerUp * Math.pow(t, P.topCurve / 10);
 }
 function restBot(pos) {
   const u = Math.abs(pos - 0.5) * 2;
   return 1 + (P.botMax - 1) * (1 - Math.pow(u, P.botFull / 10));
 }
 
+// The mouth's centre line bends with the mood: corners up for a smile, down for a frown. Everything else (lips, gap,
+// speech) is drawn relative to this bent line. u = 0 at the middle .. 1 at the corners.
+let moodS = 0;
+function centreY(pos) {
+  const u = Math.abs(pos - 0.5) * 2;
+  return MID - Math.round(moodS / 100 * P.bendPx * Math.pow(u, P.bendCurve / 10));
+}
 function vbar(x, w, h, pos) {
+  const MID = centreY(pos);
   const t = taper(pos);
   const e = P.cgapLane / 100 * h / (1 + P.cgapLane / 100);
   const g = Math.round(t * (gapHalf + e));
@@ -306,12 +344,13 @@ function vbar(x, w, h, pos) {
   if (P.lips) {
     const keep = 1 - (1 - P.lipKeep / 100) * Math.min(1, loudS * 3);   // lips can thin out while talking
     const sp = Math.max(0, h - Math.round(t * e));
-    top = Math.round(sp + restTop(pos) * keep);
-    bot = Math.round(sp + restBot(pos) * keep);
+    const thin = 1 - P.stretch / 100 * Math.max(0, moodS) / 100;       // a smile stretches the lips thinner
+    top = Math.round(sp + restTop(pos) * keep * thin);
+    bot = Math.round(sp + restBot(pos) * keep * thin);
   } else {
     top = bot = g <= 0 ? h : Math.max(h - Math.round(t * e), Math.round(t * P.toothMin));
   }
-  top = Math.min(top, MID - 1 - g); bot = Math.min(bot, MID - 1 - g);
+  top = Math.min(top, 31 - g); bot = Math.min(bot, 31 - g);
   if (g <= 0) {                                                       // closed: one bar through the centre line
     for (let xx = x; xx < x + w; xx++) for (let y = MID - top; y <= MID + bot; y++) px(xx, y);
     return;
@@ -319,6 +358,65 @@ function vbar(x, w, h, pos) {
   for (let xx = x; xx < x + w; xx++) {
     for (let k = 0; k < top; k++) px(xx, MID - g - 1 - k);
     for (let k = 0; k < bot; k++) px(xx, MID + g + k);
+  }
+}
+
+// ---- expressions: sleep and surprise -----------------------------------------------------------------------------------
+let exprAt = 0, oScale = 0;
+document.querySelectorAll('#exprs button').forEach(b => b.onclick = () => setExpr(b.dataset.e));
+function setExpr(e) {
+  expr = e; exprAt = performance.now();
+  if (e === 'surprise') oScale = 0.25;
+  document.querySelectorAll('#exprs button').forEach(b => b.classList.toggle('on', b.dataset.e === e));
+  showSettings();
+}
+function line(x0, y0, x1, y1) {                        // Bresenham
+  x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
+  const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+  let err = dx + dy;
+  for (;;) { px(x0, y0); if (x0 === x1 && y0 === y1) break; const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; } }
+}
+function drawZ(cx, cy, s) {                            // a "Z" of size s centred on (cx, cy); 2 px strokes once big enough
+  const h = Math.round(s / 2), l = cx - h, r = cx + h, t = cy - h, b = cy + h, thick = s >= 9;
+  for (let k = 0; k <= (thick ? 1 : 0); k++) {
+    line(l, t + k, r, t + k); line(l, b - k, r, b - k); line(r - k, t, l - k, b);
+  }
+}
+// Three Z's rise from just above the mouth's right corner, each growing as it goes, staggered a third of a cycle apart.
+function drawZzz(now, MW) {
+  const xs = W / 2 + MW / 2 - 6, ys = MID - 9;
+  for (let k = 0; k < 3; k++) {
+    const p = ((now / P.zTime) + k / 3) % 1;
+    if (p > 0.9) continue;                              // gone before it reaches the top
+    const s = Math.round(P.zSize * (0.4 + 0.6 * p));
+    drawZ(xs + p * (W - xs - P.zSize / 2 - 2), ys - p * (ys - P.zSize / 2 - 1), s);
+  }
+}
+// The surprised "O": an elliptical ring drawn in the same lanes as the mouth. It pops open with a small overshoot and,
+// if Piper talks while surprised, swells a little with the loudness.
+function drawO(n, pitch, barW) {
+  const target = 1 + 0.12 * loudS;
+  oScale += (target - oScale) * P.oPop / 100 + (oScale < 1 ? 0.02 : 0);
+  const a = P.oW * Math.min(oScale, 1.15), b = Math.min(31, P.oH * Math.min(oScale, 1.1)), t = P.oLip;
+  const ai = Math.max(0, a - t), bi = Math.max(0, b - t);
+  const lanesO = Math.floor(2 * a / pitch) | 1, xL = Math.round(W / 2 - lanesO * pitch / 2);
+  const kc = (lanesO - 1) / 2;
+  for (let i = 0; i < lanesO; i++) {
+    const xc = xL + i * pitch + barW / 2, dx = xc - W / 2;
+    if (Math.abs(dx) >= a) continue;
+    const yo = Math.round(b * Math.sqrt(1 - (dx / a) ** 2));
+    const yi = Math.abs(dx) < ai ? Math.round(bi * Math.sqrt(1 - (dx / ai) ** 2)) : 0;
+    // upper lip: the centre bar dips, the next oTowerBars bars each side stand up as towers, one half-height bar after
+    const k = Math.abs(i - kc);
+    let up = 0;
+    if (k < 0.5) up = -P.oDip;
+    else if (k <= P.oTowerBars) up = P.oTower;
+    else if (k <= P.oTowerBars + 1) up = Math.round(P.oTower / 2);
+    const yoTop = Math.min(MID, yo + Math.round(up * Math.min(oScale, 1)));
+    for (let xx = xL + i * pitch; xx < xL + i * pitch + barW; xx++) {
+      for (let y = yi; y <= yoTop; y++) px(xx, MID - y);
+      for (let y = yi; y <= yo; y++) px(xx, MID + y);
+    }
   }
 }
 
@@ -331,6 +429,13 @@ function frame() {
 
   const MW = Math.round(W * P.width / 100);                   // the mouth's width in pixels, centred
   const n = P.lanes, pitch = Math.max(1, Math.floor(MW / n)), barW = Math.max(1, pitch - P.gap), x0 = Math.floor((W - n * pitch) / 2);
+  let moodT = P.mood;
+  if (expr === 'sleep') {                                             // closed, relaxed, slowly breathing
+    moodT = 0;
+    loudS = P.breath / 100 * (0.5 + 0.5 * Math.sin(now / 4000 * 2 * Math.PI));
+  }
+  if (P.moodCycle) moodT = [0, 100, 0, -100][Math.floor(now / 3000) % 4];
+  moodS += (moodT - moodS) * P.moodSpeed / 100;
   gapHalf = Math.round(P.cgap / 2);
   const amp = (MID - 2 - gapHalf) * P.height / 100;
   let v;
@@ -339,7 +444,9 @@ function frame() {
   else v = spectrumFrame(now, loudRaw, n);
 
   buf.fill(0);
-  if (style === 'envelope' && P.solid) {
+  if (expr === 'surprise') {
+    drawO(n, pitch, barW);
+  } else if (style === 'envelope' && P.solid) {
     const xs = Math.floor((W - MW) / 2);
     for (let x = 0; x < MW; x++) {
       const h = Math.round(Math.min(MID - 1 - gapHalf, v.env(x / (MW - 1)) * loudS * amp));
@@ -348,6 +455,7 @@ function frame() {
   } else {
     for (let i = 0; i < n; i++) vbar(x0 + i * pitch, barW, Math.round(Math.min(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5) / n);
   }
+  if (expr === 'sleep') drawZzz(now, MW);
   for (let i = 0; i < W * H; i++) {
     const o = i * 4, on = buf[i];
     img.data[o] = on ? 235 : 0; img.data[o + 1] = on ? 240 : 0; img.data[o + 2] = on ? 255 : 0; img.data[o + 3] = 255;
@@ -356,6 +464,7 @@ function frame() {
 }
 $('reset').onclick = () => { try { localStorage.removeItem('mouth-params'); } catch (e) {} location.reload(); };
 setStyle(style);
+setExpr('normal');
 setInterval(frame, 25);                          // 40 fps, like the firmware
 </script>
 </body>
