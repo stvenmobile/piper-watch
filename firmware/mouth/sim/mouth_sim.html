@@ -104,20 +104,21 @@
     </fieldset>
 
     <fieldset>
-      <legend>Mood (smile / frown)</legend>
-      <div class="styles" id="exprs" style="margin:2px 0 8px">
-        <button data-e="normal">Normal</button><button data-e="sleep">Sleep</button><button data-e="surprise">Surprise</button>
+      <legend>Mode (what the Orin sets)</legend>
+      <div class="styles" id="modes" style="margin:2px 0 8px">
+        <button data-m="neutral">Neutral</button><button data-m="talk">Talk</button><button data-m="happytalk">Happy talk</button>
+        <button data-m="smile">Smile</button><button data-m="frown">Frown</button><button data-m="surprise">Surprise</button>
+        <button data-m="sleep">Sleep</button><button data-m="happysleep">Happy sleep</button>
       </div>
-      <label>Mood <input type="range" id="mood" min="-100" max="100" value="0"><output></output></label>
       <label>Bend px <input type="range" id="bendPx" min="0" max="20" value="10"><output></output></label>
       <label>Bend curve <input type="range" id="bendCurve" min="10" max="40" value="22"><output></output></label>
       <label>Smile thins lips % <input type="range" id="stretch" min="0" max="60" value="25"><output></output></label>
       <label>Mood change speed <input type="range" id="moodSpeed" min="1" max="40" value="8"><output></output></label>
-      <label class="check"><input type="checkbox" id="moodCycle"> Cycle: neutral → smile → neutral → frown (3 s each)</label>
     </fieldset>
 
     <fieldset>
       <legend>Sleep &amp; surprise</legend>
+      <label>Happy sleep smile % <input type="range" id="sleepSmile" min="0" max="100" value="40"><output></output></label>
       <label>Z size px <input type="range" id="zSize" min="5" max="16" value="13"><output></output></label>
       <label>Z rise time ms <input type="range" id="zTime" min="1000" max="6000" value="3200"><output></output></label>
       <label>Breathing % <input type="range" id="breath" min="0" max="30" value="8"><output></output></label>
@@ -163,7 +164,7 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const img = ctx.createImageData(W, H);
 const $ = id => document.getElementById(id);
 const P = {};                                   // live parameter values
-let style = 'envelope', expr = 'normal';
+let style = 'envelope', expr = 'normal', mode = 'neutral';
 try { style = localStorage.getItem('mouth-style') || 'envelope'; } catch (e) {}
 
 // ---- controls ----------------------------------------------------------------------------------------------------------
@@ -191,7 +192,7 @@ function setStyle(s) {
   showSettings();
 }
 function showSettings() {
-  $('settings').textContent = 'style ' + style + '  expr ' + expr + '   ' + Object.entries(P).map(([k, v]) => k + '=' + (v === true ? 1 : v === false ? 0 : v)).join('  ');
+  $('settings').textContent = 'style ' + style + '  mode ' + mode + '   ' + Object.entries(P).map(([k, v]) => k + '=' + (v === true ? 1 : v === false ? 0 : v)).join('  ');
 }
 
 const rnd = () => Math.random();
@@ -391,15 +392,31 @@ function vbar(x, w, h, pos) {
   }
 }
 
-// ---- expressions: sleep and surprise -----------------------------------------------------------------------------------
+// ---- modes: the only thing the Orin sets. Speech moves the lips only in talk and happy talk. ---------------------------
+const MODES = {
+  neutral:    { mood: 0,    expr: 'normal',   talks: false },
+  talk:       { mood: 0,    expr: 'normal',   talks: true  },
+  happytalk:  { mood: 100,  expr: 'normal',   talks: true  },
+  smile:      { mood: 100,  expr: 'normal',   talks: false },
+  frown:      { mood: -100, expr: 'normal',   talks: false },
+  surprise:   { mood: 0,    expr: 'surprise', talks: false },
+  sleep:      { mood: 0,    expr: 'sleep',    talks: false },
+  happysleep: { mood: null, expr: 'sleep',    talks: false },   // mood = P.sleepSmile
+};
 let exprAt = 0, oScale = 0;
-document.querySelectorAll('#exprs button').forEach(b => b.onclick = () => setExpr(b.dataset.e));
+document.querySelectorAll('#modes button').forEach(b => b.onclick = () => setMode(b.dataset.m));
 function setExpr(e) {
-  expr = e; exprAt = performance.now();
-  if (e === 'surprise') oScale = 0.25;
-  document.querySelectorAll('#exprs button').forEach(b => b.classList.toggle('on', b.dataset.e === e));
+  if (e === 'surprise' && expr !== 'surprise') oScale = 0.25;
+  if (e !== expr) exprAt = performance.now();
+  expr = e;
+}
+function setMode(m) {
+  mode = m;
+  setExpr(MODES[m].expr);
+  document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
   showSettings();
 }
+function modeMood() { const md = MODES[mode]; return md.mood === null ? P.sleepSmile : md.mood; }
 function line(x0, y0, x1, y1) {                        // Bresenham
   x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
   const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
@@ -541,18 +558,17 @@ function analyzerFrame(now, loudRaw) {
 let loudS = 0;
 function frame() {
   const now = performance.now();
-  const loudRaw = spLevel(now);
+  const spoken = spLevel(now);                                        // the simulated speech always runs...
+  const loudRaw = (MODES[mode].talks || style === 'analyzer') ? spoken : 0;   // ...but only moves the lips in talk modes
   loudS += (loudRaw - loudS) * P.follow / 100;
   $('m').style.width = (loudS * 100).toFixed(0) + '%';
 
   const MW = Math.round(W * P.width / 100);                   // the mouth's width in pixels, centred
   const n = P.lanes, pitch = Math.max(1, Math.floor(MW / n)), barW = Math.max(1, pitch - P.gap), x0 = Math.floor((W - n * pitch) / 2);
-  let moodT = P.mood;
+  const moodT = modeMood();
   if (expr === 'sleep') {                                             // closed, relaxed, slowly breathing
-    moodT = 0;
     loudS = P.breath / 100 * (0.5 + 0.5 * Math.sin(now / 4000 * 2 * Math.PI));
   }
-  if (P.moodCycle) moodT = [0, 100, 0, -100][Math.floor(now / 3000) % 4];
   moodS += (moodT - moodS) * P.moodSpeed / 100;
   gapHalf = Math.round(P.cgap / 2);
   const amp = (MID - 2 - gapHalf) * P.height / 100;
@@ -584,7 +600,7 @@ function frame() {
 }
 $('reset').onclick = () => { try { localStorage.removeItem('mouth-params'); } catch (e) {} location.reload(); };
 setStyle(style);
-setExpr('normal');
+setMode('talk');
 setInterval(frame, 25);                          // 40 fps, like the firmware
 </script>
 </body>

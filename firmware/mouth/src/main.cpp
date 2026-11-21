@@ -1,7 +1,7 @@
 // Piper's mouth: the "envelope" human mouth on the 2.08" SH1122 256x64 OLED, driven by the XIAO ESP32-S3.
 //
-// A port of firmware/mouth/sim/mouth_sim.html with the locked settings from sim/mouth_locked.json (2026-11-18).
-// The mouth is 40 vertical lanes across the middle 48 % of the screen:
+// A port of firmware/mouth/sim/mouth_sim.html with the locked settings from sim/mouth_locked.json (2026-11-20).
+// The mouth is 46 vertical lanes across the middle 54 % of the screen:
 //   - still lips: a top lip with a Cupid's bow (two towers and a U at the centre) and a full, rounded bottom lip;
 //   - talking: an outline made of a few soft bumps that wander (the main opening stays near the centre) opens the lanes;
 //     each lane splits into an upper and lower "tooth" with a gap that grows with the lane; the corners close;
@@ -9,11 +9,17 @@
 //   - sleep: closed relaxed lips that breathe slowly, with three Z's rising from the right corner;
 //   - surprise: an oval "O" with towers on its upper lip that pops open (and swells if Piper talks).
 //
-// At power-up it runs a DEMO loop through all of that. Serial commands (one per line, from the Orin or the monitor):
+// The Orin sets one MODE; changes between modes blend smoothly. Speech loudness only moves the lips in talk modes:
+//   0 neutral     closed lips (the default)          4 frown        closed, corners down
+//   1 talk        neutral, lips move with speech     5 surprise     the "O"
+//   2 happytalk   smiling, lips move with speech     6 sleep        closed, breathing, rising Zzz
+//   3 smile       closed, corners up                 7 happysleep   sleep with a slight smile
+//
+// At power-up it runs a DEMO loop through the modes. Serial commands (one per line, from the Orin or the monitor):
+//   M<name|0..7> set the mode, e.g. "Mtalk" or "M1"; stops the demo
 //   L<0..255>    loudness for this frame (~30 Hz while speaking); stops the demo. No level for 1.5 s -> silent.
-//   E<-100..100> mood: -100 frown .. 0 neutral .. 100 smile; stops the demo
-//   X<0|1|2>     expression: 0 normal, 1 sleep, 2 surprise; stops the demo
-//   D1 / D0      demo on / off
+//                Ignored unless the mode is talk or happytalk.
+//   D1 / D0      demo on / off (D0 returns to neutral)
 //   C<0..255>    contrast (default 160)
 //   ?            print the current state
 #include <Arduino.h>
@@ -42,7 +48,7 @@ const float cgap = 7, cgapLane = 60, corner = 25;
 const float topBody = 100, towerUp = 3, towerTop = 2, topCurve = 8, uW = 5, uDepth = 40, uRound = 20;
 const float botMax = 12, botFull = 28, botRound = 2, botRoundW = 30, lipKeep = 100;
 const float bendPx = 10, bendCurve = 22, stretch = 25, moodSpeed = 8;
-const float zSize = 13, zTime = 3200, breath = 8;
+const float zSize = 13, zTime = 3200, breath = 8, sleepSmile = 40;
 const float oW = 44, oH = 23, oLip = 8, oTower = 3, oDip = 2, oPop = 22;
 const int oTowerBars = 2;
 }  // namespace K
@@ -268,50 +274,69 @@ static void setExpr(Expr e) {
   expr = e;
 }
 
-// ---- the demo: a loop through the moods and expressions, talking and still ------------------------------------------
-struct Scene { int mood; Expr ex; bool talk; uint32_t ms; const char *name; };
+// ---- modes: the only thing the Orin sets --------------------------------------------------------------------------------
+enum Mode : uint8_t { NEUTRAL_M, TALK, HAPPY_TALK, SMILE, FROWN, SURPRISE_M, SLEEP_M, HAPPY_SLEEP, NMODES };
+struct ModeDef { const char *name; float mood; Expr ex; bool talks; };
+static const ModeDef MODES[NMODES] = {
+  {"neutral",    0,             NORMAL,   false},
+  {"talk",       0,             NORMAL,   true},
+  {"happytalk",  100,           NORMAL,   true},
+  {"smile",      100,           NORMAL,   false},
+  {"frown",      -100,          NORMAL,   false},
+  {"surprise",   0,             SURPRISE, false},
+  {"sleep",      0,             SLEEP,    false},
+  {"happysleep", K::sleepSmile, SLEEP,    false},
+};
+static Mode mode = NEUTRAL_M;
+
+static void setMode(Mode m) {
+  mode = m;
+  moodT = MODES[m].mood;
+  setExpr(MODES[m].ex);
+}
+
+static int modeFromName(const char *s) {                   // "talk", "Happy Talk", "happy_talk", "3" ...
+  while (*s == ' ') s++;
+  if (*s >= '0' && *s <= '9') { int v = atoi(s); return v < NMODES ? v : -1; }
+  char buf[16]; int n = 0;
+  for (; *s && n < 15; s++) if (isalnum((unsigned char)*s)) buf[n++] = tolower((unsigned char)*s);
+  buf[n] = 0;
+  for (int i = 0; i < NMODES; i++) if (!strcmp(buf, MODES[i].name)) return i;
+  return -1;
+}
+
+// ---- the demo: a loop through the modes ---------------------------------------------------------------------------------
+struct Scene { Mode m; uint32_t ms; };
 static const Scene scenes[] = {
-  // the moods: talk, happy talk, smile, frown (still only - no frowning talk), surprise; then sleep
-  {0,    NORMAL,   true,  6000,  "talk"},
-  {0,    NORMAL,   false, 1500,  "neutral, still"},
-  {100,  NORMAL,   true,  6000,  "happy talk"},
-  {100,  NORMAL,   false, 3000,  "smile"},
-  {0,    NORMAL,   false, 1500,  "neutral, still"},
-  {-100, NORMAL,   false, 3500,  "frown"},
-  {0,    NORMAL,   false, 1500,  "neutral, still"},
-  {0,    SURPRISE, false, 2000,  "surprise"},
-  {0,    SURPRISE, true,  3000,  "surprise, talking"},
-  {0,    NORMAL,   true,  4000,  "talk"},
-  {0,    SLEEP,    false, 10000, "sleep"},
+  {TALK, 6000}, {NEUTRAL_M, 1500}, {HAPPY_TALK, 6000}, {SMILE, 3000}, {NEUTRAL_M, 1500}, {FROWN, 3500},
+  {NEUTRAL_M, 1500}, {SURPRISE_M, 3000}, {TALK, 4000}, {SLEEP_M, 8000}, {HAPPY_SLEEP, 8000}, {NEUTRAL_M, 1500},
 };
 static const int NSCENES = sizeof(scenes) / sizeof(scenes[0]);
 static int scene = -1;
 static uint32_t sceneAt = 0;
 
-static bool demoStep(uint32_t now) {                       // returns whether the current scene is talking
+static void demoStep(uint32_t now) {
   if (scene < 0 || now - sceneAt >= scenes[scene].ms) {
     scene = (scene + 1) % NSCENES;
     sceneAt = now;
-    moodT = scenes[scene].mood;
-    setExpr(scenes[scene].ex);
-    Serial.printf("mouth demo: %s\n", scenes[scene].name);
+    setMode(scenes[scene].m);
+    Serial.printf("mouth demo: %s\n", MODES[mode].name);
   }
-  return scenes[scene].talk;
 }
 
 // ---- one frame --------------------------------------------------------------------------------------------------------
 static void frame(uint32_t nowMs) {
   float now = nowMs;
-  bool talking = demo ? demoStep(nowMs) : false;
-  float loudRaw = speech.level(now, talking);
-  if (!demo) loudRaw = (nowMs - liveAt < 1500) ? liveLevel : 0;
+  if (demo) demoStep(nowMs);
+  const bool talks = MODES[mode].talks;                    // speech only moves the lips in talk / happytalk
+  float loudRaw = speech.level(now, demo && talks);        // simulated speech in the demo...
+  if (!demo) loudRaw = (talks && nowMs - liveAt < 1500) ? liveLevel : 0;   // ...the Orin's L levels when live
   loudS += (loudRaw - loudS) * K::follow / 100;
 
   const int MW = jround(W * K::width / 100);
   const int n = K::lanes, pitch = max(1, MW / n), barW = max(1, pitch - K::gap), x0 = (W - n * pitch) / 2;
   float mt = moodT;
-  if (expr == SLEEP) {                                     // closed, relaxed, slowly breathing
-    mt = 0;
+  if (expr == SLEEP) {                                     // closed, relaxed, slowly breathing (mood: sleep or happysleep)
     loudS = K::breath / 100 * (0.5f + 0.5f * sinf(now / 4000 * 2 * PI));
   }
   moodS += (mt - moodS) * K::moodSpeed / 100;
@@ -336,9 +361,7 @@ static char lineBuf[24];
 static int lineLen = 0;
 
 static void report() {
-  static const char *names[] = {"normal", "sleep", "surprise"};
-  Serial.printf("mouth: %s, mood %d, expression %s, contrast %d\n",
-                demo ? "DEMO" : "LIVE", (int)moodT, names[expr], contrast);
+  Serial.printf("mouth: %s, mode %d %s, contrast %d\n", demo ? "DEMO" : "LIVE", (int)mode, MODES[mode].name, contrast);
 }
 
 static void stopDemo() {
@@ -349,11 +372,15 @@ static void command(const char *s) {
   int v = atoi(s + 1);
   switch (s[0]) {
     case 'L': case 'l': liveLevel = constrain(v, 0, 255) / 255.0f; liveAt = millis(); stopDemo(); break;
-    case 'E': case 'e': moodT = constrain(v, -100, 100); stopDemo(); report(); break;
-    case 'X': case 'x': setExpr((Expr)constrain(v, 0, 2)); stopDemo(); report(); break;
+    case 'M': case 'm': {
+      int m = modeFromName(s + 1);
+      if (m < 0) { Serial.printf("mouth: unknown mode '%s'\n", s + 1); break; }
+      stopDemo(); setMode((Mode)m); report();
+      break;
+    }
     case 'D': case 'd':
       demo = v != 0;
-      if (demo) scene = -1; else { moodT = 0; setExpr(NORMAL); }
+      if (demo) scene = -1; else setMode(NEUTRAL_M);
       report();
       break;
     case 'C': case 'c': contrast = constrain(v, 0, 255); oled.setContrast(contrast); report(); break;
