@@ -20,6 +20,8 @@
 //   M<name|0..7> set the mode, e.g. "Mtalk" or "M1"; stops the demo
 //   L<0..255>    loudness for this frame (~30 Hz while speaking); stops the demo. No level for 1.5 s -> silent.
 //                Ignored unless the mode is talk or happytalk.
+//   I<name|0..3> status symbol, top right, independent of the mode:
+//                0 idle (none), 1 listening (+ / - alternating), 2 thinking (3 dots filling), 3 confused (??? bobbing)
 //   D1 / D0      demo on / off (D0 returns to neutral)
 //   C<0..255>    contrast (default 160)
 //   ?            print the current state
@@ -296,14 +298,65 @@ static void setMode(Mode m) {
   setExpr(MODES[m].ex);
 }
 
-static int modeFromName(const char *s) {                   // "talk", "Happy Talk", "happy_talk", "3" ...
+// A command argument -> its number: a digit string, or a name matched ignoring case, spaces and underscores
+// ("talk", "Happy Talk", "happy_talk", "3" ...). -1 if it matches nothing.
+static int lookup(const char *s, const char *const *names, int count) {
   while (*s == ' ') s++;
-  if (*s >= '0' && *s <= '9') { int v = atoi(s); return v < NMODES ? v : -1; }
+  if (*s >= '0' && *s <= '9') { int v = atoi(s); return v < count ? v : -1; }
   char buf[16]; int n = 0;
   for (; *s && n < 15; s++) if (isalnum((unsigned char)*s)) buf[n++] = tolower((unsigned char)*s);
   buf[n] = 0;
-  for (int i = 0; i < NMODES; i++) if (!strcmp(buf, MODES[i].name)) return i;
+  for (int i = 0; i < count; i++) if (!strcmp(buf, names[i])) return i;
   return -1;
+}
+
+static int modeFromName(const char *s) {
+  static const char *names[NMODES];
+  for (int i = 0; i < NMODES; i++) names[i] = MODES[i].name;
+  return lookup(s, names, NMODES);
+}
+
+// ---- status symbol, top right: what Piper is doing (independent of the mouth mode) -----------------------------------
+enum Ind : uint8_t { IND_IDLE, IND_LISTENING, IND_THINKING, IND_CONFUSED, NIND };
+static const char *const IND_NAMES[NIND] = {"idle", "listening", "thinking", "confused"};
+static Ind ind = IND_IDLE;
+static uint32_t indAt = 0;
+
+static void setInd(Ind i) {
+  if (i != ind) indAt = millis();                          // each symbol's animation starts from its beginning
+  ind = i;
+}
+
+static void fillRect(int x, int y, int w, int h) { for (int i = 0; i < w; i++) vrun(x + i, y, y + h - 1); }
+
+static void drawIndicator(uint32_t now) {
+  const uint32_t t = now - indAt;
+  const int R = W - 3, T = 2;                              // right edge and top of the symbol area
+  switch (ind) {
+    case IND_LISTENING: {                                  // a bold + and - taking turns, 11 x 11 px
+      const int s = 11, k = 3, x = R - s, y = T;
+      fillRect(x, y + (s - k) / 2, s, k);
+      if ((t / 500) % 2 == 0) fillRect(x + (s - k) / 2, y, k, s);
+      break;
+    }
+    case IND_THINKING: {                                   // three dots fill in one by one, then start over
+      const int d = 4, sp = 3, filled = (t / 400) % 4;
+      for (int i = 0; i < 3; i++) {
+        int x = R - (3 - i) * (d + sp) + sp, y = T + 4;
+        if (i < filled) fillRect(x, y, d, d);
+        else { fillRect(x, y, d, 1); fillRect(x, y + d - 1, d, 1); fillRect(x, y, 1, d); fillRect(x + d - 1, y, 1, d); }
+      }
+      break;
+    }
+    case IND_CONFUSED: {                                   // ??? - each one bobs up in turn
+      oled.setFont(u8g2_font_helvB10_tr);
+      const int w = oled.getStrWidth("?"), bob = (t / 300) % 3;
+      for (int i = 0; i < 3; i++)
+        oled.drawStr(R - (3 - i) * (w + 1) + 1, T + oled.getAscent() + 2 - (i == bob ? 2 : 0), "?");
+      break;
+    }
+    default: break;
+  }
 }
 
 // ---- the demo: a loop through the modes ---------------------------------------------------------------------------------
@@ -359,6 +412,7 @@ static void frame(uint32_t nowMs) {
       vbar(x0 + i * pitch, barW, jround(fminf(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5f) / n);
   }
   if (expr == SLEEP) drawZzz(now, MW);
+  drawIndicator(nowMs);
   oled.sendBuffer();
 }
 
@@ -367,7 +421,8 @@ static char lineBuf[24];
 static int lineLen = 0;
 
 static void report() {
-  Serial.printf("mouth: %s, mode %d %s, contrast %d\n", demo ? "DEMO" : "LIVE", (int)mode, MODES[mode].name, contrast);
+  Serial.printf("mouth: %s, mode %d %s, status %d %s, contrast %d\n", demo ? "DEMO" : "LIVE", (int)mode,
+                MODES[mode].name, (int)ind, IND_NAMES[ind], contrast);
 }
 
 static void stopDemo() {
@@ -378,6 +433,12 @@ static void command(const char *s) {
   int v = atoi(s + 1);
   switch (s[0]) {
     case 'L': case 'l': liveLevel = constrain(v, 0, 255) / 255.0f; liveAt = millis(); stopDemo(); break;
+    case 'I': case 'i': {
+      int i = lookup(s + 1, IND_NAMES, NIND);
+      if (i < 0) { Serial.printf("mouth: unknown status '%s'\n", s + 1); break; }
+      setInd((Ind)i); report();                            // doesn't stop the demo
+      break;
+    }
     case 'M': case 'm': {
       int m = modeFromName(s + 1);
       if (m < 0) { Serial.printf("mouth: unknown mode '%s'\n", s + 1); break; }

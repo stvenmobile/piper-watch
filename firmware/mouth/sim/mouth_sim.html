@@ -110,6 +110,11 @@
         <button data-m="smile">Smile</button><button data-m="frown">Frown</button><button data-m="surprise">Surprise</button>
         <button data-m="sleep">Sleep</button><button data-m="happysleep">Happy sleep</button>
       </div>
+      <div style="font-size:12px;opacity:.7;margin:2px 0">Status symbol (top right)</div>
+      <div class="styles" id="inds" style="margin:2px 0 8px">
+        <button data-i="idle">Idle</button><button data-i="listening">Listening</button>
+        <button data-i="thinking">Thinking</button><button data-i="confused">Confused</button>
+      </div>
       <label>Bend px <input type="range" id="bendPx" min="0" max="20" value="10"><output></output></label>
       <label>Bend curve <input type="range" id="bendCurve" min="10" max="40" value="22"><output></output></label>
       <label>Smile thins lips % <input type="range" id="stretch" min="0" max="60" value="25"><output></output></label>
@@ -426,6 +431,39 @@ function setMode(m) {
   document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
   showSettings();
 }
+// ---- status symbol, top right (independent of the mode) - same geometry as the firmware ------------------------------
+let ind = 'idle', indAt = 0;
+document.querySelectorAll('#inds button').forEach(b => b.onclick = () => setInd(b.dataset.i));
+function setInd(i) {
+  if (i !== ind) indAt = performance.now();
+  ind = i;
+  document.querySelectorAll('#inds button').forEach(b => b.classList.toggle('on', b.dataset.i === i));
+}
+const fillRect = (x, y, w, h) => { for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) px(x + i, y + j); };
+function drawIndicator(now) {
+  const t = now - indAt, Rx = W - 3, T = 2;
+  if (ind === 'listening') {                       // a bold + and - taking turns, 11 x 11 px
+    const sz = 11, k = 3, x = Rx - sz, y = T;
+    fillRect(x, y + (sz - k) / 2, sz, k);
+    if (Math.floor(t / 500) % 2 === 0) fillRect(x + (sz - k) / 2, y, k, sz);
+  } else if (ind === 'thinking') {                 // three dots fill in one by one, then start over
+    const d = 4, sp = 3, filled = Math.floor(t / 400) % 4;
+    for (let i = 0; i < 3; i++) {
+      const x = Rx - (3 - i) * (d + sp) + sp, y = T + 4;
+      if (i < filled) fillRect(x, y, d, d);
+      else { fillRect(x, y, d, 1); fillRect(x, y + d - 1, d, 1); fillRect(x, y, 1, d); fillRect(x + d - 1, y, 1, d); }
+    }
+  } else if (ind === 'confused') {                 // ??? - each one bobs up in turn (approximates U8g2 helvB10)
+    const bob = Math.floor(t / 300) % 3;
+    textCtx.clearRect(0, 0, W, H);
+    textCtx.font = 'bold 13px Helvetica, Arial, sans-serif';
+    textCtx.textAlign = 'left'; textCtx.textBaseline = 'alphabetic'; textCtx.fillStyle = '#fff';
+    const w = Math.round(textCtx.measureText('?').width);
+    for (let i = 0; i < 3; i++) textCtx.fillText('?', Rx - (3 - i) * (w + 1) + 1, T + 12 - (i === bob ? 2 : 0));
+    const dd = textCtx.getImageData(0, 0, W, H).data;
+    for (let i = 0; i < W * H; i++) if (dd[i * 4 + 3] > 128) buf[i] = 1;
+  }
+}
 function modeMood() { const md = MODES[mode]; return md.mood === null ? P.sleepSmile : md.mood; }
 function line(x0, y0, x1, y1) {                        // Bresenham
   x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
@@ -603,6 +641,7 @@ function frame() {
     for (let i = 0; i < n; i++) vbar(x0 + i * pitch, barW, Math.round(Math.min(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5) / n);
   }
   if (expr === 'sleep' && style !== 'analyzer') drawZzz(now, MW);
+  if (style !== 'analyzer') drawIndicator(now);
   for (let i = 0; i < W * H; i++) {
     const o = i * 4, on = buf[i];
     img.data[o] = on ? 235 : 0; img.data[o + 1] = on ? 240 : 0; img.data[o + 2] = on ? 255 : 0; img.data[o + 3] = 255;
@@ -612,6 +651,7 @@ function frame() {
 $('reset').onclick = () => { try { localStorage.removeItem('mouth-params'); } catch (e) {} location.reload(); };
 setStyle(style);
 setMode('talk');
+setInd('idle');
 setInterval(frame, 25);                          // 40 fps, like the firmware
 </script>
 </body>
