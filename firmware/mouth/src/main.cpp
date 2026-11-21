@@ -23,6 +23,12 @@
 static const int PIN_CS = D5, PIN_DC = D0, PIN_RST = D1;
 U8G2_SH1122_256X64_F_4W_HW_SPI oled(U8G2_R0, PIN_CS, PIN_DC, PIN_RST);
 
+#if defined(ESP32)
+static const uint32_t OLED_SPI_HZ = 20000000;
+#else
+static const uint32_t OLED_SPI_HZ = 4000000;              // XIAO MG24: slower SPI (20 MHz garbled the display)
+#endif
+
 static const int W = 256, H = 64, MID = H / 2;
 static const uint32_t FRAME_MS = 25;                       // 40 frames per second, as in the simulator
 
@@ -371,7 +377,7 @@ void setup() {
   Serial.begin(115200);
   seedRng();
   SPI.begin();
-  oled.setBusClock(20000000);
+  oled.setBusClock(OLED_SPI_HZ);
   oled.begin();
   oled.setContrast(contrast);
   for (int i = 0; i < K::lanes; i++) texv[i] = 1;
