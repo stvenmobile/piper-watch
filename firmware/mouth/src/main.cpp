@@ -34,16 +34,16 @@ static const uint32_t FRAME_MS = 25;                       // 40 frames per seco
 
 // ---- locked settings (sim/mouth_locked.json) --------------------------------------------------------------------------
 namespace K {
-const float width = 48, follow = 25, height = 100;
-const int lanes = 40, gap = 1;
+const float width = 54, follow = 25, height = 115;            // 2026-11-20: whole mouth +15 %
+const int lanes = 46, gap = 1;
 const int bumps = 3;
 const float morph = 7, reshape = 450, bw = 22, drift = 7, excur = 12, excurSize = 22, side = 45, tex = 15;
-const float cgap = 6, cgapLane = 60, corner = 25;
+const float cgap = 7, cgapLane = 60, corner = 25;
 const float topBody = 100, towerUp = 3, towerTop = 2, topCurve = 8, uW = 5, uDepth = 40, uRound = 20;
-const float botMax = 10, botFull = 28, botRound = 2, botRoundW = 30, lipKeep = 100;
-const float bendPx = 9, bendCurve = 22, stretch = 25, moodSpeed = 8;
-const float zSize = 11, zTime = 3200, breath = 8;
-const float oW = 38, oH = 20, oLip = 7, oTower = 3, oDip = 2, oPop = 22;
+const float botMax = 12, botFull = 28, botRound = 2, botRoundW = 30, lipKeep = 100;
+const float bendPx = 10, bendCurve = 22, stretch = 25, moodSpeed = 8;
+const float zSize = 13, zTime = 3200, breath = 8;
+const float oW = 44, oH = 23, oLip = 8, oTower = 3, oDip = 2, oPop = 22;
 const int oTowerBars = 2;
 }  // namespace K
 
@@ -271,16 +271,17 @@ static void setExpr(Expr e) {
 // ---- the demo: a loop through the moods and expressions, talking and still ------------------------------------------
 struct Scene { int mood; Expr ex; bool talk; uint32_t ms; const char *name; };
 static const Scene scenes[] = {
-  {0,    NORMAL,   true,  6000,  "neutral, talking"},
+  // the moods: talk, happy talk, smile, frown (still only - no frowning talk), surprise; then sleep
+  {0,    NORMAL,   true,  6000,  "talk"},
   {0,    NORMAL,   false, 1500,  "neutral, still"},
-  {100,  NORMAL,   true,  6000,  "smile, talking"},
-  {100,  NORMAL,   false, 2500,  "smile, still"},
+  {100,  NORMAL,   true,  6000,  "happy talk"},
+  {100,  NORMAL,   false, 3000,  "smile"},
   {0,    NORMAL,   false, 1500,  "neutral, still"},
-  {-100, NORMAL,   true,  5000,  "frown, talking"},
-  {-100, NORMAL,   false, 2500,  "frown, still"},
+  {-100, NORMAL,   false, 3500,  "frown"},
+  {0,    NORMAL,   false, 1500,  "neutral, still"},
   {0,    SURPRISE, false, 2000,  "surprise"},
   {0,    SURPRISE, true,  3000,  "surprise, talking"},
-  {0,    NORMAL,   true,  4000,  "neutral, talking"},
+  {0,    NORMAL,   true,  4000,  "talk"},
   {0,    SLEEP,    false, 10000, "sleep"},
 };
 static const int NSCENES = sizeof(scenes) / sizeof(scenes[0]);
