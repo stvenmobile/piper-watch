@@ -18,8 +18,8 @@
 // At power-up it is LIVE in neutral, waiting for the Orin; "D1" runs a DEMO loop through the modes. Serial commands
 // (one per line, from the Orin or the monitor):
 //   M<name|0..7> set the mode, e.g. "Mtalk" or "M1"; stops the demo
-//   L<0..255>    loudness for this frame (~30 Hz while speaking); stops the demo. No level for 1.5 s -> silent.
-//                Ignored unless the mode is talk or happytalk.
+//   L<0..255>    loudness for this frame (~30 Hz while speaking); stops the demo. Ignored unless the mode is talk
+//                or happytalk. Optional: in a talk mode with no L for 1.5 s the mouth simulates speech itself.
 //   I<name|0..3> status symbol, top right, independent of the mode:
 //                0 idle (none), 1 listening (+ / - alternating), 2 thinking (3 dots filling), 3 confused (??? bobbing)
 //   D1 / D0      demo on / off (D0 returns to neutral)
@@ -383,8 +383,10 @@ static void frame(uint32_t nowMs) {
   float now = nowMs;
   if (demo) demoStep(nowMs);
   const bool talks = MODES[mode].talks;                    // speech only moves the lips in talk / happytalk
-  float loudRaw = speech.level(now, demo && talks);        // simulated speech in the demo...
-  if (!demo) loudRaw = (talks && nowMs - liveAt < 1500) ? liveLevel : 0;   // ...the Orin's L levels when live
+  // In talk modes the lips follow the Orin's L levels while they keep coming, and otherwise simulated speech.
+  const bool live = !demo && liveAt && nowMs - liveAt < 1500;
+  float loudRaw = speech.level(now, talks && !live);
+  if (live) loudRaw = talks ? liveLevel : 0;
   loudS += (loudRaw - loudS) * K::follow / 100;
 
   const int MW = jround(W * K::width / 100);
