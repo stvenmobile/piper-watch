@@ -14,10 +14,13 @@
 //   1 talk        neutral, lips move with speech     5 surprise     the "O"
 //   2 happytalk   smiling, lips move with speech     6 sleep        closed, breathing, rising Zzz
 //   3 smile       closed, corners up                 7 happysleep   sleep with a slight smile
+//   8 research    the words "Research in progress..." instead of a mouth (while Piper pauses her research)
+//   9 blank       nothing - the screen is dark (Piper idle; protects the OLED from burn-in)
+// With no command at all for 5 minutes (outside the demo) it goes blank by itself, for the same reason.
 //
 // At power-up it is LIVE in neutral, waiting for the Orin; "D1" runs a DEMO loop through the modes. Serial commands
 // (one per line, from the Orin or the monitor):
-//   M<name|0..7> set the mode, e.g. "Mtalk" or "M1"; stops the demo
+//   M<name|0..9> set the mode, e.g. "Mtalk" or "M1"; stops the demo
 //   L<0..255>    loudness for this frame (~30 Hz while speaking); stops the demo. Ignored unless the mode is talk
 //                or happytalk. Optional: in a talk mode with no L for 1.5 s the mouth simulates speech itself.
 //   I<name|0..3> status symbol, top right, independent of the mode:
@@ -57,7 +60,7 @@ const float oW = 44, oH = 23, oLip = 8, oTower = 3, oDip = 2, oPop = 22;
 const int oTowerBars = 2;
 }  // namespace K
 
-enum Expr : uint8_t { NORMAL = 0, SLEEP = 1, SURPRISE = 2 };
+enum Expr : uint8_t { NORMAL = 0, SLEEP = 1, SURPRISE = 2, RESEARCH = 3, BLANK = 4 };
 
 // ---- state ------------------------------------------------------------------------------------------------------------
 static bool demo = false;                                  // live at power-up; D1 starts the demo
@@ -279,7 +282,8 @@ static void setExpr(Expr e) {
 }
 
 // ---- modes: the only thing the Orin sets --------------------------------------------------------------------------------
-enum Mode : uint8_t { NEUTRAL_M, TALK, HAPPY_TALK, SMILE, FROWN, SURPRISE_M, SLEEP_M, HAPPY_SLEEP, NMODES };
+enum Mode : uint8_t { NEUTRAL_M, TALK, HAPPY_TALK, SMILE, FROWN, SURPRISE_M, SLEEP_M, HAPPY_SLEEP, RESEARCH_M,
+                      BLANK_M, NMODES };
 struct ModeDef { const char *name; float mood; Expr ex; bool talks; };
 static const ModeDef MODES[NMODES] = {
   {"neutral",    0,             NORMAL,   false},
@@ -290,6 +294,8 @@ static const ModeDef MODES[NMODES] = {
   {"surprise",   0,             SURPRISE, false},
   {"sleep",      0,             SLEEP,    false},
   {"happysleep", K::sleepSmile, SLEEP,    false},
+  {"research",   0,             RESEARCH, false},
+  {"blank",      0,             BLANK,    false},
 };
 static Mode mode = NEUTRAL_M;
 
@@ -403,6 +409,17 @@ static void frame(uint32_t nowMs) {
   envFrame(now, loudS, v);
 
   oled.clearBuffer();
+  if (expr == BLANK) {                                     // dark screen: nothing drawn, no symbol
+    oled.sendBuffer();
+    return;
+  }
+  if (expr == RESEARCH) {                                  // the words instead of a mouth, no symbol
+    oled.setFont(u8g2_font_helvB12_tr);
+    const char *t = "Research in progress...";
+    oled.drawStr((W - oled.getStrWidth(t)) / 2, MID + oled.getAscent() / 2, t);
+    oled.sendBuffer();
+    return;
+  }
   if (expr == SURPRISE) {
     drawO(pitch, barW);
     if (oScale > 0.85f) {                                  // "Oh!" in the middle once the O has popped open
@@ -432,7 +449,11 @@ static void stopDemo() {
   if (demo) { demo = false; Serial.println("mouth: LIVE"); }
 }
 
+static uint32_t lastCmdAt = 0;                             // for the 5-minute auto-blank
+static const uint32_t AUTO_BLANK_MS = 5UL * 60 * 1000;
+
 static void command(const char *s) {
+  lastCmdAt = millis();
   int v = atoi(s + 1);
   switch (s[0]) {
     case 'L': case 'l': liveLevel = constrain(v, 0, 255) / 255.0f; liveAt = millis(); stopDemo(); break;
@@ -492,5 +513,9 @@ void loop() {
   uint32_t now = millis();
   if ((int32_t)(now - next) < 0) return;
   next = now + FRAME_MS;
+  if (!demo && mode != BLANK_M && now - lastCmdAt > AUTO_BLANK_MS) {   // nobody driving it: go dark
+    setMode(BLANK_M);
+    Serial.println("mouth: no commands for 5 minutes - blank");
+  }
   frame(now);
 }

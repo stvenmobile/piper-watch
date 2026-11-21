@@ -109,6 +109,7 @@
         <button data-m="neutral">Neutral</button><button data-m="talk">Talk</button><button data-m="happytalk">Happy talk</button>
         <button data-m="smile">Smile</button><button data-m="frown">Frown</button><button data-m="surprise">Surprise</button>
         <button data-m="sleep">Sleep</button><button data-m="happysleep">Happy sleep</button>
+        <button data-m="research">Research msg</button><button data-m="blank">Blank</button>
       </div>
       <div style="font-size:12px;opacity:.7;margin:2px 0">Status symbol (top right)</div>
       <div class="styles" id="inds" style="margin:2px 0 8px">
@@ -329,9 +330,9 @@ const buf = new Uint8Array(W * H);
 const px = (x, y) => { if (x >= 0 && x < W && y >= 0 && y < H) buf[y * W + x] = 1; };
 const textCanvas = document.createElement('canvas'); textCanvas.width = W; textCanvas.height = H;
 const textCtx = textCanvas.getContext('2d');
-function drawText(str) {                         // approximates the firmware's U8g2 helvB14 font, centred
+function drawText(str, font = 'bold 19px Helvetica, Arial, sans-serif') {   // approximates U8g2 helvB14 / B12, centred
   textCtx.clearRect(0, 0, W, H);
-  textCtx.font = 'bold 19px Helvetica, Arial, sans-serif';
+  textCtx.font = font;
   textCtx.textAlign = 'center'; textCtx.textBaseline = 'middle'; textCtx.fillStyle = '#fff';
   textCtx.fillText(str, W / 2, MID + 1);
   const d = textCtx.getImageData(0, 0, W, H).data;
@@ -417,6 +418,8 @@ const MODES = {
   surprise:   { mood: 0,    expr: 'surprise', talks: false },
   sleep:      { mood: 0,    expr: 'sleep',    talks: false },
   happysleep: { mood: null, expr: 'sleep',    talks: false },   // mood = P.sleepSmile
+  research:   { mood: 0,    expr: 'research', talks: false },   // "Research in progress..." instead of a mouth
+  blank:      { mood: 0,    expr: 'blank',    talks: false },   // dark screen
 };
 let exprAt = 0, oScale = 0;
 document.querySelectorAll('#modes button').forEach(b => b.onclick = () => setMode(b.dataset.m));
@@ -629,6 +632,10 @@ function frame() {
   buf.fill(0);
   if (style === 'analyzer') {
     analyzerFrame(now, loudRaw);
+  } else if (expr === 'blank') {
+    // nothing
+  } else if (expr === 'research') {
+    drawText('Research in progress...', 'bold 16px Helvetica, Arial, sans-serif');
   } else if (expr === 'surprise') {
     drawO(n, pitch, barW);
     if (oScale > 0.85) drawText('Oh!');                              // in the middle once the O has popped open
@@ -642,7 +649,7 @@ function frame() {
     for (let i = 0; i < n; i++) vbar(x0 + i * pitch, barW, Math.round(Math.min(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5) / n);
   }
   if (expr === 'sleep' && style !== 'analyzer') drawZzz(now, MW);
-  if (style !== 'analyzer' && expr !== 'sleep') drawIndicator(now);   // the Zzz own that corner while asleep
+  if (style !== 'analyzer' && !['sleep', 'research', 'blank'].includes(expr)) drawIndicator(now);   // the Zzz own that corner while asleep
   for (let i = 0; i < W * H; i++) {
     const o = i * 4, on = buf[i];
     img.data[o] = on ? 235 : 0; img.data[o + 1] = on ? 240 : 0; img.data[o + 2] = on ? 255 : 0; img.data[o + 3] = 255;
