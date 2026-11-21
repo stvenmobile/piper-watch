@@ -100,6 +100,11 @@ Source: `34_turret_to_lid_exploded.scad` (in this folder).*
 1. **Pillow block** onto the skirt's plate: skirt upside down, block on the top face, 4 x M4 into the plate's inserts.
 2. **Pan servo** up into the sleeve from below: shaft up on the bearing's axis, the body running toward the **front** (the sleeve's open end), case top pressed against the stop rails.
    First plug the lead from the servo adapter into one of its two bottom sockets (the other is for the tilt servo, 3.10).
+   The sleeve is **52.6 mm deep and the servo case only 32**: the servo does *not* go up to the plate. It stops on two stop rails on the sleeve's side walls, 20.6 mm below the plate,
+   which leaves room above it for the horn, the hub's closed end and the hub's cable window. Its bottom then sits flush with the sleeve's bottom edge, where the strap goes.
+
+   ![Skirt and pan servo, section](35_render_skirt_servo_section.png)
+   *35: section along the pan servo (front to the left): plate and pillow block on top, the hub's closed end on the horn, the servo case against the stop rails, the strap flush with the sleeve's bottom.*
 3. **Pan strap** under the servo, M3 into the inserts; the plugs come out through the strap's cutout.
 4. **Hub.** Pan servo torque off. Hub down through the bearing onto the horn with its **cable window facing the front** (over the top of the pan servo, toward the sleeve's open end:
    the sleeve is closed round the hub on the other three sides). 4 x M3 down the open tube through the hub's floor into the horn. The flange should rest on the bearing and the hub turn freely.
