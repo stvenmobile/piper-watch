@@ -55,7 +55,22 @@ static float oScale = 0;
 static int gapHalf = 0;
 
 // ---- small helpers ----------------------------------------------------------------------------------------------------
-static inline float rnd() { return esp_random() / 4294967296.0f; }
+static uint32_t rngState = 0x9E3779B9;                     // xorshift32: portable (ESP32-S3 and XIAO MG24)
+static inline float rnd() {
+  uint32_t x = rngState;
+  x ^= x << 13; x ^= x >> 17; x ^= x << 5;
+  rngState = x;
+  return x / 4294967296.0f;
+}
+static void seedRng() {
+#if defined(ESP32)
+  rngState = esp_random() | 1;
+#else
+  uint32_t s = micros();                                   // a few floating-ADC reads add some per-boot variety
+  for (int i = 0; i < 8; i++) s = s * 31 + analogRead(D2);   // D2 is unused
+  rngState = s | 1;
+#endif
+}
 static inline float clampf(float v, float a, float b) { return v < a ? a : v > b ? b : v; }
 static inline float gaussf(float x, float c, float w) { float d = (x - c) / w; return expf(-d * d); }
 static inline int jround(float v) { return (int)floorf(v + 0.5f); }   // JavaScript's Math.round
@@ -354,6 +369,7 @@ static void readSerial() {
 // ---- main -------------------------------------------------------------------------------------------------------------
 void setup() {
   Serial.begin(115200);
+  seedRng();
   SPI.begin();
   oled.setBusClock(20000000);
   oled.begin();
