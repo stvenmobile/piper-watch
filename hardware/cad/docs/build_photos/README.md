@@ -9,13 +9,9 @@ Renders (`NN_render_*.png`) come from `parts/base_v4.scad` (`part = "head_view"`
 |---|---|---|
 | 1 | Tub: feet, inserts, Orin, power, button, antennas | ✅ |
 | 2 | Lid with its wall, servo adapter | ✅ |
-| 3 | Skirt and pan servo (pan stack) | not detailed yet |
-| 4 | Hub and turret | |
-| 5 | Tilt servo, strap, crank | |
-| 6 | Head: front piece, back piece, OLED, camera | ✅ (built ahead) |
-| 7 | Head into the cheeks | |
-| 8 | Tilt rod | |
-| 9 | XIAO, wiring, cheek covers, ears, cowl | |
+| 3 | Pan stack, turret, tilt linkage and the head, onto the lid (render 34) | next |
+| 4 | Head: front piece, back piece, OLED, camera | ✅ (built ahead; goes in at 3.8) |
+| 5 | Head into the cheeks, cheek covers and ears | goes in at 3.8 |
 
 ## Parts legend (what to print, and what NOT to)
 
@@ -82,24 +78,66 @@ the 12 V DC jack, the 19 mm momentary power button (Geekworm T100, LED ring), tw
 ![Base closed, from the back](32_base_closed_rear.jpg)
 *32: the base closed, from the back: lid and round wall on the tub; on the back wall the 12 V jack (left), the two antenna connectors and the port window with the USB cables leaving it.*
 
-## Step 3: skirt and pan servo (not detailed yet)
+## Step 3: pan stack, turret, tilt linkage, onto the lid
 
-**Parts:** `base_skirt_v4.3mf` (slips over the wall, carries the pan plate and pillow block), `base_pan_strap_v4.3mf` (under the pan servo, 2 x M3).
+Everything above the lid is built **on the bench as one unit** and lowered onto the lid last. Three things force the order:
+the hub's four screws into the pan servo's horn are driven *down the open hub tube*, so the hub goes on before the turret;
+the servo plugs are on the pan servo's *bottom* face, out of reach once the skirt is over the wall;
+and the head's cables come out of the hub's window *inside* the skirt, so they have to be fed down before the skirt goes on.
+
+![Turret to lid, exploded](34_render_turret_to_lid_exploded.png)
+*34: this step exploded, bottom to top; the numbers are the sub-steps below. Red line: the cables' way down the turret floor hole and the hub, out of its window toward the front.
+Source: `34_turret_to_lid_exploded.scad` (in this folder).*
+
+**Parts:** `base_skirt_v4.3mf`, `base_pan_strap_v4.3mf`, `base_hub_v4.3mf`, `base_turret_v4.3mf`, `base_strap_v4.3mf` (tilt servo strap), `base_crank_v4.3mf`, `base_cowl_v4.3mf` (the 2026-11-15 version), the head (step 4), the cheek covers, ears and plugs (step 5).
+**Bought:** ServoCity 1" pillow block, 2 x STS3215 (ID 1 = pan, ID 2 = tilt), M3 threaded rod + 2 M3 rose-joint rod ends + 2 jam nuts, 2 x 608 bearings.
+**Screws** (lengths marked ~ are estimates: check before driving them home): 4 x M4 (pillow block), M3 x 8 (pan strap), 4 x short M3 ~6 (hub into the horn: they must not bottom out in the horn),
+2 x M3 x 8 (tilt strap), 4 x short M3 ~6 (crank onto the tilt horn), 2 x M3 ~10 (rod ends), 4 x M3 x 8 (turret onto the hub flange), 4 x M2.5 ~8 (skirt into the wall), 2 x M3 x 8 button head (cowl).
+**On the bench:** the servo adapter powered and on USB, with `tools/servo_test` to switch a servo's torque off (`py goto.py --id N --release`) so it turns by hand.
+
+**The pan stack**
+
+1. **Pillow block** onto the skirt's plate: skirt upside down, block on the top face, 4 x M4 into the plate's inserts.
+2. **Pan servo** up into the sleeve from below: shaft up on the bearing's axis, the body running toward the **front** (the sleeve's open end), case top pressed against the stop rails.
+   First plug the lead from the servo adapter into one of its two bottom sockets (the other is for the tilt servo, 3.10).
+3. **Pan strap** under the servo, M3 into the inserts; the plugs come out through the strap's cutout.
+4. **Hub.** Pan servo torque off. Hub down through the bearing onto the horn with its **cable window facing the front** (over the top of the pan servo, toward the sleeve's open end:
+   the sleeve is closed round the hub on the other three sides). 4 x M3 down the open tube through the hub's floor into the horn. The flange should rest on the bearing and the hub turn freely.
+
+**The turret**
+
+5. **Tilt servo** in its cradle: plug its lead into its bottom socket first (it leaves through the cradle's open end toward the hub hole), then the strap across its top, 2 x M3 x 8.
+   **XIAO** hot-glued into its pocket, USB-C toward the hub hole.
+6. **Crank** onto the tilt servo's horn, 4 x M3. Torque off, then turn the horn so the crank points **up, leaning about 15 degrees forward** (its position with the head level).
+7. **Tilt rod:** the two rod ends on the M3 rod, **27 mm eye centre to eye centre**, jam nuts snug. One eye onto the crank's pin: M3 through the eye into the crank's insert, from outside.
+8. **Head into the cheeks** (608s, axle pins, covers, ears: step 5), then the rod's other eye onto the head's crank bracket: M3 through the eye into the bracket's insert (a ball-end hex key between arm and cheek helps).
+   **Check by hand** (tilt servo torque off): the head swings nose-down to nose-up smoothly, and is level with the crank up-and-forward; if not, change the rod's length a turn at a time.
+
+**Cables and joining**
+
+9. **Cables down the hub:** the camera's USB cable, the XIAO's USB cable and the tilt servo's lead, plug end first, down through the turret floor's hole, down the hub tube and out of the window
+   (its chamfers turn a plug fed down outward). Biggest plug first. Leave slack above for the tilt and pan.
+10. **Turret onto the hub flange**, the head facing the same way as the hub's window (front), 4 x M3 x 8 from above into the flange's inserts. Pull the slack through the window, forward over the pan servo,
+    and plug the **tilt servo's lead into the pan servo's second socket**.
+    **Pan check:** turn the turret slowly by hand to each side and watch the window: the cables must slide, not pinch between the hub and the sleeve. Note how far it turns freely; the Orin
+    allows +-90 degrees (`head.servos.pan_limits`): lower that if the cables tighten sooner.
+11. **Onto the lid:** the USB cables down through the lid's cable slot into the tub (to the Orin's ports), then the skirt over the wall (its grooves over the wall's four insert columns), the sleeve's open end to the front.
+    4 x M2.5 radially through the skirt into the column inserts.
+12. **Cowl** over the back of the turret, 2 x M3 x 8 button head from outside into the posts' inserts.
+
+**Last: centre and limits.** The servos' stored centre and tilt limits were set on the old test stand, with a different linkage, so set them again:
+
+- Torque off both, hold the head **level and facing front**, then `py centre_here.py 1` and `py centre_here.py 2` (this pose becomes 2048 on both).
+- Move the tilt in small steps (`py goto.py --id 2 <deg>`) nose-down and nose-up to just short of any contact (floor, cowl window, cheeks). Put the two angles in `LIMITS[2]` in `tools/servo_test/sts.py` and run `py set_limits.py 2`.
+- On the Orin (`piper_assistant` config `head.servos`): the same `tilt_limits`, and `home` back to `[0, 0]` (it is `[0, -33]` for the old stand).
 
 ---
 
-# The turret and the head
+# The head
 
-| Step | What | Parts still to print |
-|---|---|---|
-| 4 | Inserts in the turret (strap 2, cowl 2, covers 6) and hub (4); `base_hub_v4.3mf` and `base_turret_v4.3mf` on the pan stack, 4 x M3 x 8 | none: `base_turret_v4.3mf` and `base_hub_v4.3mf` are printed |
-| 5 | Tilt servo in its cradle, strap, crank on the horn | **`base_strap_v4.3mf`** (1); `base_crank_v4.3mf` is printed |
-| 6 | Head (below) | done |
-| 7 | 608 bearings and the head into the cheeks | see the note below |
-| 8 | Tilt rod (M3 rod, 2 rose joints) | none |
-| 9 | XIAO, wiring, cheek covers (6 x button-head **M3 x 12**), ears, cowl | **`base_cover_v5.3mf`** (print 2), **`base_ear_v5.3mf`** (print 2), **`base_plug_v5.3mf`** (print 1, holds 2); **`base_cowl_v4.3mf`** was updated 2026-11-15 (cheek-cutout tips removed, 3 mm inner fillet on the front wall): print this version, not an older one |
+**Inserts first:** turret (tilt strap 2, cowl 2, cheek covers 6), hub flange (4). Still to print for step 3: **`base_strap_v4.3mf`** (1), **`base_cover_v5.3mf`** (2), **`base_ear_v5.3mf`** (2), **`base_plug_v5.3mf`** (1, holds 2); **`base_cowl_v4.3mf`** was updated 2026-11-15 (cheek-cutout tips removed, 3 mm inner fillet on the front wall): print this version, not an older one.
 
-## Step 6: head: front piece, back piece, OLED, camera ✅
+## Step 4: head: front piece, back piece, OLED, camera ✅
 
 **Camera on the camframe (first try, kept for the record).** Part: `base_camframe_v4.3mf` (superseded by the two-piece head). The webcam PCB (Logitech 210-002028-003) is fitted to the camframe: lens in its square pocket, glass eyes in the D3 and D6 seats,
 mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edge slot, the mic side is hot-glued.
@@ -154,7 +192,7 @@ mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edg
 
 **Lens flange (fitted):** `out/lens_flange.3mf` (source `parts/lens_flange.scad`): 20 mm ring, 11.2 mm hole (clears the four lugs on the lens), 1.8 mm thick, no notches. Print flat in blue or white, fixed with super glue (printed in white, fitted).
 
-## Step 7: head into the cheeks
+## Step 5: head into the cheeks, cheek covers and ears
 
 Press a 608 into each cheek from the inner face, slide the head in from the front (the arms' spacer bosses sit 0.2 mm from the cheeks), then push one axle pin from the outside through each bearing into the D bore of the arm (flat side down, it only fits one way).
 The pin's flange sits in the 12 mm lip bore against the bearing; the cheek cover (flat, 8 mm thick, **new** `base_cover_v5.3mf` x 2, replaces `base_cover_v4`) closes the bore and holds the pin in. It uses the cheeks' existing M3 inserts, plus one new M3 heat-set insert in the middle of each cover for the ear.
@@ -162,7 +200,7 @@ The pin's flange sits in the 12 mm lip bore against the bearing; the cheek cover
 ![Cheek covers](12_render_cheek_covers.png)
 *12: the two cheek covers, each with its ear, pulled off the turret's cheeks (head and axle pins in place). Each cover is a flat 34 mm disc, 8 mm thick, held by 3 x button-head M3 x 12 (heads sit on the surface, no counterbore) into the three M3 inserts in the cheek's outer face (bolt circle r 14); it also closes the bearing bore and holds the axle pin in.*
 
-## Step 9: ears (decorative)
+### Ears (decorative)
 
 ![Ears fitted](15_render_ears.png)
 *15: the ears fitted: a 12 mm square stalk from the centre of each cover ending in a 36 mm octagonal disc (print blue or white). The covers are fixed to the turret, so the ears do not nod with the head.*
