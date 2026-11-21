@@ -15,7 +15,8 @@
 //   2 happytalk   smiling, lips move with speech     6 sleep        closed, breathing, rising Zzz
 //   3 smile       closed, corners up                 7 happysleep   sleep with a slight smile
 //
-// At power-up it runs a DEMO loop through the modes. Serial commands (one per line, from the Orin or the monitor):
+// At power-up it is LIVE in neutral, waiting for the Orin; "D1" runs a DEMO loop through the modes. Serial commands
+// (one per line, from the Orin or the monitor):
 //   M<name|0..7> set the mode, e.g. "Mtalk" or "M1"; stops the demo
 //   L<0..255>    loudness for this frame (~30 Hz while speaking); stops the demo. No level for 1.5 s -> silent.
 //                Ignored unless the mode is talk or happytalk.
@@ -56,7 +57,7 @@ const int oTowerBars = 2;
 enum Expr : uint8_t { NORMAL = 0, SLEEP = 1, SURPRISE = 2 };
 
 // ---- state ------------------------------------------------------------------------------------------------------------
-static bool demo = true;
+static bool demo = false;                                  // live at power-up; D1 starts the demo
 static int contrast = 160;
 static float moodT = 0, moodS = 0;                         // target and smoothed mood, -100..100
 static Expr expr = NORMAL;
