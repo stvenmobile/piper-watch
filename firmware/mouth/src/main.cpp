@@ -348,6 +348,11 @@ static void frame(uint32_t nowMs) {
   oled.clearBuffer();
   if (expr == SURPRISE) {
     drawO(pitch, barW);
+    if (oScale > 0.85f) {                                  // "Oh!" in the middle once the O has popped open
+      oled.setFont(u8g2_font_helvB14_tr);
+      const char *t = "Oh!";
+      oled.drawStr((W - oled.getStrWidth(t)) / 2, MID + oled.getAscent() / 2, t);
+    }
   } else {
     for (int i = 0; i < n; i++)
       vbar(x0 + i * pitch, barW, jround(fminf(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5f) / n);

@@ -322,6 +322,16 @@ function spectrumFrame(now, loudRaw, n) {
 // ---- drawing -----------------------------------------------------------------------------------------------------------
 const buf = new Uint8Array(W * H);
 const px = (x, y) => { if (x >= 0 && x < W && y >= 0 && y < H) buf[y * W + x] = 1; };
+const textCanvas = document.createElement('canvas'); textCanvas.width = W; textCanvas.height = H;
+const textCtx = textCanvas.getContext('2d');
+function drawText(str) {                         // approximates the firmware's U8g2 helvB14 font, centred
+  textCtx.clearRect(0, 0, W, H);
+  textCtx.font = 'bold 19px Helvetica, Arial, sans-serif';
+  textCtx.textAlign = 'center'; textCtx.textBaseline = 'middle'; textCtx.fillStyle = '#fff';
+  textCtx.fillText(str, W / 2, MID + 1);
+  const d = textCtx.getImageData(0, 0, W, H).data;
+  for (let i = 0; i < W * H; i++) if (d[i * 4 + 3] > 128) buf[i] = 1;
+}
 // A lane: with no centre gap, one bar symmetric about the centre line. With a gap, two "teeth" - one above, one below -
 // each growing away from the gap. toothMin keeps short stubs showing when the mouth is quiet.
 // The gap is per lane: a base gap plus a share of that lane's own height, so a lane that grows opens wider and one that
@@ -582,6 +592,7 @@ function frame() {
     analyzerFrame(now, loudRaw);
   } else if (expr === 'surprise') {
     drawO(n, pitch, barW);
+    if (oScale > 0.85) drawText('Oh!');                              // in the middle once the O has popped open
   } else if (style === 'envelope' && P.solid) {
     const xs = Math.floor((W - MW) / 2);
     for (let x = 0; x < MW; x++) {
