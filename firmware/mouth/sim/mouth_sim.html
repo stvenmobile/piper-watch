@@ -437,6 +437,7 @@ document.querySelectorAll('#inds button').forEach(b => b.onclick = () => setInd(
 function setInd(i) {
   if (i !== ind) indAt = performance.now();
   ind = i;
+  if (i === 'listening' && MODES[mode].talks) setMode(mode === 'happytalk' ? 'smile' : 'neutral');   // listening stops talking
   document.querySelectorAll('#inds button').forEach(b => b.classList.toggle('on', b.dataset.i === i));
 }
 const fillRect = (x, y, w, h) => { for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) px(x + i, y + j); };

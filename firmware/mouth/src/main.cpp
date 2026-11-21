@@ -22,6 +22,7 @@
 //                or happytalk. Optional: in a talk mode with no L for 1.5 s the mouth simulates speech itself.
 //   I<name|0..3> status symbol, top right, independent of the mode:
 //                0 idle (none), 1 listening (+ / - alternating), 2 thinking (3 dots filling), 3 confused (??? bobbing)
+//                Listening stops talking: talk -> neutral, happytalk -> smile.
 //   D1 / D0      demo on / off (D0 returns to neutral)
 //   C<0..255>    contrast (default 160)
 //   ?            print the current state
@@ -438,7 +439,10 @@ static void command(const char *s) {
     case 'I': case 'i': {
       int i = lookup(s + 1, IND_NAMES, NIND);
       if (i < 0) { Serial.printf("mouth: unknown status '%s'\n", s + 1); break; }
-      setInd((Ind)i); report();                            // doesn't stop the demo
+      setInd((Ind)i);                                      // doesn't stop the demo
+      if (i == IND_LISTENING && MODES[mode].talks)         // listening means she has stopped talking:
+        setMode(mode == HAPPY_TALK ? SMILE : NEUTRAL_M);   // talk -> neutral, happytalk -> smile
+      report();
       break;
     }
     case 'M': case 'm': {
