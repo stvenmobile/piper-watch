@@ -641,7 +641,7 @@ function frame() {
     for (let i = 0; i < n; i++) vbar(x0 + i * pitch, barW, Math.round(Math.min(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5) / n);
   }
   if (expr === 'sleep' && style !== 'analyzer') drawZzz(now, MW);
-  if (style !== 'analyzer') drawIndicator(now);
+  if (style !== 'analyzer' && expr !== 'sleep') drawIndicator(now);   // the Zzz own that corner while asleep
   for (let i = 0; i < W * H; i++) {
     const o = i * 4, on = buf[i];
     img.data[o] = on ? 235 : 0; img.data[o + 1] = on ? 240 : 0; img.data[o + 2] = on ? 255 : 0; img.data[o + 3] = 255;

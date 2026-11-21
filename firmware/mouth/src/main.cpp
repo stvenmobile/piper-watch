@@ -412,7 +412,7 @@ static void frame(uint32_t nowMs) {
       vbar(x0 + i * pitch, barW, jround(fminf(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5f) / n);
   }
   if (expr == SLEEP) drawZzz(now, MW);
-  drawIndicator(nowMs);
+  if (expr != SLEEP) drawIndicator(nowMs);                  // the Zzz own that corner while asleep
   oled.sendBuffer();
 }
 
