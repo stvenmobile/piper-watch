@@ -1,7 +1,7 @@
 # Lessons from the servo test stand
 
-Things the test stand (`parts/servo_test_stand.scad`) taught us. Apply all of them when the real
-base box, turret and head are designed from `concepts/servo_turret.scad`.
+Things the servo test stand (`parts/servo_test_stand.scad`, whose pan stack `base_v4.scad` builds on)
+taught us. They apply to any change to the base, turret and head.
 
 ## Measurements
 
@@ -36,7 +36,9 @@ base box, turret and head are designed from `concepts/servo_turret.scad`.
 
    Short stops at one end let it rock.
 4. **Give every cable a route through every part,** big enough for the plug (an STS3215 3-pin plug
-   needs about 7.5 × 7.5 mm). The turret's servo pedestal sat on top of the hole down into the hub.
+   needs about 7.5 × 7.5 mm) *and* for the plug to turn every corner on its way. The pan joint's hub
+   (19 mm bore, window into a 20.6 mm gap) is too tight for a moulded USB-A plug: see the run book, step 3.9.
+   (On the stand, the turret's servo pedestal sat on top of the hole down into the hub.)
 5. **Keep printed parts clear of the servo case:** the turret's strap post overlapped the tilt
    servo's case by 1 mm. Start any wall or post at the case plus clearance.
 6. **Overhangs facing the bed get a 45° back:** stop rails and pads on parts printed upside down.

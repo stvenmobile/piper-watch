@@ -34,7 +34,9 @@
 #include <U8g2lib.h>
 
 static const int PIN_CS = D5, PIN_DC = D0, PIN_RST = D1;
-U8G2_SH1122_256X64_F_4W_HW_SPI oled(U8G2_R0, PIN_CS, PIN_DC, PIN_RST);
+// The OLED sits upside down in the assembled head, so the picture is turned 180 deg
+// (U8G2_R2). Use U8G2_R0 for a display on the bench the right way up.
+U8G2_SH1122_256X64_F_4W_HW_SPI oled(U8G2_R2, PIN_CS, PIN_DC, PIN_RST);
 
 #if defined(ESP32)
 static const uint32_t OLED_SPI_HZ = 20000000;

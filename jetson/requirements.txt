@@ -1,3 +1,0 @@
-# Jetson-side dependencies (OpenCV, TensorRT and PyTorch come from JetPack, not pip)
-pyserial
-numpy

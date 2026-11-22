@@ -1,6 +1,4 @@
 # Hardware
 
-- `cad/`: 3D-printable parts (tilt yoke, camera housing, pan coupling, enclosure)
-- `wiring/`: wiring diagrams and photos
-
-The bill of materials, power design and pin table are in the main README.
+- `wiring.md`: power, the mouth OLED's pins and the cable routes.
+- `cad/`: the printed parts (OpenSCAD) and the assembly run book (`cad/docs/build_photos/README.md`).

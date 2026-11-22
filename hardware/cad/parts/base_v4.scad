@@ -1,6 +1,6 @@
 // BASE v4 - electronics box + stationary pan cylinder on the test stand's pillow-block stack.
 //
-//   TUB    rounded-square box (118 x 120) holding ONLY the Orin NX carrier (+ fuse/terminal block). Its top has a 45-deg-filleted LEDGE
+//   TUB    rounded box (150 x 120 x 60) holding ONLY the Orin NX carrier (+ fuse/terminal block). Its top has a 45-deg-filleted LEDGE
 //          (6 mm) with a pocket above it: the flat LID drops into the pocket and sits on the ledge, flush with the wall tops.
 //          The Orin stands forward; its ports face a PLUG ZONE (28 mm) at the back: the 12 V jack, the power button and the fuse /
 //          terminal block live there, and the lid's cable slot drops straight into it - so every cable from the head reaches an
@@ -16,7 +16,8 @@
 //          long side across, power edge (USB-C, DC terminal, jack) to the back over the lid slot, servo connectors to the front.
 //
 // Frame: pan axis = (0,0) = the box centre; Z = 0 under the box floor; +Y = front (cylinder/head side), back wall at Y = -60.
-// part = "v4_view" | "v4_tub" | "v4_lid" (with the wall) | "v4_skirt"
+// part = "v4_view" | "v4_tub" | "v4_lid" (with the wall) | "v4_skirt" | "v4_panstrap" | "v4_railshim" | "v4_hub" | "v4_turret" | "v4_strap"
+//        | "v4_crank" | "v4_cowl" | "v4_cover" | "v4_ear" | "v4_plug" | "head_view"   (the head itself is in head_v6.scad; export.sh knows every file name)
 include <servo_test_stand.scad>
 
 part = "v4_view";
@@ -283,7 +284,7 @@ module fillet_ring2d(d) difference() {
     translate([tsv[1] - 2, xi_y[0] - 1]) square([8, 1 - xi_y[0]]);                                              // and the cable's way through the cradle's right wall
     translate([tsv[0] - 6, tsv_y[0] + 17]) square([8, 25]);                                                    // horn side opening
     translate([-60, cw_y - cw_t - 0.1]) square([120, cw_t + 0.2]);                                              // the cowl's front wall (y 5.5 .. 8)
-    circle(d = 20, $fn = 48);                                                                                  // hub hole
+    offset(r = 1) cable_hole2d();                                                                              // the cable hole down into the hub
     for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0]) circle(d = 9, $fn = 24);                   // flange screws
     for (sx = [-1, 1]) translate([sx > 0 ? 38 : -54, -60]) square([16, 68]);                                    // cowl's cheek notch: no fillet behind y = 8
 }
@@ -294,6 +295,16 @@ module fillets4() for (k = [0 : fl_n - 1]) {
 module strap4() color("#6b8fb5") difference() {
     box([sb_x[0][0], sb_x[1][1]], sb_y, [sb_top, sb_top + sb_t]);
     for (b = sb_x) translate([(b[0] + b[1]) / 2, (sb_y[0] + sb_y[1]) / 2, sb_top - 1]) hole3(sb_t + 2);
+}
+// The turret floor's cable hole, down into the hub's bore (2026-11-21). The first turrets had only the FRONT half of an 18 mm circle
+// (the half under the tilt servo's cradle was left solid), and moulded USB plugs would barely pass it. Now: the hub's whole bore (19 mm),
+// plus a slot running 15 mm forward, 18 wide (as wide as the cowl's cable notch), so a plug can be tipped into the bore from the front.
+// The cradle's front wall and the front corner of the tilt servo's pocket now bridge the rear half (about 19 mm; prints fine floor-down).
+// Cable routing through the pan joint is still very tight: see the run book, step 3.9.
+cab_w = 18;  cab_fwd = 15;
+module cable_hole2d() union() {
+    circle(d = hub_id, $fn = 64);
+    hull() { circle(d = cab_w, $fn = 48); translate([0, cab_fwd - cab_w / 2]) circle(d = cab_w, $fn = 48); }
 }
 module turret4() difference() {
     union() {
@@ -326,10 +337,7 @@ module turret4() difference() {
     }
     for (b = sb_x) translate([(b[0] + b[1]) / 2, (sb_y[0] + sb_y[1]) / 2, sb_top - insert_m3[1]]) insert3();   // M3 inserts for the strap
     for (a = cs_ang) rotate(a) translate([cs_in + 0.01, 0, z_ft + cs_z]) rotate([0, -90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1] + 0.2, $fn = 24);   // radial M3 insert bores, pressed in from the outer face
-    intersection() {                                                                                      // cables down the hub: the half under the tilt servo's cradle (y < its front wall) stays solid
-        translate([0, 0, z_floor - 1]) cylinder(d = 18, h = floor_t + 2, $fn = 48);
-        box([-20, 20], [tsv_y[1] + 3, 20], [z_floor - 2, z_floor + floor_t + 2]);
-    }
+    translate([0, 0, z_floor - 1]) linear_extrude(floor_t + 2) cable_hole2d();                           // cables down the hub (enlarged 2026-11-21, see cable_hole2d)
     for (a = [hub_a : 90 : 360]) rotate(a) translate([flange_r, 0, z_floor - 1]) hole3(floor_t + 2);        // 4 x M3 into the hub flange
     for (s = [-1, 1], c = cv_pts) translate([s > 0 ? ch_x[1] + 0.01 : -ch_x[1] - 0.01, ax_y + c[0], ax_z + c[1]]) rotate([0, s > 0 ? -90 : 90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1] + 0.2, $fn = 24);   // M3 inserts for the cheek covers
     for (s = [-1, 1]) {                                                                                   // 608 pockets from the inner faces

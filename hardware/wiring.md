@@ -7,8 +7,7 @@ speakerphone) runs on 5 V from the Jetson's USB ports. There's no buck converter
 stepper any more.
 
 > The earlier Level 2 design (19 V brick, TMC2209 stepper, perfboard, panel fuse, three-display
-> head) is in this file's git history and in `hardware/kicad/`. The top-level README still
-> describes parts of it.
+> head, KiCad schematics) is in the git history.
 
 ## Overview
 
@@ -25,7 +24,7 @@ stepper any more.
  USB to the Orin (data + 5 V):
    • servo adapter (USB-C)       - lid, straight down the lid slot
    • head XIAO ESP32-S3 (USB-C)  - mouth OLED; down the hub, out its window, down the lid slot
-   • C920 camera                 - down the hub, out its window, down the lid slot
+   • camera (webcam board)       - down the hub, out its window, down the lid slot
    • speakerphone
 ```
 
@@ -130,10 +129,12 @@ both its power and its serial link to the Orin (it shows up as `303A:1001`).
   bus lead. These are the only cables that cross the pan joint, and they cross it on the axis, so
   panning twists them a little instead of dragging them. Never route a cable through a hole away from the centre: the
   turret turns over the fixed plate and would shear it.
-- **Fishing order:** with the hub out of the pillow block, feed each plug down the hub's bore and
-  out of its window (the window's chamfers guide it). Fit the hub, then turn the head by hand until
-  the window faces the open front of the pan servo's sleeve. The camera's cable goes with its
-  JST plug unplugged at the C920 board; the XIAO's USB-C end goes to the XIAO.
+- **Extremely tight:** the hub's bore is 19 mm and its window opens into a 20.6 mm gap over the pan
+  servo, so a moulded USB-A plug can't get through. Route the cables **small end first, from below**,
+  with a pull cord: the camera cable unplugged at the camera board, the XIAO cable's USB-C end, the
+  tilt servo lead either end; the USB-A ends stay at the Orin. Full steps: run book, step 3.9
+  (`hardware/cad/docs/build_photos/README.md`). The hub goes into the pillow block first: with cables
+  already out of its window it can't pass the bearing.
 - **Lid slot:** everything going down to the Orin, the hub cables and the servo adapter's USB, drops
   through the lid's slot into the plug zone; the USB-A ends then leave through the back wall's port window.
 - **Wi-Fi antennas:** two 6.5 mm holes in the back wall, 43 mm up

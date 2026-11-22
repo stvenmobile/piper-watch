@@ -7,12 +7,12 @@ Angles are servo degrees (robot convention: pan + = left, tilt + = up); tilt is 
 import argparse
 import time
 
-from sts import Bus, deg_to_pos, pos_to_deg
+from sts import LIMITS, Bus, deg_to_pos, pos_to_deg
 
 PAN, TILT = 1, 2
-T_LEVEL = -33.0       # tilt servo angle with the head about level (by eye)
-T_UP = 6.3            # max up
-T_DOWN = -70.0        # max down
+T_LEVEL = 0.0         # tilt servo angle with the head level (the horns were fitted at centre)
+T_UP = LIMITS[TILT][1]      # max up / down: whatever sts.py's LIMITS allow (pan is clamped to them too)
+T_DOWN = LIMITS[TILT][0]
 
 LOOKS = [             # (name, pan, tilt)
     ("forward", 0, T_LEVEL),

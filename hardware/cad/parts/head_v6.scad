@@ -2,7 +2,7 @@
 //
 //   FRONT   the whole front of the head (18 mm deep): front wall with 4 openings (camera square hole, OLED window, 2 eye holes), flared side
 //           walls, visor, 2 joint bosses (M2.5 insert) and 3 pilot bosses for the straps. Open at the back and at the bottom. Prints front face down, no supports.
-//   BACK    rear plate, the two pivot arms with axle stubs and the crank bracket. Bolted to the front with 2 x M2.5 through its two ears.
+//   BACK    rear plate, the two pivot arms (a D-shaped bore in each for the separate axle pins) and the crank bracket. Bolted to the front with 2 x M2.5 through its two ears.
 //   STRAPS  1 long camera strap (one M2 at each end) and 1 OLED half strap (one M2, on the top edge; now optional). The OLED itself is held
 //           by four M2 screws through its mounting holes into the front wall.
 // The OLED sits in the front wall (glass in a pocket behind a 2.2 lip); 9.8 mm are free behind its board for the Dupont plugs.

@@ -3,7 +3,12 @@
 The build from the bottom up: the tub (electronics box), the lid with its wall, the pan stack, the turret, then the head.
 Each step has the parts and hardware it needs, what to do, and a render or photo of what it should look like.
 Photos of the real build go in this folder, named `NN_what_it_shows.jpg`, and get added under the step they belong to.
-Renders (`NN_render_*.png`) come from `parts/base_v4.scad` (`part = "head_view"`). Wiring details are in `hardware/wiring.md`.
+Renders (`NN_render_*.png`) come from `parts/base_v4.scad` and `parts/head_v6.scad`. Wiring details are in `hardware/wiring.md`.
+All the printable files are made by `hardware/cad/export.sh` into `hardware/cad/out/`.
+
+> **Cable routing through the pan joint is extremely tight.** Three cables (camera USB, XIAO USB, tilt servo lead) have to pass the
+> turret floor, the hub's 19 mm bore and the hub's cable window, which opens into a 20.6 mm gap over the pan servo. A moulded USB-A plug
+> will not make that turn. Read step 3.9 before you start: route the cables **small end first, from below**, with a pull cord.
 
 | Step | What | Status |
 |---|---|---|
@@ -15,14 +20,25 @@ Renders (`NN_render_*.png`) come from `parts/base_v4.scad` (`part = "head_view"`
 
 ## Parts legend (what to print, and what NOT to)
 
-![Parts legend, base](14_parts_legend_base.png)
+Only the current version of each part is kept; older versions are in the git history.
+
+**The base, from the turret down** (source `parts/base_v4.scad`):
+
+| File | Print | What it is |
+|---|---|---|
+| `base_tub_v4.3mf` | 1 | the electronics box: Orin carrier, 12 V split block, DC jack, power button |
+| `base_lid_v4.3mf` | 1 | the flat lid and the stationary round wall, one piece, with the servo adapter's standoffs |
+| `base_skirt_v4.3mf` | 1 | slips over the wall; carries the pan servo's sleeve, the plate and the pillow block |
+| `base_rail_shim_v4.3mf` | 0 or 1 | only for a skirt printed before 2026-11-21 (no stop rails): two bars, see step 3.2 |
+| `base_pan_strap_v4.3mf` | 1 | under the pan servo, 2 x M3 |
+| `base_hub_v4.3mf` | 1 | the tube through the pillow block onto the pan servo's horn; the cables' way through the pan joint |
+| `base_turret_v4.3mf` | 1 | floor, tilt servo cradle, XIAO pocket, cheeks (sits on the hub flange, 4 x M3) |
+
+**Above the turret** (head from `parts/head_v6.scad`; cowl, crank, strap, covers, ears and plugs from `parts/base_v4.scad`):
 
 ![Parts legend, head](13_parts_legend.png)
 
-All superseded parts are in `out/archive/` (printable files) and `parts/archive/` or `parts/prototype/` (sources), so everything left in `out/` is current.
-
-![Cable routes](22_render_cable_routes.png)
-*22: cutaway of the whole stack, bottom to top: the Orin in the tub, the servo adapter on the lid inside the round wall, the pan servo, the turret and the head. Red: the head's cable up through the hub; yellow: the servo adapter's leads down through the lid's cable slot to the tub.*
+Also: `lens_flange.3mf` and `oled_washers_x4.3mf` (step 4).
 
 ---
 
@@ -63,14 +79,8 @@ the 12 V DC jack, the 19 mm momentary power button (Geekworm T100, LED ring), tw
 3. **Leads.** The adapter's power and USB leads go down the cable slot to the tub; its servo lead waits for the pan servo (step 3).
 4. **Close.** Lid onto the tub, screws into the eight inserts.
 
-![Servo adapter location](19_render_adapter_location.png)
-*19: the bus servo adapter (orange) lies on the lid, inside the round wall, under the pan servo. Its power and USB leads go down the lid's cable slot; its servo lead goes up to the pan servo, and the tilt servo chains off the pan servo's second connector.*
-
 ![Servo adapter board](20_servo_adapter_board.jpg)
 *20: the Waveshare Bus Servo Adapter (A), 33 x 43 mm. Mounting holes: 2.5 mm on a 27.5 x 37 pattern (checked with `parts/prototype/adapter_hole_coupon.scad`). Left long edge: two servo connectors and the UART header; right long edge: USB-C, the DC screw terminal and the 9-12.6 V barrel jack.*
-
-![Servo adapter on its standoffs](21_render_adapter_standoffs.png)
-*21: the adapter on four 5 mm standoffs printed with the lid: long side across, power edge to the back beside the cable slot, servo connectors to the front under the pan servo's strap (3 mm clear).*
 
 ![Lid with the servo adapter](33_lid_servo_adapter.jpg)
 *33: the lid from above: the servo adapter on its standoffs inside the round wall; the 12 V leads (red / black) and the braided USB cable come up through the cable slot at the back; spare cable coiled for now.*
@@ -83,13 +93,13 @@ the 12 V DC jack, the 19 mm momentary power button (Geekworm T100, LED ring), tw
 Everything above the lid is built **on the bench as one unit** and lowered onto the lid last. Three things force the order:
 the hub's four screws into the pan servo's horn are driven *down the open hub tube*, so the hub goes on before the turret;
 the servo plugs are on the pan servo's *bottom* face, out of reach once the skirt is over the wall;
-and the head's cables come out of the hub's window *inside* the skirt, so they have to be fed down before the skirt goes on.
+and the head's cables come out of the hub's window *inside* the skirt, so they have to go through the hub before the skirt goes on.
 
 ![Turret to lid, exploded](34_render_turret_to_lid_exploded.png)
-*34: this step exploded, bottom to top; the numbers are the sub-steps below. Red line: the cables' way down the turret floor hole and the hub, out of its window toward the front.
+*34: this step exploded, bottom to top; the numbers are the sub-steps below. Red line: the cables' way between the turret floor hole and the hub's window, which faces the front.
 Source: `34_turret_to_lid_exploded.scad` (in this folder).*
 
-**Parts:** `base_skirt_v4.3mf`, `base_pan_strap_v4.3mf`, `base_hub_v4.3mf`, `base_turret_v4.3mf`, `base_strap_v4.3mf` (tilt servo strap), `base_crank_v4.3mf`, `base_cowl_v4.3mf` (the 2026-11-15 version), the head (step 4), the cheek covers, ears and plugs (step 5).
+**Parts:** `base_skirt_v4.3mf`, `base_pan_strap_v4.3mf`, `base_hub_v4.3mf`, `base_turret_v4.3mf`, `base_strap_v4.3mf` (tilt servo strap), `base_crank_v4.3mf`, `base_cowl_v4.3mf`, the head (step 4), the cheek covers, ears and plugs (step 5).
 **Bought:** ServoCity 1" pillow block, 2 x STS3215 (ID 1 = pan, ID 2 = tilt), M3 threaded rod + 2 M3 rose-joint rod ends + 2 jam nuts, 2 x 608 bearings.
 **Screws** (lengths marked ~ are estimates: check before driving them home): 4 x M4 (pillow block), M3 x 8 (pan strap), 4 x short M3 ~6 (hub into the horn: they must not bottom out in the horn),
 2 x M3 x 8 (tilt strap), 4 x short M3 ~6 (crank onto the tilt horn), 2 x M3 ~10 (rod ends), 4 x M3 x 8 (turret onto the hub flange), 4 x M2.5 ~8 (skirt into the wall), 2 x M3 x 8 button head (cowl).
@@ -123,8 +133,20 @@ Source: `34_turret_to_lid_exploded.scad` (in this folder).*
 
 **Cables and joining**
 
-9. **Cables down the hub:** the camera's USB cable, the XIAO's USB cable and the tilt servo's lead, plug end first, down through the turret floor's hole, down the hub tube and out of the window
-   (its chamfers turn a plug fed down outward). Biggest plug first. Leave slack above for the tilt and pan.
+9. **Cables through the hub. This is the tightest step of the build.** The hub's bore is 19 mm, and with the pan servo in place
+   there are only 20.6 mm between the servo and the plate where the window opens, so a plug has to turn a very sharp corner.
+   A moulded **USB-A plug will not go through**, so route every cable **small end first, from below**: the USB-A ends stay at the
+   bottom (they go to the Orin) and only the small ends travel up.
+   - **Camera:** unplug its cable at the camera board (open the head's back piece) and send that end up.
+   - **XIAO:** the USB-C end goes up.
+   - **Tilt servo lead:** either end (a small 3-pin plug).
+   - Hold the turret just above the hub. Drop a **pull cord** (string, or a length of stiff wire) down through the turret floor's hole and
+     the hub's bore and out of the window. Tape one plug to it, nose first, and pull it up while you guide it into the window from the
+     front of the sleeve, over the pan servo. Biggest plug first; leave slack above for the tilt and pan; then reconnect the camera.
+   - Turrets printed before 2026-11-21 have only half a cable hole in the floor (the front half of an 18 mm circle). The current turret
+     opens the hub's whole bore plus a slot 15 mm forward, so a plug can be tipped in from the front.
+   - If a plug still won't go, cut the cable, pull it through bare and fit a solder-on USB-A plug (or splice the old one back) afterwards.
+     USB 2.0 is fine with a short splice if the two data wires stay twisted.
 10. **Turret onto the hub flange**, the head facing the same way as the hub's window (front), 4 x M3 x 8 from above into the flange's inserts. Pull the slack through the window, forward over the pan servo,
     and plug the **tilt servo's lead into the pan servo's second socket**.
     **Pan check:** turn the turret slowly by hand to each side and watch the window: the cables must slide, not pinch between the hub and the sleeve. Note how far it turns freely; the Orin
@@ -143,21 +165,12 @@ Source: `34_turret_to_lid_exploded.scad` (in this folder).*
 
 # The head
 
-**Inserts first:** turret (tilt strap 2, cowl 2, cheek covers 6), hub flange (4). Still to print for step 3: **`base_strap_v4.3mf`** (1), **`base_cover_v5.3mf`** (2), **`base_ear_v5.3mf`** (2), **`base_plug_v5.3mf`** (1, holds 2); **`base_cowl_v4.3mf`** was updated 2026-11-15 (cheek-cutout tips removed, 3 mm inner fillet on the front wall): print this version, not an older one.
+**Inserts first:** turret (tilt strap 2, cowl 2, cheek covers 6), hub flange (4). Also for step 3: **`base_strap_v4.3mf`** (1), **`base_cover_v5.3mf`** (2), **`base_ear_v5.3mf`** (2), **`base_plug_v5.3mf`** (1, holds 2), **`base_cowl_v4.3mf`** (1).
 
 ## Step 4: head: front piece, back piece, OLED, camera ✅
 
-**Camera on the camframe (first try, kept for the record).** Part: `base_camframe_v4.3mf` (superseded by the two-piece head). The webcam PCB (Logitech 210-002028-003) is fitted to the camframe: lens in its square pocket, glass eyes in the D3 and D6 seats,
-mic cans in their pockets. One side is held by an M2.5 x 12 bolt through the edge slot, the mic side is hot-glued.
-
-![Camera board, rear](01_camera_board_rear.jpg)
-*01: webcam PCB, rear: M2.5 screw through the edge slot, thermal pad, chips.*
-
-![Camera on the camframe, front](02_camera_on_camframe_front.jpg)
-*02: camera on the camframe from the front. USB cable leaves at the bottom.*
-
-**Parts (in `out/`):** `base_head_front_v6.3mf` (print front face down, no supports), `base_head_back_v6.3mf` (print front face down, tree supports under the axle stubs and the crank bracket),
-`base_head_straps_v6.3mf` (1 long camera strap + 1 OLED half strap, flat). **Redesign 2026-11-14:** the printed axle stubs are gone; the back piece now has a D-shaped bore in each arm and a 0.8 mm spacer boss, and the axle is two separate pins, `base_axle_pin_v6.3mf` (print 2, identical, flat side down, lying on the bed). The back piece must be **reprinted**. They replace `base_head_v4`, `base_camframe_v4`, `base_head_v5` and `base_plate_v4`; do not print those. Printed and assembled (2026-11-14).
+**Parts (in `out/`):** `base_head_front_v6.3mf` (print front face down, no supports), `base_head_back_v6.3mf` (print front face down, tree supports under the crank bracket),
+`base_head_straps_v6.3mf` (1 long camera strap + 1 OLED half strap, flat). The axle is two separate pins, `base_axle_pin_v6.3mf` (print 2, identical, flat side down, lying on the bed), into a D-shaped bore in each of the back piece's arms.
 **Hardware:** the camera with its glass eyes, the OLED (2.08", GME25664-65), 3 x M2.5 heat-set inserts (front piece), 1 x M3 heat-set insert (crank bracket on the back piece's left arm),
 2 x **M2.5 x 10** + 1 x **M2.5 x 8** (joint, the short one at the bottom right), 2 x **M2 x 6** (camera strap, one at each end), 4 x **M2 x 4** (OLED board) + 1 x **M2 x 5** (OLED half strap, optional extra), all M2 self-tapping into the printed pilot holes.
 

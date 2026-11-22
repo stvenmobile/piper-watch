@@ -1,4 +1,5 @@
 # Docs
 
-Design notes that outgrow the main README, for example the full Jetson ↔ head protocol spec
-and servo calibration records. Reference: [LCDWiki E32R40T](https://www.lcdwiki.com/4.0inch_ESP32-32E_Display).
+Datasheets and design notes that outgrow the main README.
+
+- `oled_gme25664-65.md`: the 2.08" OLED used for the mouth (dimensions, pinout, vendor drawings).

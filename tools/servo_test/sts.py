@@ -2,9 +2,12 @@
 
 Register map: Feetech STS series (little-endian, protocol_end = 0).
 """
+import os
+
 from scservo_sdk import COMM_SUCCESS, PacketHandler, PortHandler
 
-PORT = "COM21"
+# the adapter's serial port: COM21 on the Windows bench; on the Orin e.g.  STS_PORT=/dev/ttyACM0 python3 goto.py ...
+PORT = os.environ.get("STS_PORT", "COM21")
 BAUD = 1_000_000
 
 # EEPROM
@@ -31,11 +34,13 @@ CENTRE = 2048
 # seen from above), tilt + = the disc's pin UP from forward (head tilts up). Both servos' raw positive
 # directions are the opposite (checked 2026-10-21).
 DIRECTION = {1: -1, 2: -1}
-# allowed range per servo, in servo degrees (robot convention). Also written to the servo's own angle
-# limits by set_limits.py. Tilt (2026-10-21, by eye on the test stand, camera looking along the plate):
-#   -70 -> head about -24 (max down)    +6.3 -> head about +20..25 (max up)
-#   readings: servo -64.8 -> -21, -53.1 -> -12, 0 -> +20 (design: -27, -20, +20)
-LIMITS = {2: (-70.0, 6.3)}
+# allowed range per servo, in servo degrees (robot convention); goto.py and look.py clamp to it, and
+# set_limits.py writes it into the servo. 2026-11-22: the robot's first power-up, horns fitted at centre
+# (centre_both.py) with the head level and facing front. START NARROW and widen in small steps while
+# watching for contact; then write the real limits here, run set_limits.py, and copy them to
+# piper-assistant (vision.follow: pan_limits, tilt_limits; home [0, 0]).
+# (The test stand's tilt limits were -70 .. +6.3 with a different linkage: not valid on the robot.)
+LIMITS = {1: (-20.0, 20.0), 2: (-10.0, 10.0)}
 
 
 def clamp(sid, deg):
