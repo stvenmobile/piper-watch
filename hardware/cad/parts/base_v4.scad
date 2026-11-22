@@ -148,7 +148,13 @@ module skirt_extra4() difference() {
     }
 }
 sk_fil = 4;                                     // skirt: fillet where the pan servo's sleeve meets the plate's underside
-module skirt4s() difference() {                // the stand's base() + the skirt, with the 4 strap-insert bosses run up into the plate and a fillet round the sleeve
+// Retrofit for a skirt printed without the rails: two spacer bars, pushed up into the sleeve against the plate's underside
+// along its side walls before the servo goes in; the servo's case top bears on them and they are trapped by it (no glue).
+// They stay clear of the hub (from y = 9.5, like the rails) and leave the middle open for the cables over the servo.
+rs_t = 2.8;  rs_h = -plate_t - z_case_top - 0.2;   // 2.8 thick (the rails are 3), 20.4 tall: 0.2 short so the strap still seats
+module rail_shim4() cube([rs_t, stop_y[1] - stop_y[0], rs_h]);
+module skirt4s() { skirt4s_body(); stop_rails(); }   // 2026-11-21: the rails go back in AFTER the pocket cut (the first skirts had none: the pocket cut took them out)
+module skirt4s_body() difference() {           // the stand's base() + the skirt, with the 4 strap-insert bosses run up into the plate and a fillet round the sleeve
     sx = [-srv[1] / 2 - clr, srv[1] / 2 + clr];  sy = [-srv_sh - clr, srv[0] - srv_sh + clr];   // sleeve inside (as in base())
     union() {
         base(); skirt_extra4();
@@ -562,6 +568,7 @@ if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_strap") strap4();
+if (part == "v4_railshim") for (k = [0, 1]) translate([k * 8, 0, 0]) rail_shim4();   // print two (one file): only for a skirt printed before 2026-11-21 (no stop rails)
 if (part == "v4_panstrap") pan_strap4();                // pan-servo strap (2 x M3): the sleeve end's outline, one cut-out underneath
 if (part == "v4_cover") cover4();                                                                                   // print two, inner face down (the square pocket and insert bore face up)
 if (part == "v4_ear") translate([0, 0, ear_t]) rotate([180, 0, 0]) translate([0, 0, -(ear_len - ear_t)]) ear4();     // print two, octagon's outer face down, stalk up

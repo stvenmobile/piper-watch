@@ -141,6 +141,11 @@ module base() {
             translate([x * pb_holes[0] / 2, y * pb_holes[1] / 2, -insert_m4[1]]) cylinder(d = insert_m4[0], h = insert_m4[1] + 1, $fn = 24);
         for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, z_case_bot - 0.01]) insert3();   // strap inserts
     }
+    stop_rails();
+}
+
+module stop_rails() {
+    sy = [-srv_sh - clr, srv[0] - srv_sh + clr];            // sleeve inside, Y (shaft at Y = 0)
     // stop rails: the servo's case top bears on these, along more than half its length so it can't rock
     // before the strap goes on; they start just clear of the hub's opening. A 45 deg back (toward the plate)
     // so they print without supports - the base prints upside down.

@@ -102,9 +102,12 @@ Source: `34_turret_to_lid_exploded.scad` (in this folder).*
    First plug the lead from the servo adapter into one of its two bottom sockets (the other is for the tilt servo, 3.10).
    The sleeve is **52.6 mm deep and the servo case only 32**: the servo does *not* go up to the plate. It stops on two stop rails on the sleeve's side walls, 20.6 mm below the plate,
    which leaves room above it for the horn, the hub's closed end and the hub's cable window. Its bottom then sits flush with the sleeve's bottom edge, where the strap goes.
+   **Skirts printed before 2026-11-21 have no stop rails** (a modelling slip cut them out): the servo slides up to the plate, and the hub, turret and head could be lifted
+   with it. Print `base_rail_shim_v4.3mf` (two 2.8 x 24.6 x 20.4 mm bars) and push one up each side wall of the sleeve, against the plate's underside, before the servo goes in;
+   the servo's case then stops on them and traps them (no glue). Keep them at the sleeve's open (front) end, clear of the hub's opening. Re-printed skirts have the rails.
 
    ![Skirt and pan servo, section](35_render_skirt_servo_section.png)
-   *35: section along the pan servo (front to the left): plate and pillow block on top, the hub's closed end on the horn, the servo case against the stop rails, the strap flush with the sleeve's bottom.*
+   *35: section along the pan servo (front to the left): plate and pillow block on top, the hub's closed end on the horn, cut through a stop rail (green), the servo case against it, the strap flush with the sleeve's bottom.*
 3. **Pan strap** under the servo, M3 into the inserts; the plugs come out through the strap's cutout.
 4. **Hub.** Pan servo torque off. Hub down through the bearing onto the horn with its **cable window facing the front** (over the top of the pan servo, toward the sleeve's open end:
    the sleeve is closed round the hub on the other three sides). 4 x M3 down the open tube through the hub's floor into the horn. The flange should rest on the bearing and the hub turn freely.
