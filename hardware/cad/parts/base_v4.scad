@@ -167,6 +167,25 @@ module skirt4s() difference() {                // the stand's base() + the skirt
     for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, z_case_bot - 0.01]) insert3();   // strap inserts
     for (a = [0, 90, 180, 270]) rotate(a) translate([sk_ri - 1, -4, sk_z0 - z_pt - 1]) cube([wall_ro + 1.2 - (sk_ri - 1), 8, bolt_z + 7 - sk_z0 + 1]);   // shallow grooves (r 49.7) for the lid's insert columns: the first lids' columns stand 1 mm proud of the wall
 }
+// v4 pan strap (2026-11-21): the outline of the sleeve's bottom end (walls + the 4 insert bosses), so the shaft end is
+// closed round the idler disc's hole; the raised block's and the sockets' cut-outs run into one (the strip between them
+// hit the chamfered end of the servo's raised block)
+module pan_strap4() {
+    sx = [-srv[1] / 2 - clr, srv[1] / 2 + clr];  sy = [-srv_sh - clr, srv[0] - srv_sh + clr];   // sleeve inside (as in base())
+    yf = srv[0] - srv_sh;                                                                        // the servo's far end
+    difference() {
+        linear_extrude(strap_t) union() {
+            translate([sx[0] - sleeve_t, sy[0] - sleeve_t]) square([sx[1] - sx[0] + 2 * sleeve_t, sy[1] - sy[0] + sleeve_t]);
+            for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y]) circle(d = ins_boss, $fn = 32);
+        }
+        translate([0, 0, -1]) cylinder(d = sts_horn_d + 1.5, h = strap_t + 2, $fn = 48);       // idler disc
+        for (x = [-1, 1], y = pan_ins_y) translate([x * pan_ins_x, y, -1]) hole3(strap_t + 2);
+        box([-(srv[1] / 2 - bot_blk[2] + bot_clr), srv[1] / 2 - bot_blk[2] + bot_clr],          // the raised block, run on to the sockets
+            [yf - bot_skt[0], yf - bot_blk[0] + bot_clr], [-1, strap_t + 1]);
+        box([-(srv[1] / 2 - bot_skt[2] + bot_clr), srv[1] / 2 - bot_skt[2] + bot_clr],          // the sockets + plugs
+            [yf - bot_skt[1] - bot_clr, yf - bot_skt[0] + bot_clr], [-1, strap_t + 1]);
+    }
+}
 
 // ==== TURRET v4 + HEAD v4 (stand frame: pan axis = origin, z = 0 at the plate top) =========================================
 // The head is a VERTICAL camera plate carried 20 mm in front of the tilt axle by two arms; the axle is only 32 mm above the floor.
@@ -486,7 +505,7 @@ module covers4() for (sx = [-1, 1]) translate([sx > 0 ? ch_x[1] : -ch_x[1], ax_y
 
 module turret_stack4() {                        // everything above the lid, stand frame
     color("#6b8fb5") base();
-    color("#2b2b2b") translate([0, 0, z_case_bot - strap_t]) pan_strap();
+    color("#2b2b2b") translate([0, 0, z_case_bot - strap_t]) pan_strap4();
     color("#b0b6bd") translate([-pb[0] / 2, -pb[1] / 2, 0]) cube(pb);                                                     // pillow block
     translate([0, 0, z_horn - disc_h]) rotate([0, 0, 90]) servo_model();                                                  // pan servo
     color("#e8a33d") hub4();
@@ -543,7 +562,7 @@ if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_strap") strap4();
-if (part == "v4_panstrap") pan_strap();                 // the stand's pan-servo strap (2 x M3), as printed
+if (part == "v4_panstrap") pan_strap4();                // pan-servo strap (2 x M3): the sleeve end's outline, one cut-out underneath
 if (part == "v4_cover") cover4();                                                                                   // print two, inner face down (the square pocket and insert bore face up)
 if (part == "v4_ear") translate([0, 0, ear_t]) rotate([180, 0, 0]) translate([0, 0, -(ear_len - ear_t)]) ear4();     // print two, octagon's outer face down, stalk up
 if (part == "v4_plug") for (k = [0, 1]) translate([k * 14, 0, plug_stem]) plug4();                                   // print two (one file), stem down, dome up, glued over the screw

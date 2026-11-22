@@ -17,7 +17,7 @@ color("#b5c4d6") lid4();
 translate([ad_c[0], ad_c[1], wall_top + ad_so[1]]) color("#222") translate([-21.5, -16.5, 0]) cube([43, 33, 1.6]);   // servo adapter
 
 // ---- pan stack --------------------------------------------------------------------------------------------------------
-at(d_strap) color("#2b2b2b") translate([0, 0, z_case_bot - strap_t]) pan_strap();
+at(d_strap) color("#2b2b2b") translate([0, 0, z_case_bot - strap_t]) pan_strap4();
 at(d_pan) translate([0, 0, z_horn - disc_h]) rotate([0, 0, 90]) servo_model();
 at(d_skirt) color("#8fa9c4") skirt4s();
 at(d_pb) color("#b0b6bd") translate([-pb[0] / 2, -pb[1] / 2, 0]) cube(pb);
