@@ -40,7 +40,9 @@ DIRECTION = {1: -1, 2: -1}
 # watching for contact; then write the real limits here, run set_limits.py, and copy them to
 # piper-assistant (vision.follow: pan_limits, tilt_limits; home [0, 0]).
 # (The test stand's tilt limits were -70 .. +6.3 with a different linkage: not valid on the robot.)
-LIMITS = {1: (-20.0, 20.0), 2: (-10.0, 10.0)}
+# Robot, 2026-11-22: pan +-60 (no strain on the head's cables); tilt -16 .. +50 with 0 = head level (re-centred with the
+# 31 mm rod on; nose-down touches at about -19, +50 looks well up). Copied to piper-assistant (vision.follow).
+LIMITS = {1: (-60.0, 60.0), 2: (-16.0, 50.0)}
 
 
 def clamp(sid, deg):

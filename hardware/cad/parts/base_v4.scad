@@ -208,15 +208,17 @@ lens_z = oled_head ? 18 : 0;                    // lens height above the axle (O
 oz = -7.5;  ox = -3.9;                          // OLED centre: height rel. the axle; active area is 3.9 mm left of the PCB centre (header end)
 tsv = [-22, 10];  tsv_y = [-48.5, -48.5 + 45.22];  tsv_z = [z_ft, z_ft + 24.72];       // tilt servo body: x, y, z (shaft along X, near its back end)
 tsh = [-22, tsv_y[1] - 10.11, z_ft + 12.36];    // shaft: x of the horn face, y, z
-// linkage (solved: monotonic over -25 .. +45 deg; wanted -22 .. +23)
-cr_s = 12;  sa0 = 75.7;                         // servo crank length, its angle at tilt 0 (from +Y, counter-clockwise seen from +X); the servo is turned end for end (shaft 13.4 behind the rod's front)
+// linkage (solved: monotonic over -30 .. +45 deg; wanted -22 .. +23). 2026-11-22: the rod ends bought are 15 mm from eye centre to
+// body end, so the rod can't be shorter than 30; built at 31 mm eye to eye (30.2 in side view), which puts the crank straight up
+// with the head level (it was 27.9 / 27 with the crank leaning 14 deg forward). Servo travel for -22 .. +23: 113.4 .. 70.8 deg.
+cr_s = 12;  sa0 = 91.3;                         // servo crank length, its angle at tilt 0 (from +Y, counter-clockwise seen from +X); the servo is turned end for end (shaft 13.4 behind the rod's front)
 cr_h = 11;  hb0 = 255;                         // head crank length, its direction at tilt 0 (255 = down and a little back)
-rod_L = 27;                                     // pin centre to pin centre (planar; about 28 with the 7 mm X offset)
+rod_L = 30.2;                                   // pin centre to pin centre in side view (31 eye to eye with the 7 mm X offset)
 show_cowl = true;  show_fov = false;  fov_v = 43;                 // draw the camera's centre ray and its vertical field of view (C920 ~43 deg, to confirm)
 show_camframe = true;                               // false for the one-piece head concept (head_v5_concept.scad)
 cam_dx = 0;                                       // camera stack's x shift (head_v5: lens centred on the OLED window)
 xp_cam = 0;  xp_cov = 0;  xp_oled = 0;                 // exploded-view offsets for the head renders (mm along y)
-tilt4 = 0;  sa4 = 75.7;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
+tilt4 = 0;  sa4 = 91.3;                          // pose for the picture: head tilt (nose up +) and the servo angle that goes with it
 pin_s = [-33.5, tsh[1] + cr_s * cos(sa4), tsh[2] + cr_s * sin(sa4)];                     // servo crank pin: the rod end's centre (5 wide: x -36 .. -31, outside the crank's pin boss)
 pin_h = [-26.5, ax_y + cr_h * cos(hb0 + tilt4), ax_z + cr_h * sin(hb0 + tilt4)];         // head crank pin: rod end centre (x -29 .. -24, on the inner face of the bracket's boss)
 xi_x = [27.5, 49.3];  xi_y = [-15.2, 3.4];     // XIAO ESP32-S3 pocket interior (board 21 x 17.8 + 0.4 each side; USB-C end at x min, pointing at the hub hole)
@@ -423,13 +425,20 @@ module head4() translate([0, ax_y, ax_z]) rotate([tilt4, 0, 0]) translate([0, -a
     }
     }
 }
-module crank4() color("#e8a33d") difference() {                    // hub on the horn's 4 x M3 (PCD 14) + arm to the 14 mm pin; M3 insert in the pin boss, rod end bolted on its free face
+// Crank v2 (2026-11-22, after the first print): a 7 mm hole through the hub's centre for the horn's own M3 centre screw (its head
+// kept the crank from sitting flush), and the 4 horn-screw holes now go right through (the two beside the pin boss stopped inside
+// it), with 6 mm counterbores so every screw has 3 mm under its head: 4 x M3 x 6 into the horn.
+module crank4() color("#e8a33d") difference() {                    // hub on the horn's 4 x M3 (PCD 14) + arm to the 12 mm pin; M3 insert in the pin boss, rod end bolted on its free face
     hull() {
         translate([tsh[0] - 6, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = 20, h = 3, $fn = 48);              // hub x -28 .. -25
         translate([pin_s[0] + 2.5, pin_s[1], pin_s[2]]) rotate([0, 90, 0]) cylinder(d = 9, h = 6, $fn = 32);       // pin boss x -31 .. -25
     }
     translate([pin_s[0] + 2.5 - 0.01, pin_s[1], pin_s[2]]) rotate([0, 90, 0]) cylinder(d = insert_m3[0], h = insert_m3[1] + 0.2, $fn = 24);   // insert bore from the free face
-    translate([tsh[0] - 7, tsh[1], tsh[2]]) rotate([0, 90, 0]) for (a = [45 : 90 : 360]) rotate(a) translate([sts_horn_pcd / 2, 0, 0]) cylinder(d = 3.4 + cal_hole, h = 5, $fn = 24);   // horn screws
+    translate([tsh[0] - 10, tsh[1], tsh[2]]) rotate([0, 90, 0]) cylinder(d = 7, h = 8, $fn = 40);                  // the horn's centre screw head
+    translate([tsh[0] - 10, tsh[1], tsh[2]]) rotate([0, 90, 0]) for (a = [45 : 90 : 360]) rotate(a) translate([sts_horn_pcd / 2, 0, 0]) {
+        cylinder(d = 3.4 + cal_hole, h = 8, $fn = 24);                                                             // horn screws, right through (x -32 .. -24)
+        cylinder(d = 6, h = 4, $fn = 32);                                                                          // counterbore from the free face to x -28: 3 mm under the head
+    }
 }
 module tilt_rod4() color("#c0392b") {                                // M3 threaded rod + two rose-joint rod ends (eye d 10, 5 wide, as on the test stand)
     hull() for (p = [pin_s, pin_h]) translate(p) sphere(d = 3, $fn = 12);

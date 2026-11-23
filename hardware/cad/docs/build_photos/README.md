@@ -14,9 +14,9 @@ All the printable files are made by `hardware/cad/export.sh` into `hardware/cad/
 |---|---|---|
 | 1 | Tub: feet, inserts, Orin, power, button, antennas | ✅ |
 | 2 | Lid with its wall, servo adapter | ✅ |
-| 3 | Pan stack, turret, tilt linkage and the head, onto the lid (render 34) | next |
+| 3 | Pan stack, turret, tilt linkage and the head, onto the lid (render 34) | ✅ (2026-11-22; servos centred, limits set) |
 | 4 | Head: front piece, back piece, OLED, camera | ✅ (built ahead; goes in at 3.8) |
-| 5 | Head into the cheeks, cheek covers and ears | goes in at 3.8 |
+| 5 | Head into the cheeks, cheek covers and ears | ✅ (at 3.8) |
 
 ## Parts legend (what to print, and what NOT to)
 
@@ -88,7 +88,7 @@ the 12 V DC jack, the 19 mm momentary power button (Geekworm T100, LED ring), tw
 ![Base closed, from the back](32_base_closed_rear.jpg)
 *32: the base closed, from the back: lid and round wall on the tub; on the back wall the 12 V jack (left), the two antenna connectors and the port window with the USB cables leaving it.*
 
-## Step 3: pan stack, turret, tilt linkage, onto the lid
+## Step 3: pan stack, turret, tilt linkage, onto the lid ✅
 
 Everything above the lid is built **on the bench as one unit** and lowered onto the lid last. Three things force the order:
 the hub's four screws into the pan servo's horn are driven *down the open hub tube*, so the hub goes on before the turret;
@@ -100,7 +100,7 @@ and the head's cables come out of the hub's window *inside* the skirt, so they h
 Source: `34_turret_to_lid_exploded.scad` (in this folder).*
 
 **Parts:** `base_skirt_v4.3mf`, `base_pan_strap_v4.3mf`, `base_hub_v4.3mf`, `base_turret_v4.3mf`, `base_strap_v4.3mf` (tilt servo strap), `base_crank_v4.3mf`, `base_cowl_v4.3mf`, the head (step 4), the cheek covers, ears and plugs (step 5).
-**Bought:** ServoCity 1" pillow block, 2 x STS3215 (ID 1 = pan, ID 2 = tilt), M3 threaded rod + 2 M3 rose-joint rod ends + 2 jam nuts, 2 x 608 bearings.
+**Bought:** ServoCity 1" pillow block, 2 x STS3215 (ID 1 = pan, ID 2 = tilt), M3 threaded rod (about 18 mm) + 2 M3 rose-joint rod ends, threadlocker, 2 x 608 bearings.
 **Screws** (lengths marked ~ are estimates: check before driving them home): 4 x M4 (pillow block), M3 x 8 (pan strap), 4 x short M3 ~6 (hub into the horn: they must not bottom out in the horn),
 2 x M3 x 8 (tilt strap), 4 x short M3 ~6 (crank onto the tilt horn), 2 x M3 ~10 (rod ends), 4 x M3 x 8 (turret onto the hub flange), 4 x M2.5 ~8 (skirt into the wall), 2 x M3 x 8 button head (cowl).
 **On the bench:** the servo adapter powered and on USB, with `tools/servo_test` to switch a servo's torque off (`py goto.py --id N --release`) so it turns by hand.
@@ -119,6 +119,9 @@ Source: `34_turret_to_lid_exploded.scad` (in this folder).*
    ![Skirt and pan servo, section](35_render_skirt_servo_section.png)
    *35: section along the pan servo (front to the left): plate and pillow block on top, the hub's closed end on the horn, cut through a stop rail (green), the servo case against it, the strap flush with the sleeve's bottom.*
 3. **Pan strap** under the servo, M3 into the inserts; the plugs come out through the strap's cutout.
+
+   ![Hub on the pan servo](37_hub_on_pan_servo.jpg)
+   *37: the pan servo with the hub on its horn, out of the skirt: the hub's cable window just above the horn, the flange on top.*
 4. **Hub.** Pan servo torque off. Hub down through the bearing onto the horn with its **cable window facing the front** (over the top of the pan servo, toward the sleeve's open end:
    the sleeve is closed round the hub on the other three sides). 4 x M3 down the open tube through the hub's floor into the horn. The flange should rest on the bearing and the hub turn freely.
 
@@ -126,10 +129,15 @@ Source: `34_turret_to_lid_exploded.scad` (in this folder).*
 
 5. **Tilt servo** in its cradle: plug its lead into its bottom socket first (it leaves through the cradle's open end toward the hub hole), then the strap across its top, 2 x M3 x 8.
    **XIAO** hot-glued into its pocket, USB-C toward the hub hole.
-6. **Crank** onto the tilt servo's horn, 4 x M3. Torque off, then turn the horn so the crank points **up, leaning about 15 degrees forward** (its position with the head level).
-7. **Tilt rod:** the two rod ends on the M3 rod, **27 mm eye centre to eye centre**, jam nuts snug. One eye onto the crank's pin: M3 through the eye into the crank's insert, from outside.
+6. **Crank** onto the tilt servo's horn, 4 x M3 x 6 (counterbored). Torque off, then turn the horn so the crank points **straight up**
+   (its position with the head level). If the holes don't line up there, lift the horn off its spline and refit it a tooth over:
+   the 4 holes (90 deg) and the 25-tooth spline together give 3.6 deg steps. Cranks printed before 2026-11-22 don't sit flush:
+   reprint (the new one clears the horn's centre screw head and its 4 holes go right through).
+7. **Tilt rod:** the two rod ends on the M3 rod, **31 mm eye centre to eye centre** (measured straight), threadlocker on both
+   threads. Rod ends 15 mm from eye centre to body end leave only 1 mm between the bodies, so no jam nuts; the rod is about 18 mm.
+   One eye onto the crank's pin: M3 through the eye into the crank's insert, from outside.
 8. **Head into the cheeks** (608s, axle pins, covers, ears: step 5), then the rod's other eye onto the head's crank bracket: M3 through the eye into the bracket's insert (a ball-end hex key between arm and cheek helps).
-   **Check by hand** (tilt servo torque off): the head swings nose-down to nose-up smoothly, and is level with the crank up-and-forward; if not, change the rod's length a turn at a time.
+   **Check by hand** (tilt servo torque off): the head swings nose-down to nose-up smoothly, and is level with the crank straight up; if not, change the rod's length a turn at a time.
 
 **Cables and joining**
 
@@ -147,19 +155,37 @@ Source: `34_turret_to_lid_exploded.scad` (in this folder).*
      opens the hub's whole bore plus a slot 15 mm forward, so a plug can be tipped in from the front.
    - If a plug still won't go, cut the cable, pull it through bare and fit a solder-on USB-A plug (or splice the old one back) afterwards.
      USB 2.0 is fine with a short splice if the two data wires stay twisted.
+
+   ![Turret unit with the hub and cables](38_turret_unit_hub_cables.jpg)
+   *38: the turret unit on its back: the head (camera, glass eyes, the mouth's window), cheeks and covers; the hub's flange and tube, with the pan servo's horn on its closed end and the cables (USB, servo lead) out of its window.*
 10. **Turret onto the hub flange**, the head facing the same way as the hub's window (front), 4 x M3 x 8 from above into the flange's inserts. Pull the slack through the window, forward over the pan servo,
     and plug the **tilt servo's lead into the pan servo's second socket**.
-    **Pan check:** turn the turret slowly by hand to each side and watch the window: the cables must slide, not pinch between the hub and the sleeve. Note how far it turns freely; the Orin
-    allows +-90 degrees (`head.servos.pan_limits`): lower that if the cables tighten sooner.
+    **Pan check:** turn the turret slowly by hand to each side and watch the window: the cables must slide, not pinch between the hub and the sleeve. Note how far it turns freely
+    (the first build: +-60 degrees with no strain).
 11. **Onto the lid:** the USB cables down through the lid's cable slot into the tub (to the Orin's ports), then the skirt over the wall (its grooves over the wall's four insert columns), the sleeve's open end to the front.
     4 x M2.5 radially through the skirt into the column inserts.
+    **Keep everything under the pan servo below 16 mm above the lid** (the strap's underside ends up there). On the first build the servo adapter on its
+    5 mm standoffs, with a servo lead plugged into its top-entry connector, stood about 20 mm tall and held the skirt 4 mm short (photo 36).
+    The adapter was taken off its standoffs and stuck inside the skirt with an adhesive mount, behind the servo, at least 30 mm up from the skirt's
+    lower edge (so the wall passes under it). Route servo leads round the side of the sleeve, never under the strap.
+
+    ![Lid with the adapter on its standoffs](36_lid_adapter_on_standoffs.jpg)
+    *36: the lid on the first build, adapter still on its standoffs: the pan servo's lead (red / white / black) plugged into it stands up out of the board, which is what held the skirt 4 mm high.*
 12. **Cowl** over the back of the turret, 2 x M3 x 8 button head from outside into the posts' inserts.
 
-**Last: centre and limits.** The servos' stored centre and tilt limits were set on the old test stand, with a different linkage, so set them again:
+    ![Turret from above, cowl on](39_turret_from_above_cowl.jpg)
+    *39: from above, cowl (blue) at the back: the head (left) between the cheeks (608s, white spacers, blue covers); behind it the tilt servo under its strap, the head's crank bracket, and the head's wires going down to the floor hole.*
 
-- Torque off both, hold the head **level and facing front**, then `py centre_here.py 1` and `py centre_here.py 2` (this pose becomes 2048 on both).
-- Move the tilt in small steps (`py goto.py --id 2 <deg>`) nose-down and nose-up to just short of any contact (floor, cowl window, cheeks). Put the two angles in `LIMITS[2]` in `tools/servo_test/sts.py` and run `py set_limits.py 2`.
-- On the Orin (`piper_assistant` config `head.servos`): the same `tilt_limits`, and `home` back to `[0, 0]` (it is `[0, -33]` for the old stand).
+**Last: centre and limits** (`tools/servo_test`, run on the Orin: `sts.py` finds the adapter by its USB ID; stop piper-assistant first, only one program can use the adapter).
+
+- `python3 ping.py 1 2` reads where both servos are and their stored limits, without moving anything.
+- **Pan:** head facing straight forward (by hand, torque off, or in small `goto.py --id 1` steps), then `python3 center_here.py 1`: that pose becomes 0.
+- **Tilt, with the rod on:** bring the head **level** with small `goto.py --id 2` steps, then `python3 center_here.py 2` (hold the head: it turns the torque off).
+  Centre the tilt with the rod on: centring the bare crank "straight up" left the first build's head looking 15 degrees up at 0.
+- **Limits:** start narrow (`LIMITS` in `sts.py`, then `python3 set_limits.py <id>`) and widen a step at a time, watching for contact and the load figure `goto.py` prints.
+  First build: **pan -60 .. +60** (no strain on the cables), **tilt -16 .. +50** (nose-down touches at about -19; +50 looks well up).
+  A servo that stalls cuts its own drive (overload protection) and then ignores moves: `python3 center_both.py --release` resets it.
+- **piper-assistant** (`config.yaml`, `vision: follow:`): the same `pan_limits` and `tilt_limits`, `home: [0, 0]`, `tilt_ratio: 1.0` (the test stand's linkage needed 1.6).
 
 ---
 

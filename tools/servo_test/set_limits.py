@@ -33,6 +33,13 @@ try:
     eeprom(bus.w2, sid, ADDR_MIN_ANGLE, a)
     eeprom(bus.w2, sid, ADDR_MAX_ANGLE, b)
     eeprom(bus.w1, sid, ADDR_LOCK, 1)
-    print(f"ID {sid}: angle limits now {bus.r2(sid, ADDR_MIN_ANGLE)}..{bus.r2(sid, ADDR_MAX_ANGLE)} (raw)")
+    for attempt in range(5):                # read back; the servo may still be busy saving
+        try:
+            print(f"ID {sid}: angle limits now {bus.r2(sid, ADDR_MIN_ANGLE)}..{bus.r2(sid, ADDR_MAX_ANGLE)} (raw)")
+            break
+        except (IOError, IndexError):
+            time.sleep(0.3)
+    else:
+        print(f"ID {sid}: limits written; no answer reading them back - check with: python3 ping.py {sid}")
 finally:
     bus.close()
