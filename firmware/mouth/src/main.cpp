@@ -9,6 +9,14 @@
 //   - sleep: closed relaxed lips that breathe slowly, with three Z's rising from the right corner;
 //   - surprise: an oval "O" with towers on its upper lip that pops open (and swells if Piper talks).
 //
+// Two STYLES draw the same modes (S command, remembered across restarts on the ESP32-S3):
+//   lips      the envelope mouth above (the default)
+//   spectrum  the lanes are an audio spectrum analyser, mirrored centre-out (low pitches in the middle, high
+//             towards the corners), mirrored about a flat centre line: each lane is one bar that jumps up with
+//             each syllable and falls back slowly. Most syllables lean to one side; about one in four is symmetric. At rest a flat dashed line whatever the mood (no smile or
+//             frown); asleep the bars breathe low under the Zzz. Surprise, research, blank and the status
+//             symbols as in lips.
+//
 // The Orin sets one MODE; changes between modes blend smoothly. Speech loudness only moves the lips in talk modes:
 //   0 neutral     closed lips (the default)          4 frown        closed, corners down
 //   1 talk        neutral, lips move with speech     5 surprise     the "O"
@@ -27,11 +35,15 @@
 //                0 idle (none), 1 listening (+ / - alternating), 2 thinking (3 dots filling), 3 confused (??? bobbing)
 //                Listening stops talking: talk -> neutral, happytalk -> smile.
 //   D1 / D0      demo on / off (D0 returns to neutral)
+//   S<name|0..1> style: lips or spectrum ("Sspectrum", "S1"); saved on the ESP32-S3
 //   C<0..255>    contrast (default 160)
 //   ?            print the current state
 #include <Arduino.h>
 #include <SPI.h>
 #include <U8g2lib.h>
+#if defined(ESP32)
+#include <Preferences.h>                                    // the style survives a restart (NVS)
+#endif
 
 static const int PIN_CS = D5, PIN_DC = D0, PIN_RST = D1;
 // The OLED sits upside down in the assembled head, so the picture is turned 180 deg
@@ -105,10 +117,14 @@ static void vrun(int x, int y0, int y1) {                  // a vertical run y0.
 }
 
 // ---- simulated speech: syllables, words, short pauses ---------------------------------------------------------------
+// Each syllable also picks a spectral shape for the spectrum style: three "formant" peaks (0 = lowest band .. 1 =
+// highest) that the current peaks glide towards, and ~20 % of syllables are a hissy "s" that lights the high bands.
 struct Speech {
   float segStart = 0, segLen = 0, pk = 0;
-  bool voiced = false;
+  bool voiced = false, hiss = false;
+  float skew = 0;                                          // spectrum style: 0 = symmetric, else lean left (-) / right (+)
   int syl = 0, word = 0;
+  float f[3] = {0.10f, 0.35f, 0.60f}, ft[3] = {0.10f, 0.35f, 0.60f};
 
   void next(float now) {
     segStart = now;
@@ -128,6 +144,23 @@ struct Speech {
     voiced = true;
     segLen = 120 + rnd() * 140;
     pk = rnd() < 0.15f ? 1.0f : 0.45f + 0.55f * rnd();
+    hiss = rnd() < 0.2f;
+    // most syllables lean to one side (formants shift outward there, that side is louder, each side has its own
+    // noise); about 1 in 4 is a mirror-symmetric pattern
+    skew = rnd() < 0.75f ? (rnd() < 0.5f ? -1 : 1) * (0.3f + 0.7f * rnd()) : 0;
+    ft[0] = 0.04f + 0.16f * rnd();                         // F1: low
+    ft[1] = 0.25f + 0.30f * rnd();                         // F2: middle
+    ft[2] = 0.55f + 0.30f * rnd();                         // F3: upper middle
+  }
+
+  void glide() { for (int k = 0; k < 3; k++) f[k] += (ft[k] - f[k]) * 0.18f; }
+
+  // Relative energy at frequency x (0..1), about 0..1, with per-lane, per-frame noise so the bars dance.
+  float spectrum(float x, float noise) const {
+    float s = hiss ? 0.25f * gaussf(x, 0.05f, 0.15f) + 0.9f * gaussf(x, 0.85f, 0.25f)
+                   : 0.30f * (1 - x) + 1.00f * gaussf(x, f[0], 0.07f) + 0.75f * gaussf(x, f[1], 0.09f)
+                     + 0.45f * gaussf(x, f[2], 0.10f);
+    return s * (0.55f + 0.65f * noise);
   }
 
   float level(float now, bool on) {
@@ -221,6 +254,53 @@ static void vbar(int x, int w, int h, float pos) {
     if (top > 0) vrun(xx, cy - g - top, cy - g - 1);
     if (bot > 0) vrun(xx, cy + g, cy + g + bot - 1);
   }
+}
+
+// ---- the spectrum style -----------------------------------------------------------------------------------------------
+enum Style : uint8_t { LIPS, SPECTRUM, NSTYLES };
+static const char *const STYLE_NAMES[NSTYLES] = {"lips", "spectrum"};
+static Style style = LIPS;
+
+namespace SP {
+const int rest = 1;                                        // half-height at rest: a 3 px dash per lane
+const float attack = 0.7f, fall = 0.05f;                   // jump up fast, fall 5 % of full height per frame
+const float corner = 0.35f;                                // bars at the corners reach this fraction of the middle's
+const float gain = 1.7f;                                   // speech loudness x spectrum (~0..1) -> bar height
+}
+static float spDisp[K::lanes];
+
+// loud: the smoothed loudness (talking), or the breathing level asleep (then smooth, no dancing)
+static void spectrumLanes(uint32_t nowMs, float loud, bool asleep, int x0, int pitch, int barW, int n, float amp) {
+  const float c = (n - 1) / 2.0f;
+  // Mirrored lanes share their noise, so the pattern is symmetric unless the syllable leans (speech.skew); a leaning
+  // syllable also gives each side its own noise.
+  static float nz[K::lanes];
+  for (int i = 0; i < n; i++) nz[i] = (i <= n - 1 - i || speech.skew != 0) ? rnd() : nz[n - 1 - i];
+  for (int i = 0; i < n; i++) {
+    float pos = (i + 0.5f) / n, freq = c > 0 ? fabsf(i - c) / c : 0;
+    float shape = SP::corner + (1 - SP::corner) * taper(pos);       // a mouth: lower towards the corners
+    float side = i < c ? -1.0f : i > c ? 1.0f : 0.0f, lean = speech.skew * side;   // +: the side it leans to
+    float sp = speech.spectrum(clampf(freq - 0.15f * lean, 0, 1), nz[i]) * (1 + 0.45f * lean);
+    float target = asleep ? loud * 4 * (1 - 0.6f * freq) : SP::gain * loud * sp;
+    target = clampf(target * shape, 0, 1);
+    float &d = spDisp[i];
+    if (target > d) d += (target - d) * SP::attack;
+    else            d = fmaxf(target, d - SP::fall);
+
+    int h = SP::rest + jround(d * amp);                    // a flat centre line: no smile / frown here
+    int x = x0 + i * pitch;
+    for (int xx = x; xx < x + barW; xx++) vrun(xx, MID - h, MID + h);
+  }
+}
+
+static void setStyle(Style s, bool save) {
+  style = s;
+  for (int i = 0; i < K::lanes; i++) spDisp[i] = 0;
+#if defined(ESP32)
+  if (save) { Preferences p; p.begin("mouth", false); p.putUChar("style", (uint8_t)s); p.end(); }
+#else
+  (void)save;
+#endif
 }
 
 // ---- sleep: Zzz -------------------------------------------------------------------------------------------------------
@@ -395,6 +475,7 @@ static void frame(uint32_t nowMs) {
   // In talk modes the lips follow the Orin's L levels while they keep coming, and otherwise simulated speech.
   const bool live = !demo && liveAt && nowMs - liveAt < 1500;
   float loudRaw = speech.level(now, talks && !live);
+  speech.glide();
   if (live) loudRaw = talks ? liveLevel : 0;
   loudS += (loudRaw - loudS) * K::follow / 100;
 
@@ -429,6 +510,10 @@ static void frame(uint32_t nowMs) {
       const char *t = "Oh!";
       oled.drawStr((W - oled.getStrWidth(t)) / 2, MID + oled.getAscent() / 2, t);
     }
+  } else if (style == SPECTRUM) {
+    // talking: half the raw loudness, so each syllable punches (the lips use the smoothed one)
+    spectrumLanes(nowMs, expr == SLEEP ? loudS : 0.5f * (loudS + loudRaw), expr == SLEEP, x0, pitch, barW, n,
+                  MID - 4 - SP::rest);
   } else {
     for (int i = 0; i < n; i++)
       vbar(x0 + i * pitch, barW, jround(fminf(MID - 1 - gapHalf, v[i] * amp)), (i + 0.5f) / n);
@@ -443,8 +528,8 @@ static char lineBuf[24];
 static int lineLen = 0;
 
 static void report() {
-  Serial.printf("mouth: %s, mode %d %s, status %d %s, contrast %d\n", demo ? "DEMO" : "LIVE", (int)mode,
-                MODES[mode].name, (int)ind, IND_NAMES[ind], contrast);
+  Serial.printf("mouth: %s, mode %d %s, status %d %s, style %s, contrast %d\n", demo ? "DEMO" : "LIVE", (int)mode,
+                MODES[mode].name, (int)ind, IND_NAMES[ind], STYLE_NAMES[style], contrast);
 }
 
 static void stopDemo() {
@@ -479,6 +564,13 @@ static void command(const char *s) {
       if (demo) scene = -1; else setMode(NEUTRAL_M);
       report();
       break;
+    case 'S': case 's': {
+      int st = lookup(s + 1, STYLE_NAMES, NSTYLES);
+      if (st < 0) { Serial.printf("mouth: unknown style '%s'\n", s + 1); break; }
+      if (st != style) setStyle((Style)st, true);
+      report();
+      break;
+    }
     case 'C': case 'c': contrast = constrain(v, 0, 255); oled.setContrast(contrast); report(); break;
     case '?': report(); break;
     default: break;
@@ -506,6 +598,10 @@ void setup() {
   oled.setContrast(contrast);
   for (int i = 0; i < K::lanes; i++) texv[i] = 1;
   for (int k = 0; k < K::bumps; k++) bumpNew(bump[k], millis(), k);
+#if defined(ESP32)
+  { Preferences p; p.begin("mouth", true); uint8_t st = p.getUChar("style", LIPS); p.end();
+    setStyle(st < NSTYLES ? (Style)st : LIPS, false); }
+#endif
   report();
 }
 
