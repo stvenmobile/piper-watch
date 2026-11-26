@@ -18,8 +18,9 @@ Licence: GPL-3.0-or-later (the eyes are a port of FluxGarage RoboEyes) - see `LI
 2. Plug the board's **USB-UART** USB-C port (a COM port in Device Manager).
 3. Pick the env (status bar, or `-e`), **Upload**, then **Monitor** (115200). If it can't connect, hold BOOT,
    tap RESET, release BOOT.
-4. 5": power the board from its **USB** socket as well as the **UART** socket (to the PC) - on one cable the
-   lit screen can pull the voltage down far enough for the serial chip (COM port) to drop off.
+4. Use the socket marked **UART** (the CH340 serial chip) for upload and monitor. The **USB** socket is the
+   P4's own USB: it shows a COM port only while the chip is in its bootloader, so the port vanishes when the
+   board resets (an error at the end of the upload, and no serial monitor afterwards).
 
 ## Orientation
 Upright = the board's USB connectors on the **left**. Mounted the other way round, send `R` (rotates 180°).
