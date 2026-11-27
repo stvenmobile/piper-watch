@@ -4,17 +4,30 @@
 //   TOP      turret top: a 6 mm plate on the hub flange (the same 4 x M3) with a ring hanging 4 mm down over the
 //            skirt, 1.5 mm clear of it: the 13 mm gap above the skirt is hidden. Prints plate down, ring up.
 //   HEAD     one shell: front wall with the screen window (45 deg chamfer) and the camera seat, sides, top and
-//            floor, all four corners rounded (r 24) seen from the front. Open at the back. 160 wide x 53 deep x ~140 tall, centred over the pan axis.
+//            floor, all four corners rounded (r 24) seen from the front. Open at the back. 160 wide (197 over the pods) x 53 deep x ~146 tall, centred over the pan axis.
 //            Prints front face down, no supports.
 //   BACK     the back panel: sits flush in the open back on 4 corner bosses, 4 x M3 into heat-set inserts.
 //   CAMSTRAP holds the C920's bare board on its seat (2 x M2 self-tapping), as on head v6.
 // The panel (screen facing forward, USB-C ports on the left seen from the front) is held by 4 x M3 x 8 through its
 // own holes into bosses behind the front wall; its glass rests on the wall's inner face. The camera looks 4 deg up.
-// Width: 160 leaves 11.5 mm beside the panel's USB-C edge - room for a RIGHT-ANGLE USB-C plug, not a straight one.
-// part = "v7_view" | "v7_head" | "v7_back" | "v7_camstrap" | "v7_top"
+// Width: 160 leaves only 11.5 mm beside the panel's USB-C edge, too little for the right-angle plug in the upper
+// (UART) jack: the head is wider in the middle - a hollow pod each side (ear_style smooth or ribbed) gives it 30 mm
+// past the board's edge. Add-ons: stepped ear cups on the pods with antenna stalks.
+// part = "v7_view" | "v7_head" | "v7_back" | "v7_camstrap" | "v7_top" | "v7_ear" | "v7_ball" | "v7_stalk"
 //
-// Version 0.3.1 - created 2026-11-26, last modified 2026-11-26
+// Version 0.6.1 - created 2026-11-26, last modified 2026-11-27
 // History:
+//   0.6.1  2026-11-27  Chin 6 mm taller (floor to panel 26, H 146.3); everything above moves up with it.
+//                      Ear antenna stalks 40 long (were 30).
+//   0.6.0  2026-11-27  Back to built-in pods (0.4.0's idea; the bolt-on pills of 0.5.0 are dropped: they couldn't
+//                      sit back from the front face). The pods now give 30 mm past the board's edge over 40+ of
+//                      height for the upper (UART) jack's plug and cable.
+//                      ear_style "smooth" | "ribbed". Ears (two-step cups, 30 / 20, the 1 mm front step for a
+//                      second colour) with antenna stalks and balls are add-ons (v7_ear, v7_ball, v7_stalk).
+//   0.5.0  2026-11-27  Ears are bolt-on parts (v7_ear, print 2): stepped pills on 3 x M3 inserts. The shell's outline
+//                      and the back panel go back to the plain 160 wide head; the side walls get the openings.
+//   0.4.0  2026-11-27  Hollow robot ears on both sides at the USB-C ports' height: the right-angle plug needs ~15 mm
+//                      beyond the board's edge (it had 11.5). The back panel takes the ears' outline too.
 //   0.3.1  2026-11-26  Floor cable opening matches the turret top's hole (cable_hole2d) - the old larger opening
 //                      with the pointed back was covered by the top plate anyway.
 //   0.3.0  2026-11-26  Back-panel bosses on gussets: each boss's front end rises from its wall at 45 deg (prints
@@ -43,9 +56,9 @@ W = 160;  D = 53;                              // width, depth (centred on the p
 wt = 2.5;                                      // shell wall
 rb = 24;  rt = 24;                             // corner radii seen from the front: bottom, top
 hz0 = tp_z + tp_t;                             // head's underside, on the plate
-mb = 20;                                       // floor to the panel's bottom edge
+mb = 26;                                       // floor to the panel's bottom edge (a bigger chin: was 20)
 gap_b = 5;  cam_board = [82, 23];  tm = 12;    // panel -> camera board, the C920 board, top margin
-H = mb + cp5_board[1] + gap_b + cam_board[1] + tm;   // 140.3
+H = mb + cp5_board[1] + gap_b + cam_board[1] + tm;   // 146.3
 yf = D / 2;  yi = yf - wt;                     // front face, front wall's inner face (the glass rests on it)
 pz = hz0 + mb;                                 // panel board's bottom edge
 px = -cp5_board[0] / 2;                        // panel board's left edge seen from behind (x = model x + px)
@@ -76,10 +89,63 @@ bk_pts = [[W / 2 - rb, hz0 + wt + 4], [-(W / 2 - rb), hz0 + wt + 4],
 hp_pts = [[42, -14], [-42, -14], [42, 3], [-42, 3]];
 
 // ---- helpers -----------------------------------------------------------------------------------------------------
-module head2d(off = 0) hull() {
+module body2d(off = 0) hull() {
     for (sx = [-1, 1]) translate([sx * (W / 2 - rb), hz0 + rb]) circle(r = rb - off, $fn = 96);
     for (sx = [-1, 1]) translate([sx * (W / 2 - rt), hz0 + H - rt]) circle(r = rt - off, $fn = 96);
 }
+// ---- ears ----------------------------------------------------------------------------------------------------------
+// The head is wider in the middle: a hollow pod on each side, through the full depth (a prism along y: prints with
+// no overhang, front face down; the back panel takes its outline), centred on the space a right-angle USB-C plug in
+// the UPPER (UART) jack needs - with room for common cables, not just the one in hand (25 out from the board's edge,
+// 7 thick, cable down ~32): inside, the pod reaches 30 past the board's edge over 40+ of height, from 9.5 above the
+// jack's centre down. The left pod is the mirror image. The ears themselves are add-on parts (below).
+ear_style = "smooth";                          // "ribbed" | "smooth": grooves along the pod's outer face, or none
+jack = [cp5_board[0] / 2, 15.4, pz + cp5_usbc[1][1] + cp5_usbc_sz[1] / 2];   // upper jack: board edge x, centre y, z
+ear_zc = jack[2] + 9.5 - 20;                   // pod centre height: the 40 tall plug + cable space, centred (z ~77.5)
+ear_rib = [3, 4, 1.2, 12];                     // ribbed: grooves - count, height, depth, pitch
+ear_out = jack[0] + 30 + wt + (ear_style == "ribbed" ? ear_rib[2] : 0);   // pod's outer face x (98.5, ribbed 99.7)
+ear_h = 50;                                    // outer face height
+ear_fl = tan(30);                              // flanks: they widen by this per mm towards the wall
+ear_btn = [26, 16, 5, 10];                     // button: base d, top d (45 deg: (26 - 16) / 2 = 5 proud), height, dimple d
+module ear2d() for (m = [0, 1]) mirror([m, 0]) difference() {
+    offset(r = 2) offset(delta = -2) polygon([
+        [W / 2 - 3, ear_zc - ear_h / 2 - (ear_out - W / 2 + 3) * ear_fl], [ear_out, ear_zc - ear_h / 2],
+        [ear_out, ear_zc + ear_h / 2], [W / 2 - 3, ear_zc + ear_h / 2 + (ear_out - W / 2 + 3) * ear_fl]]);
+    if (ear_style == "ribbed") for (i = [0 : ear_rib[0] - 1])
+        translate([ear_out - ear_rib[2], ear_zc + (i - (ear_rib[0] - 1) / 2) * ear_rib[3] - ear_rib[1] / 2]) square([ear_rib[2] + 1, ear_rib[1]]);
+}
+// the head's outline seen from the front, with the pods; off > 0 = inset (the inside, the back panel)
+module head2d(off = 0) offset(r = -off) offset(r = -1.5) offset(delta = 1.5) union() { body2d(0); ear2d(); }
+// ---- add-ons: ear cups, antennas ----------------------------------------------------------------------------------
+// EAR: a stepped "headphone" cup on each pod's outer face (decoration), 2 x M3 heat-set inserts in its back, screws
+// from inside the pod. One part, print 2: the left ear is the right one turned 180 deg about the vertical, so its
+// screws sit at y +9 (the right ear's at y -9 keep clear of the plug's space). A 4 mm socket in the cup's top rim
+// takes an antenna stalk: 4 mm rod (dowel, brass, carbon) or the printed v7_stalk, a ball (v7_ball) glued on the tip.
+// The cup's thin front step can be printed in a second colour.
+cup = [[30, 8, 1.5], [20, 1, 0]];             // ear cup steps: diameter, height, top chamfer (back to front)
+cup_scr = [[-6, -9], [6, -9]];                 // ear screws, cup frame (x = down, y): global y -9, z ear_zc -+ 6
+sock = [4.2, 10];                              // antenna sockets: d, depth
+stalk = [3.9, 40];                             // printed stalks: d, length
+ball = [13, 1.5];                              // ball: d, flat cut at the bottom
+module chamf_cyl(d, h, c) union() { cylinder(d = d, h = h - c, $fn = 96); translate([0, 0, h - c - 0.01]) cylinder(d1 = d, d2 = d - 2 * c, h = c + 0.01, $fn = 96); }
+module cup_local() difference() {                // back face on z = 0, axis +z; "up" is -x
+    union() { for (i = [0 : len(cup) - 1]) translate([0, 0, sum_h(i)]) chamf_cyl(cup[i][0], cup[i][1] + 0.01, cup[i][2]); }
+    for (p = cup_scr) translate([p[0], p[1], -0.01]) cylinder(d = insert_m3[0], h = insert_m3[1] + 1, $fn = 24);
+    translate([-cup[0][0] / 2 - 1, 0, cup[0][1] / 2]) rotate([0, 90, 0]) cylinder(d = sock[0], h = sock[1] + 1, $fn = 24);   // antenna socket, down from the rim
+}
+function sum_h(i) = i == 0 ? 0 : sum_h(i - 1) + cup[i - 1][1];
+module ear_r7() translate([ear_out, 0, ear_zc]) rotate([0, 90, 0]) cup_local();   // right ear, in place
+module ears7() { ear_r7(); rotate([0, 0, 180]) ear_r7(); }
+module ball_local() difference() {               // flat on z = 0, socket up from it
+    translate([0, 0, ball[0] / 2 - ball[1]]) sphere(d = ball[0], $fn = 64);
+    translate([0, 0, -ball[0]]) cube(2 * ball[0], center = true);
+    translate([0, 0, -1]) cylinder(d = sock[0], h = 7, $fn = 24);
+}
+module ear_holes7() {                            // in the head: screw clearance through the pods' outer walls
+    for (r = [0, 180]) rotate([0, 0, r]) for (p = cup_scr)
+        translate([ear_out - wt - 1, p[1], ear_zc - p[0]]) rotate([0, 90, 0]) hole3(wt + 2);
+}
+
 module ey(y0, y1) translate([0, y1, 0]) rotate([90, 0, 0]) linear_extrude(y1 - y0) children();   // 2D (x, z) -> y0 .. y1
 
 module bk_boss7(p) {
@@ -154,6 +220,7 @@ module head7() difference() {
     // floor: the cables' opening, the same shape as the hole in the turret top below it, and 4 x M3 clearance holes
     translate([0, 0, hz0 - 1]) linear_extrude(wt + 2) cable_hole2d();
     for (p = hp_pts) translate([p[0], p[1], hz0 - 1]) hole3(wt + 2);
+    ear_holes7();                                                                                          // add-ons' screws
 }
 
 module back7() difference() {
@@ -183,6 +250,10 @@ if (part == "v7_view") {
     translate([0, 0, z_pt]) {
         color("#2a2d31") top7();
         color("#2a2d31") head7();
+        color("#8a9099") ears7();
+        color("#c8a040") for (r = [0, 180]) rotate([0, 0, r]) translate([ear_out + cup[0][1], 0, ear_zc]) rotate([0, 90, 0]) cylinder(d = cup[1][0], h = cup[1][1] + 0.02, $fn = 96);   // the front step, other colour
+        color("#8a9099") { for (r = [0, 180]) rotate([0, 0, r]) translate([ear_out + cup[0][1] / 2, 0, ear_zc + cup[0][0] / 2 - sock[1] + 2]) cylinder(d = stalk[0], h = stalk[1], $fn = 24); }
+        color("#b0b6bf") { for (r = [0, 180]) rotate([0, 0, r]) translate([ear_out + cup[0][1] / 2, 0, ear_zc + cup[0][0] / 2 - sock[1] + 2 + stalk[1] - 5 - ball[1]]) ball_local(); }
         color("#3a3e44") back7();
         color("#6b8fb5") camstrap7();
         panel7();
@@ -193,3 +264,6 @@ if (part == "v7_top") translate([0, 0, tp_z + tp_t]) rotate([180, 0, 0]) top7();
 if (part == "v7_head") translate([0, 0, yf]) rotate([-90, 0, 0]) head7();                                  // front face on the bed
 if (part == "v7_back") translate([0, 0, yf]) rotate([90, 0, 0]) back7();                             // flat, outer face down
 if (part == "v7_camstrap") camstrap_flat();
+if (part == "v7_ear") cup_local();                                                                         // back face down, print 2
+if (part == "v7_ball") ball_local();                                                                       // flat down, print 2
+if (part == "v7_stalk") for (i = [0 : 1]) translate([i * 8, 0, 0]) cylinder(d = stalk[0], h = stalk[1], $fn = 24);   // upright, 2
