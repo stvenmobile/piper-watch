@@ -9,9 +9,16 @@ the printed base and runs all the software (speech, vision, the head link). Two 
 move the head; the Orin drives them directly over USB through a Waveshare bus servo adapter. A
 **XIAO ESP32-S3** in the turret drives the mouth.
 
-> **Status:** being built. The base (tub, lid, servo adapter, power) and the head are assembled; the pan
-> stack, turret and tilt linkage are next (run book step 3). The mouth firmware is done and driven by
-> piper-assistant.
+> **Status (2026-11-26):** version 1 is **built and working**: the tilting head (v6) with the OLED mouth and the
+> webcam, on the pan/tilt turret (photos below). A second head, pan-only with a 5" screen face (v7), is being
+> printed. Both are kept as options: see [Head options](#head-options).
+
+| Front | Back |
+| --- | --- |
+| ![Piper-Watch v1, front](hardware/cad/docs/build_photos/40_complete_front.jpg) | ![Piper-Watch v1, back](hardware/cad/docs/build_photos/41_complete_back.jpg) |
+
+*Version 1, finished. The ring that should hide the gap above the skirt (`surround4`) was never printed, so the
+pan hub shows there; head v7's turret top includes that ring.*
 
 > **Build warning - cable routing is extremely tight.** The camera's and the XIAO's USB cables and the
 > tilt servo's lead all pass through the pan joint: the turret floor, the hub's **19 mm** bore, and the
@@ -22,7 +29,22 @@ move the head; the Orin drives them directly over USB through a Waveshare bus se
 
 ---
 
-## How it fits together
+## Head options
+
+| | Option A: tilting head (v6) | Option B: pan-only screen head (v7) |
+| --- | --- | --- |
+| Status | **Built and working** (2026-11) | **In progress**: designed, printing (head_v7 0.2.0) |
+| Moves | pan and tilt (two STS3215) | pan only; the head is fixed to a new turret top |
+| Face | 2.08" OLED mouth + two LED "eyes" | 5" CrowPanel Advanced ESP32-P4 (800 x 480 IPS): drawn eyes and mouth (`firmware/face_p4`) |
+| Camera | webcam board behind the brow | the same webcam board, fixed 4 deg up |
+| Sources | `parts/base_v4.scad` (turret, cowl, tilt linkage, cheeks, ears) + `parts/head_v6.scad` | `parts/head_v7.scad` (turret top, shell, back panel, camera strap), on the same base, pan servo and hub |
+| Run book | [steps 1-5](hardware/cad/docs/build_photos/README.md) | to be written when it is built |
+
+Option A is a complete, proven build and stays in the repository. Option B drops the tilt mechanism to
+give the screen face a simple, clean housing: the screen's drawn eyes can glance up and down instead.
+Everything below the turret (tub, lid, skirt, pan servo, hub) is shared.
+
+## How it fits together (option A)
 
 ```text
              HEAD (tilts)   webcam board (lens + two LED "eyes" behind glass domes), 2.08" OLED mouth

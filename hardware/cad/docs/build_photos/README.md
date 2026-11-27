@@ -17,6 +17,7 @@ All the printable files are made by `hardware/cad/export.sh` into `hardware/cad/
 | 3 | Pan stack, turret, tilt linkage and the head, onto the lid (render 34) | ✅ (2026-11-22; servos centred, limits set) |
 | 4 | Head: front piece, back piece, OLED, camera | ✅ (built ahead; goes in at 3.8) |
 | 5 | Head into the cheeks, cheek covers and ears | ✅ (at 3.8) |
+| - | Finished: version 1 (photos 40, 41) | ✅ (2026-11-26) |
 
 ## Parts legend (what to print, and what NOT to)
 
@@ -258,3 +259,25 @@ The pin's flange sits in the 12 mm lip bore against the bearing; the cheek cover
 **Parts:** `base_cover_v5.3mf` x 2 (print inner face down, pocket up), `base_ear_v5.3mf` x 2 (print octagon face down, stalk up, no supports), `base_plug_v5.3mf` (one file, 2 plugs, stem down, dome up).
 **Hardware:** 2 x M3 heat-set insert (one in each cover's centre, pressed in from the pocket floor), 2 x M3 x 18 button head (ears), 6 x M3 x 12 button head (covers). Assembly: insert the M3 in each cover, push the ear's stalk into the pocket, screw the ear on, glue the plug over the head, then fit the cover on the cheek with its three screws.
 Draft clash-checked against the head (tilt -22 to 45 deg) and the cowl: clear. Source: `base_v4.scad` (`cover4`, `ear4`, `plug4`; `part = "v4_cover" | "v4_ear" | "v4_plug"`).
+
+# Finished: version 1 (2026-11-26)
+
+![Front](40_complete_front.jpg)
+*40: version 1, finished, from the front: the tilting head (v6) with the OLED mouth, the webcam lens and the two LED eyes; ears on the cheek covers.*
+
+![Back](41_complete_back.jpg)
+*41: from the back: the cowl over the turret, the skirt, and the tub's back wall with the DC jack, the two Wi-Fi antennas and the USB cables into the Orin.*
+
+**Known gap:** the ring that hangs from the turret over the top of the skirt (`surround4` in `base_v4.scad`) is in the
+model but was never added to `export.sh`, so it was not printed: there is a ~13 mm gap above the skirt where the pan
+hub shows. Harmless for this build. The pan-only head (`parts/head_v7.scad`) has the ring built into its turret top
+(1.5 mm clear of the skirt).
+
+## Servo adapter in a slot (2026-11-26)
+
+The Waveshare servo adapter moves off its standoffs on the lid into a slot at the pan servo's horn end (the back), right over the
+lid's cable slot. `out/base_adapter_shelf_v4.3mf` (source `base_v4.scad`, `adapter_shelf4`): a plain upside-down L, 43 wide, both
+legs flat. The short leg (15 long) glues under the skirt's plate; the long leg (35 below it) hangs parallel to the end face of the
+pan servo's sleeve, about 20 mm from it - set it by test fit with the board before the glue sets. The board (33 x 43) slides in
+sideways (open at both sides, the right-angle USB plug out one side) and is held with a dab of hot glue, so it can still come out.
+The skirt itself is unchanged. Print the long leg flat on the bed, short leg up, no supports.

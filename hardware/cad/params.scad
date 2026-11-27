@@ -1,5 +1,12 @@
 // Piper-Watch - all dimensions in one place (millimetres).
 // Values marked EST are estimates; correct them after measuring the real part.
+//
+// Version 1.1.2 - created 2026-09 (see git history), last modified 2026-11-26
+// History:
+//   1.1.2  2026-11-26  cp5_lcd depth MEASURED: 5.9 from the glass's front to the board (the model says 5.7).
+//   1.1.1  2026-11-26  cp5_glass, cp5_active and cp5_active_c MEASURED on the real panel.
+//   1.1.0  2026-11-26  CrowPanel Advanced 5" ESP32-P4 panel (cp5_*), from Elecrow's STEP model.
+//                      First version block in this file.
 
 $fn = 96;                        // circle smoothness for previews/exports
 
@@ -145,3 +152,34 @@ cam_core     = [cam_w, cam_d, cam_h];
 
 // --- E32R40T 4" display board - TODO: measure outline, holes, connector positions --
 lcd_board    = [110, 70, 12];    // EST placeholder
+
+// --- CrowPanel Advanced 5" ESP32-P4 (Elecrow DHE04005D, 800 x 480 IPS) - the face panel ---------------
+// From Elecrow's STEP model (ESP32-P4-5_0-inch-20251230.stp, local copy in vitamins/models/, not committed;
+// source: github.com/Elecrow-RD/-CrowPanel-Advanced-5inch-ESP32-P4-HMI-AI-Display-800x480-IPS-Touch-Screen).
+// Measured 2026-11-26 from the model, not yet from the real panel.
+// Coordinates as in the model: origin at a board corner, X along the long side, Y along the short side,
+// the board's BACK face at Z = 0 (components towards +Z), the screen facing -Z.
+// Seen from the FRONT, X is mirrored: the USB-C edge (X = 132) is on the LEFT.
+cp5_board    = [132.0, 80.3, 1.6];       // PCB, Z -1.6..0
+cp5_hole_d   = 3.3;                      // 4 mounting holes (M3 clearance) ...
+cp5_holes    = [[3, 3], [129, 3], [3, 77.3], [129, 77.3]];   // ... 3.0 in from each edge: 126 x 74.3 apart
+cp5_lcd      = [120.7, 76.3, 5.9];       // LCD module on the front: 5.9 deep MEASURED 2026-11-26 (glass front to the board; model 5.7)
+cp5_lcd_xy   = [5.9, 2.0];               // its corner on the board (5.9 / 5.4 margins left / right, 2.0 top and bottom)
+cp5_glass    = [120.0, 75.0];            // MEASURED 2026-11-26: front glass (the model's module outline is 120.7 x 76.3)
+cp5_active   = [108.0, 65.0];            // MEASURED 2026-11-26: pixel area. Seen from the front (camera connector up):
+                                         //   6 mm glass border left and right, 3 mm at the top, 7 mm at the bottom
+cp5_active_c = [cp5_lcd_xy[0] + cp5_lcd[0] / 2,                  // its centre, model coordinates: centred across, ...
+                cp5_lcd_xy[1] + cp5_lcd[1] / 2 + (7 - 3) / 2];   // ... 2 mm above the glass centre (towards the camera connector)
+cp5_back_h   = 8.0;                      // tallest part on the back (most are <= 5.6)
+cp5_depth    = cp5_lcd[2] + cp5_board[2] + cp5_back_h;   // 15.3: screen glass to the tallest back part
+// Edge features (model coordinates; [x, y, z] corner + [w, d, h] size):
+cp5_usbc     = [[124.6, 27.0, -0.99], [124.6, 44.0, -0.99]];   // 2 x USB-C on the X = 132 edge, opening +X ...
+cp5_usbc_sz  = [7.3, 9.0, 4.2];                                 // ... the plug needs ~12 x 7 clear beyond the edge
+cp5_buttons  = [[0.7, 24.9, 0], [0.7, 31.4, 0]];               // 2 push buttons on the X = 0 edge, pressed from -X (EST: boot / reset)
+cp5_button_sz = [7.0, 4.5, 4.5];
+cp5_edge_x0  = [[0.0, 44.4, -0.1, 16.6, 13.2, 2.5]];           // EST card slot on the X = 0 edge [x,y,z,w,d,h]
+cp5_conn_r   = [126.0, 9.5, 0.05, 5.9, 15.0, 7.7];             // 4-pin connector by the X = 132 edge [x,y,z,w,d,h]
+// Optional MIPI camera (the "with camera" kit): ribbon from a connector at the top centre, lens on the FRONT
+// above the board's top edge. Piper uses the C920 instead.
+cp5_cam_conn = [57.3, 70.3, 0, 17.6, 4.4, 2.0];
+cp5_cam      = [59.8, 71.8, -9.25, 12.5, 25.3, 11.0];         // ribbon + module, reaches Y = 97.1

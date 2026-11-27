@@ -12,12 +12,22 @@
 //          sleeve (base()), widened to a disc. Four M2.5 bolts go radially through the skirt into the wall's inserts. The pan servo
 //          hangs from the plate inside the wall; the pillow block, hub and turret are the stand's, unchanged.
 //   SURROUND  the rotating part of the turret: a short cylinder that hangs from the turret floor over the skirt's top.
-//   The servo ADAPTER (Waveshare Bus Servo Adapter A, 33 x 43) sits on 4 standoffs on the lid under the pan servo (inside the cylinder),
-//          long side across, power edge (USB-C, DC terminal, jack) to the back over the lid slot, servo connectors to the front.
+//   The servo ADAPTER (Waveshare Bus Servo Adapter A, 33 x 43): since 2026-11-26 it stands in a SLOT at the pan servo's horn end,
+//          between the sleeve's end face and a flat plate ~20 mm out: a plain upside-down L (part "v4_adshelf", adapter_shelf4)
+//          glued under the skirt's plate, its distance set by test fit. Open at both sides (slide the board in sideways; the right-angle USB plug comes out a side),
+//          held with a dab of hot glue, right over the lid's cable slot.
+//          Was: on 4 standoffs on the lid under the pan servo (the standoffs are still on the lid, unused).
 //
 // Frame: pan axis = (0,0) = the box centre; Z = 0 under the box floor; +Y = front (cylinder/head side), back wall at Y = -60.
 // part = "v4_view" | "v4_tub" | "v4_lid" (with the wall) | "v4_skirt" | "v4_panstrap" | "v4_railshim" | "v4_hub" | "v4_turret" | "v4_strap"
-//        | "v4_crank" | "v4_cowl" | "v4_cover" | "v4_ear" | "v4_plug" | "head_view"   (the head itself is in head_v6.scad; export.sh knows every file name)
+//        | "v4_crank" | "v4_cowl" | "v4_cover" | "v4_ear" | "v4_plug" | "v4_adshelf" | "head_view"   (the head itself is in head_v6.scad; export.sh knows every file name)
+//
+// Version 4.1.1 - created 2026-11 (see git history), last modified 2026-11-26
+// History:
+//   4.1.1  2026-11-26  Adapter shelf simplified: a plain L (short leg 15 long, both legs flat), no locating foot; the gap is set
+//                      by test fit when gluing.
+//   4.1.0  2026-11-26  Servo adapter slot at the pan servo's horn end: a glue-in upside-down L, part "v4_adshelf"
+//                      (adapter_shelf4). The skirt itself is unchanged. First version block in this file.
 include <servo_test_stand.scad>
 
 part = "v4_view";
@@ -155,6 +165,20 @@ sk_fil = 4;                                     // skirt: fillet where the pan s
 rs_t = 2.8;  rs_h = -plate_t - z_case_top - 0.2;   // 2.8 thick (the rails are 3), 20.4 tall: 0.2 short so the strap still seats
 module rail_shim4() cube([rs_t, stop_y[1] - stop_y[0], rs_h]);
 module skirt4s() { skirt4s_body(); stop_rails(); }   // 2026-11-21: the rails go back in AFTER the pocket cut (the first skirts had none: the pocket cut took them out)
+
+// ---- servo adapter slot (2026-11-26) ----------------------------------------------------------------------------------------------
+// A plain upside-down L glued into the skirt: its short leg (15 long) glues under the skirt's plate, its long leg (the plate, 35 below
+// the short leg) hangs parallel to the end face of the pan servo's sleeve at the horn end (-Y), about 20 mm from it - set by test fit
+// when gluing. The adapter board (33 x 43, its parts within 20 mm) slides in sideways; a dab of hot glue holds it.
+// Drawn here at 20 mm from the sleeve's end face.
+ash_gap = 20;  ash_t = 2.5;  ash_w = 43;  ash_h = 35;  ash_bt = 3;  ash_bl = 15;   // gap, plate thickness, width, height below the short leg, short leg thickness and length
+ash_ye = -srv_sh - clr - sleeve_t;                       // the sleeve's end face (-13.41)
+module adapter_shelf4() {
+    yp = ash_ye - ash_gap - ash_t;                       // the plate's outer face
+    translate([-ash_w / 2, yp, -plate_t - ash_bt - ash_h]) cube([ash_w, ash_t, ash_h + ash_bt]);          // the long leg (the plate)
+    translate([-ash_w / 2, yp, -plate_t - ash_bt]) cube([ash_w, ash_bl, ash_bt]);                         // the short leg, under the skirt's plate
+}
+   // 2026-11-21: the rails go back in AFTER the pocket cut (the first skirts had none: the pocket cut took them out)
 module skirt4s_body() difference() {           // the stand's base() + the skirt, with the 4 strap-insert bosses run up into the plate and a fillet round the sleeve
     sx = [-srv[1] / 2 - clr, srv[1] / 2 + clr];  sy = [-srv_sh - clr, srv[0] - srv_sh + clr];   // sleeve inside (as in base())
     union() {
@@ -582,6 +606,7 @@ if (part == "v4_view") {
 if (part == "v4_tub") tub4();
 if (part == "v4_lid") translate([0, 0, -ledge_z]) lid4();
 if (part == "v4_skirt") rotate([180, 0, 0]) skirt4s();
+if (part == "v4_adshelf") rotate([90, 0, 0]) translate([0, -(ash_ye - ash_gap - ash_t), 0]) adapter_shelf4();   // plate flat on the bed, bridge up
 if (part == "v4_turret") translate([0, 0, -z_floor]) turret4();
 if (part == "v4_cowl") translate([0, 0, cw_h]) rotate([180, 0, 0]) translate([0, 0, -z_ft]) cowl4();
 if (part == "v4_strap") strap4();
