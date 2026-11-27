@@ -39,6 +39,11 @@ venv/
 *.bak
 *.gcode
 *.3mf.bak
+*.zip
+
+# --- VSCode 
+.vscode/ 
+*.code-workspace
 
 # --- Editors / OS ---
 .idea/
